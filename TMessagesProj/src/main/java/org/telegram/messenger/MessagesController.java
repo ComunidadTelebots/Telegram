@@ -9942,8 +9942,8 @@ public class MessagesController extends BaseController implements NotificationCe
             if (updatesQueueChannels.size() != 0) {
                 for (int a = 0; a < updatesQueueChannels.size(); a++) {
                     long key = updatesQueueChannels.keyAt(a);
-                    long updatesStartWaitTime = updatesStartWaitTimeChannels.valueAt(a);
-                    if (Math.abs(currentTime - updatesStartWaitTime) >= 1500) {
+                    long updatesStartWaitTime = updatesStartWaitTimeChannels.get(key);
+                    if (updatesStartWaitTime != 0 && Math.abs(currentTime - updatesStartWaitTime) >= 1500) {
                         if (BuildVars.LOGS_ENABLED) {
                             FileLog.d("QUEUE CHANNEL " + key + " UPDATES WAIT TIMEOUT - CHECK QUEUE");
                         }
