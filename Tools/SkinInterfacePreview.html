@@ -2648,6 +2648,14 @@
         }
     }
 
+    const folderData = [
+        { name: "Todos",     icon: "💬", color: "#4b9bd6" },
+        { name: "No leídos", icon: "✉️", color: "#e96060" },
+        { name: "Personal",  icon: "👤", color: "#55a982" },
+        { name: "Canales",   icon: "📢", color: "#e6a817" },
+        { name: "Trabajo",   icon: "💼", color: "#9b6bd6" },
+    ];
+
     function chatsScreen() {
         return `
             <div class="screen-relative ${active.layout === "original" || active.layout === "holo" ? "compact" : ""}">
@@ -2717,16 +2725,26 @@
                     <div class="remind-sheet">
                         <h3>Recordarme este mensaje</h3>
                         <div class="remind-chips">
-                            ${[["⏰","En 1 hora","Hoy, sobre las ${new Date(Date.now()+3600000).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}","1h"],
-                               ["🌙","Esta tarde","Hoy a las 18:00","tarde"],
-                               ["🌅","Mañana por la mañana","Mañana a las 9:00","manana"],
-                               ["📅","Próxima semana","Lunes a las 9:00","semana"],
-                               ["🔔","Elegir fecha y hora","Personalizar recordatorio","custom"]
-                              ].map(([icon,title,sub,val])=>`
-                            <button class="remind-chip" data-remind="${val}">
-                                <div class="remind-chip-icon">${icon}</div>
-                                <div><strong>${title}</strong><span>${sub}</span></div>
-                            </button>`).join("")}
+                            <button class="remind-chip" data-remind="1h">
+                                <div class="remind-chip-icon">⏰</div>
+                                <div><strong>En 1 hora</strong><span id="remind-1h-time">Calculando...</span></div>
+                            </button>
+                            <button class="remind-chip" data-remind="tarde">
+                                <div class="remind-chip-icon">🌙</div>
+                                <div><strong>Esta tarde</strong><span>Hoy a las 18:00</span></div>
+                            </button>
+                            <button class="remind-chip" data-remind="manana">
+                                <div class="remind-chip-icon">🌅</div>
+                                <div><strong>Mañana por la mañana</strong><span>Mañana a las 9:00</span></div>
+                            </button>
+                            <button class="remind-chip" data-remind="semana">
+                                <div class="remind-chip-icon">📅</div>
+                                <div><strong>Próxima semana</strong><span>Lunes a las 9:00</span></div>
+                            </button>
+                            <button class="remind-chip" data-remind="custom">
+                                <div class="remind-chip-icon">🔔</div>
+                                <div><strong>Elegir fecha y hora</strong><span>Personalizar recordatorio</span></div>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -3376,6 +3394,8 @@ boolean showChatDividers()</div>
         });
 
         // ── Recordatorio ─────────────────────────────────────────────────────
+        const t1h = document.querySelector("#remind-1h-time");
+        if (t1h) t1h.textContent = "Hoy, sobre las " + new Date(Date.now() + 3600000).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" });
         document.querySelectorAll("[data-long-pressable]").forEach(msg => {
             let timer;
             msg.addEventListener("pointerdown", () => {
