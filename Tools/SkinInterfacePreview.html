@@ -1166,6 +1166,220 @@
             color: white;
             font-size: 20px;
         }
+
+        .app-shell.dark {
+            --app-surface: #18222d;
+            --app-text: #f2f5f7;
+            background: #111a23;
+            color: var(--app-text);
+        }
+
+        .app-shell.dark .app-screen,
+        .app-shell.dark .section,
+        .app-shell.dark .settings-hero,
+        .app-shell.dark .setting-row,
+        .app-shell.dark .chat-row,
+        .app-shell.dark .contact-row,
+        .app-shell.dark .call-row {
+            border-color: #273746;
+            background: #17212b;
+            color: #f2f5f7;
+        }
+
+        .app-shell.dark .row-copy span,
+        .app-shell.dark .section-description,
+        .app-shell.dark .row-value {
+            color: #9fb0bf;
+        }
+
+        .app-shell.dark .folder-tabs,
+        .app-shell.dark .story-row,
+        .app-shell.dark .composer-bar {
+            border-color: #273746;
+            background: #17212b;
+        }
+
+        .app-shell.density-compact .chat-row,
+        .app-shell.density-compact .contact-row,
+        .app-shell.density-compact .call-row,
+        .app-shell.density-compact .setting-row {
+            min-height: 52px;
+            padding-top: 7px;
+            padding-bottom: 7px;
+        }
+
+        .app-shell.density-compact .list-avatar {
+            width: 40px;
+            height: 40px;
+            flex-basis: 40px;
+        }
+
+        body.device-tablet .phone {
+            width: min(760px, calc(100vw - 28px));
+        }
+
+        body.device-foldable .phone {
+            width: min(620px, calc(100vw - 28px));
+            border-radius: 16px;
+        }
+
+        body.device-foldable .phone::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 1px;
+            pointer-events: none;
+            background: rgb(0 0 0 / 8%);
+        }
+
+        .control-block {
+            padding: 15px 14px;
+            border-bottom: 1px solid #e2e7ea;
+            background: var(--app-surface);
+        }
+
+        .control-block > strong {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .segmented {
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: 1fr;
+            padding: 3px;
+            border-radius: 11px;
+            background: #e8edf1;
+        }
+
+        .segmented button {
+            padding: 9px 6px;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: #52616d;
+            cursor: pointer;
+        }
+
+        .segmented button.active {
+            background: white;
+            color: #2485c4;
+            box-shadow: 0 1px 5px rgb(0 0 0 / 12%);
+        }
+
+        .switch-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            min-height: 62px;
+            padding: 10px 14px;
+            border: 0;
+            border-bottom: 1px solid #e2e7ea;
+            background: var(--app-surface);
+            color: inherit;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .switch {
+            width: 42px;
+            height: 24px;
+            position: relative;
+            margin-left: auto;
+            flex: 0 0 42px;
+            border-radius: 14px;
+            background: #bdc7ce;
+        }
+
+        .switch::after {
+            content: "";
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: white;
+            transition: transform .18s;
+        }
+
+        .switch.on {
+            background: #42a0dc;
+        }
+
+        .switch.on::after {
+            transform: translateX(18px);
+        }
+
+        .feature-note {
+            padding: 10px 14px 18px;
+            color: #77848e;
+            font-size: 11px;
+            line-height: 1.45;
+        }
+
+        .compare-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 14px;
+        }
+
+        .compare-phone {
+            overflow: hidden;
+            min-height: 390px;
+            border: 1px solid #d7dfe4;
+            border-radius: 18px;
+            background: #edf2f4;
+        }
+
+        .compare-phone header {
+            padding: 12px;
+            background: #438fbe;
+            color: white;
+            font-weight: 700;
+        }
+
+        .compare-phone.modern header {
+            background: linear-gradient(135deg, #527ed2, #755fc6);
+        }
+
+        .compare-row {
+            display: flex;
+            gap: 7px;
+            padding: 10px 8px;
+            border-bottom: 1px solid #dce3e7;
+            background: white;
+            font-size: 10px;
+        }
+
+        .compare-dot {
+            width: 27px;
+            height: 27px;
+            flex: 0 0 27px;
+            border-radius: 50%;
+            background: #65a7d1;
+        }
+
+        .changelog-card {
+            margin: 12px;
+            padding: 15px;
+            border-radius: 15px;
+            background: var(--app-surface);
+            box-shadow: 0 2px 12px rgb(0 0 0 / 7%);
+        }
+
+        .changelog-card small {
+            color: #6f7d88;
+        }
+
+        .changelog-card ul {
+            padding-left: 18px;
+            line-height: 1.7;
+        }
     </style>
 </head>
 <body>
@@ -1290,6 +1504,17 @@
     let currentRoute = "chats";
     let currentFolder = "Todos";
     let currentChat = null;
+    const defaultPreferences = {
+        colorMode: "light",
+        density: "normal",
+        device: "phone",
+        instantApply: true,
+        animations: true,
+        adaptiveIcons: true,
+        experimentalSkins: false,
+        rememberSkin: true
+    };
+    let preferences = loadPreferences();
 
     const chats = [
         { id: 1, name: "Comunidad Telebots", initials: "CT", message: "Nueva versión disponible para probar", time: "12:42", unread: 4, color: "#5b9bd5" },
@@ -1320,6 +1545,10 @@
         calls: "Llamadas",
         settings: "Ajustes",
         appearance: "Apariencia",
+        customization: "Personalización",
+        experiments: "Funciones experimentales",
+        compare: "Comparar diseños",
+        changelog: "Novedades",
         profile: "Mi perfil",
         saved: "Mensajes guardados",
         search: "Buscar"
@@ -1334,9 +1563,18 @@
 
     function renderApp(options = {}) {
         const shell = document.querySelector("#app-shell");
-        shell.className = `app-shell layout-${active.layout}`;
+        const darkMode = preferences.colorMode === "dark" ||
+            (preferences.colorMode === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        shell.className = [
+            "app-shell",
+            `layout-${active.layout}`,
+            `density-${preferences.density}`,
+            darkMode ? "dark" : ""
+        ].filter(Boolean).join(" ");
         shell.style.setProperty("--app-radius", radiusStyle(active.radius));
         shell.style.setProperty("--app-accent", active.accent);
+        document.body.classList.remove("device-phone", "device-tablet", "device-foldable");
+        document.body.classList.add(`device-${preferences.device}`);
         renderToolbar(options);
         renderScreen(options);
         document.querySelectorAll(".bottom-item").forEach(item => {
@@ -1347,7 +1585,7 @@
     function renderToolbar(options) {
         const toolbar = document.querySelector("#app-toolbar");
         if (currentRoute === "chat") {
-            const chat = options.chat || chats[0];
+            const chat = options.chat || currentChat || chats[0];
             toolbar.innerHTML = `
                 <button class="icon-button" data-action="back">‹</button>
                 <div class="list-avatar" style="width:36px;height:36px;flex-basis:36px;background:${chat.color}">${chat.initials}</div>
@@ -1355,7 +1593,7 @@
                 <button class="icon-button" data-action="call">⌕</button>
                 <button class="icon-button" data-action="profile">⋮</button>`;
         } else {
-            const backRoutes = ["appearance", "profile", "saved", "search"];
+            const backRoutes = ["appearance", "customization", "experiments", "compare", "changelog", "profile", "saved", "search"];
             toolbar.innerHTML = `
                 <button class="icon-button" data-action="${backRoutes.includes(currentRoute) ? "back" : "menu"}">${backRoutes.includes(currentRoute) ? "‹" : "☰"}</button>
                 <div class="toolbar-title"><strong>${routeTitles[currentRoute] || "Telegram"}</strong></div>
@@ -1372,6 +1610,10 @@
         if (currentRoute === "calls") screen.innerHTML = callsScreen();
         if (currentRoute === "settings") screen.innerHTML = settingsScreen();
         if (currentRoute === "appearance") screen.innerHTML = appearanceScreen();
+        if (currentRoute === "customization") screen.innerHTML = customizationScreen();
+        if (currentRoute === "experiments") screen.innerHTML = experimentsScreen();
+        if (currentRoute === "compare") screen.innerHTML = compareScreen();
+        if (currentRoute === "changelog") screen.innerHTML = changelogScreen();
         if (currentRoute === "profile") screen.innerHTML = profileScreen();
         if (currentRoute === "saved") screen.innerHTML = savedScreen();
         if (currentRoute === "search") screen.innerHTML = searchScreen();
@@ -1463,6 +1705,10 @@
             ["◉", "Privacidad y seguridad", ""],
             ["▣", "Datos y almacenamiento", ""],
             ["◌", "Apariencia", "appearance"],
+            ["⚙", "Personalización de interfaz", "customization"],
+            ["◫", "Comparar diseños", "compare"],
+            ["⚗", "Funciones experimentales", "experiments"],
+            ["★", "Novedades", "changelog"],
             ["文", "Idioma", ""],
             ["?", "Ayuda", ""]
         ];
@@ -1506,7 +1752,116 @@
                 <div class="row"><span>Tamaño del texto</span><span class="row-value">16</span></div>
                 <div class="row"><span>Fondo de chat</span><span class="row-value">›</span></div>
                 <div class="row"><span>Esquinas de mensajes</span><span class="row-value" id="corner-value">${active.radius}</span></div>
+            </section>
+            <section class="section">
+                <button class="setting-row" data-route="customization">
+                    <span class="setting-icon">⚙</span>
+                    <span class="row-copy"><strong>Personalización avanzada</strong><span>Modo, densidad y dispositivo</span></span>
+                    <span>›</span>
+                </button>
+                <button class="setting-row" data-route="compare">
+                    <span class="setting-icon">◫</span>
+                    <span class="row-copy"><strong>Comparar interfaces</strong><span>Diseño histórico y moderno</span></span>
+                    <span>›</span>
+                </button>
             </section>`;
+    }
+
+    function customizationScreen() {
+        return `
+            <div class="control-block">
+                <strong>Modo de color</strong>
+                ${segmentedControl("colorMode", [["light", "Claro"], ["dark", "Oscuro"], ["auto", "Automático"]])}
+            </div>
+            <div class="control-block">
+                <strong>Densidad de la interfaz</strong>
+                ${segmentedControl("density", [["compact", "Compacta"], ["normal", "Normal"]])}
+            </div>
+            <div class="control-block">
+                <strong>Vista del dispositivo</strong>
+                ${segmentedControl("device", [["phone", "Móvil"], ["tablet", "Tablet"], ["foldable", "Plegable"]])}
+            </div>
+            ${switchControl("instantApply", "Aplicar cambios al instante", "No requiere reiniciar la aplicación.")}
+            ${switchControl("animations", "Animaciones de interfaz", "Transiciones adaptadas a cada diseño.")}
+            ${switchControl("adaptiveIcons", "Iconos adaptativos", "Usa el estilo de iconos propio de cada versión.")}
+            ${switchControl("rememberSkin", "Recordar diseño seleccionado", "Guarda la selección como una preferencia Android.")}
+            <p class="feature-note">Estas opciones afectan a toda la preview y se conservan al volver a abrir el archivo.</p>`;
+    }
+
+    function experimentsScreen() {
+        return `
+            ${switchControl("experimentalSkins", "Diseños en desarrollo", "Muestra Glass, Redesign y futuras interfaces incompletas.")}
+            ${switchControl("animations", "Nuevo motor de animaciones", "Prueba transiciones modernas sobre diseños históricos.")}
+            ${switchControl("adaptiveIcons", "Paquetes de iconos por versión", "Cambia iconos junto con barras, listas y burbujas.")}
+            <div class="changelog-card">
+                <strong>Estado del módulo</strong>
+                <p style="line-height:1.5;color:#6f7d88">Las funciones experimentales quedan aisladas del núcleo de Telegram y pueden desactivarse sin perder chats ni preferencias.</p>
+            </div>`;
+    }
+
+    function compareScreen() {
+        const comparedSkin = active.id === "android:current" ? androidVersions[0] : active;
+        const oldName = comparedSkin.year ? `${comparedSkin.name} ${comparedSkin.year}` : comparedSkin.name;
+        return `
+            <div class="control-block">
+                <strong>Comparación simultánea</strong>
+                <div style="color:#71808b;font-size:12px">Misma información y API, diferente capa visual.</div>
+            </div>
+            <div class="compare-grid">
+                ${comparePhone(oldName, false)}
+                ${comparePhone("Actual 2026", true)}
+            </div>
+            <button class="switch-row" data-route="appearance">
+                <span class="setting-icon">◌</span>
+                <span class="row-copy"><strong>Cambiar diseño comparado</strong><span>Selecciona otra versión en Apariencia</span></span>
+                <span>›</span>
+            </button>`;
+    }
+
+    function changelogScreen() {
+        return `
+            <article class="changelog-card">
+                <small>PREVIEW 0.4 · JUNIO 2026</small>
+                <h3>Personalización completa</h3>
+                <ul>
+                    <li>Modo claro, oscuro y automático.</li>
+                    <li>Densidad compacta o normal.</li>
+                    <li>Simulación para móvil, tablet y plegable.</li>
+                    <li>Preferencias persistentes.</li>
+                    <li>Comparador de interfaces.</li>
+                </ul>
+            </article>
+            <article class="changelog-card">
+                <small>PREVIEW 0.3</small>
+                <h3>Interfaces históricas</h3>
+                <p>Diseños Android Original, Holo, Material, Clásico, Actual, Redesign y Glass con funciones modernas.</p>
+            </article>`;
+    }
+
+    function segmentedControl(key, values) {
+        return `<div class="segmented">${values.map(([value, label]) =>
+            `<button class="${preferences[key] === value ? "active" : ""}" data-pref="${key}" data-value="${value}">${label}</button>`
+        ).join("")}</div>`;
+    }
+
+    function switchControl(key, title, description) {
+        return `
+            <button class="switch-row" data-toggle="${key}">
+                <span class="row-copy"><strong>${title}</strong><span>${description}</span></span>
+                <span class="switch ${preferences[key] ? "on" : ""}"></span>
+            </button>`;
+    }
+
+    function comparePhone(name, modern) {
+        return `
+            <div class="compare-phone ${modern ? "modern" : ""}">
+                <header>${name}</header>
+                ${chats.slice(0, 5).map(chat => `
+                    <div class="compare-row">
+                        <span class="compare-dot" style="background:${chat.color}"></span>
+                        <span><strong>${chat.name}</strong><br>${chat.message.slice(0, 23)}</span>
+                    </div>`).join("")}
+            </div>`;
     }
 
     function profileScreen() {
@@ -1586,6 +1941,21 @@
         document.querySelectorAll("[data-action]").forEach(button => {
             button.onclick = () => handleAction(button.dataset.action);
         });
+        document.querySelectorAll("[data-pref]").forEach(button => {
+            button.onclick = () => {
+                preferences[button.dataset.pref] = button.dataset.value;
+                savePreferences();
+                renderApp();
+            };
+        });
+        document.querySelectorAll("[data-toggle]").forEach(button => {
+            button.onclick = () => {
+                const key = button.dataset.toggle;
+                preferences[key] = !preferences[key];
+                savePreferences();
+                renderApp();
+            };
+        });
         const messageInput = document.querySelector("#message-input");
         if (messageInput) {
             messageInput.onkeydown = event => {
@@ -1658,6 +2028,28 @@
         }, 1600);
     }
 
+    function loadPreferences() {
+        try {
+            const stored = JSON.parse(localStorage.getItem("telegramPreviewPreferences") || "{}");
+            return { ...defaultPreferences, ...stored };
+        } catch {
+            return { ...defaultPreferences };
+        }
+    }
+
+    function savePreferences() {
+        try {
+            localStorage.setItem("telegramPreviewPreferences", JSON.stringify(preferences));
+            if (preferences.rememberSkin) {
+                localStorage.setItem("telegramPreviewSkin", active.id);
+            } else {
+                localStorage.removeItem("telegramPreviewSkin");
+            }
+        } catch {
+            // The preview still works when browser storage is unavailable.
+        }
+    }
+
     function radiusStyle(radius) {
         return `${Math.min(radius, 18)}px`;
     }
@@ -1689,7 +2081,9 @@
         const container = document.querySelector("#timeline");
         if (!container) return;
         container.innerHTML = "";
-        androidVersions.forEach(skin => {
+        androidVersions
+            .filter(skin => preferences.experimentalSkins || !["android:redesign", "android:glass"].includes(skin.id))
+            .forEach(skin => {
             const button = document.createElement("button");
             button.className = `timeline-card ${active.id === skin.id ? "active" : ""}`;
             button.innerHTML = `<strong>${skin.name}</strong><span>${skin.year}</span>`;
@@ -1720,6 +2114,7 @@
     document.querySelector("#cancel").addEventListener("click", closePreview);
     document.querySelector("#apply").addEventListener("click", () => {
         active = pending;
+        savePreferences();
         renderApp(currentRoute === "chat" ? { chat: currentChat || chats[0] } : {});
         closePreview();
     });
@@ -1741,9 +2136,31 @@
             event.currentTarget.classList.remove("visible");
         }
     });
+    try {
+        const savedSkinId = localStorage.getItem("telegramPreviewSkin");
+        const savedSkin = androidVersions.find(skin => skin.id === savedSkinId) ||
+            families.find(skin => skin.id === savedSkinId);
+        if (savedSkin && preferences.rememberSkin) active = savedSkin;
+    } catch {
+        // Ignore storage restrictions in local preview mode.
+    }
+
     const query = new URLSearchParams(location.search);
+    if (["light", "dark", "auto"].includes(query.get("mode"))) {
+        preferences.colorMode = query.get("mode");
+    }
+    if (["phone", "tablet", "foldable"].includes(query.get("device"))) {
+        preferences.device = query.get("device");
+    }
+    if (["compact", "normal"].includes(query.get("density"))) {
+        preferences.density = query.get("density");
+    }
     const requestedScreen = query.get("screen");
-    const availableScreens = ["chats", "chat", "contacts", "calls", "settings", "appearance", "profile", "saved", "search"];
+    const availableScreens = [
+        "chats", "chat", "contacts", "calls", "settings", "appearance",
+        "customization", "experiments", "compare", "changelog",
+        "profile", "saved", "search"
+    ];
     if (availableScreens.includes(requestedScreen)) currentRoute = requestedScreen;
     if (currentRoute === "chat") currentChat = chats[0];
     renderApp(currentRoute === "chat" ? { chat: currentChat } : {});
