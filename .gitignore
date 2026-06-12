@@ -1,3 +1,6 @@
+# API keys — never commit
+TMessagesProj/src/main/java/org/telegram/messenger/BuildVars.java
+
 .idea/
 .vscode/
 .gradle/
