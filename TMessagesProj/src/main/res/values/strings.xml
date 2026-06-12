@@ -2228,6 +2228,10 @@
     <string name="ThemeNight">Night</string>
     <string name="ThemeArcticBlue">Arctic</string>
     <string name="ThemeClassic">Classic</string>
+    <string name="SkinInterfaceDesign">INTERFACE DESIGN</string>
+    <string name="SkinInterfaceDesignInfo">Change the complete interface design, not only its colors</string>
+    <string name="SkinAndroidVersions">ANDROID VERSIONS</string>
+    <string name="SkinAndroidVersionsInfo">Use a historical Android design with the latest Telegram features</string>
     <string name="DeleteThemeTitle">Delete theme</string>
     <string name="DeleteThemeAlert">Are you sure you want to delete this theme?</string>
     <string name="IncorrectTheme">Incorrect theme file</string>

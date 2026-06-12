@@ -244,6 +244,7 @@ public class ApplicationLoader extends Application {
         }
 
         SharedConfig.loadConfig();
+        org.telegram.ui.skins.SkinManager.get(); // aplica el skin guardado sobre bubbleRadius
         SharedPrefsHelper.init(applicationContext);
         for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) { //TODO improve account
             UserConfig.getInstance(a).loadConfig();

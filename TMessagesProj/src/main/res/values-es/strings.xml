@@ -340,6 +340,10 @@
     <string name="ChangeUserNameColor">Cambiar tu color</string>
     <string name="ChangeChannelNameColor2">Apariencia</string>
     <string name="ChangeGroupAppearance">Apariencia</string>
+    <string name="SkinInterfaceDesign">DISEÑO DE INTERFAZ</string>
+    <string name="SkinInterfaceDesignInfo">Cambia el diseño completo de la interfaz, no solo los colores</string>
+    <string name="SkinAndroidVersions">VERSIONES DE ANDROID</string>
+    <string name="SkinAndroidVersionsInfo">Usa un diseño histórico de Android con las funciones más recientes de Telegram</string>
     <string name="ChatBackground">Fondo de pantalla</string>
     <string name="ResetChatBackgrounds">Restablecer fondos de pantalla</string>
     <string name="ResetChatBackgroundsInfo">Elimina todos los fondos de pantalla subidos y restaura los preinstalados.</string>

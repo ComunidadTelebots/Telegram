@@ -92,6 +92,7 @@ import org.telegram.ui.Cells.TextSettingsCell;
 import org.telegram.ui.Cells.ThemePreviewMessagesCell;
 import org.telegram.ui.Cells.ThemeTypeCell;
 import org.telegram.ui.Cells.ThemesHorizontalListCell;
+import org.telegram.ui.Cells.SkinSelectorCell;
 import org.telegram.ui.Components.AlertsCreator;
 import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.CubicBezierInterpolator;
@@ -147,6 +148,7 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
 
     @Keep
     private int backgroundRow;
+    private int skinSelectorRow;
     private int textSizeHeaderRow;
     @Keep
     private int textSizeRow;
@@ -557,6 +559,7 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
         automaticHeaderRow = -1;
         automaticBrightnessRow = -1;
         automaticBrightnessInfoRow = -1;
+        skinSelectorRow = -1;
         textSizeHeaderRow = -1;
         themeHeaderRow = -1;
         bubbleRadiusHeaderRow = -1;
@@ -653,6 +656,7 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
             createNewThemeRow = rowCount++;
             lastShadowRow = rowCount++;
         } else if (currentType == THEME_TYPE_BASIC) {
+            skinSelectorRow = rowCount++;
             textSizeHeaderRow = rowCount++;
             textSizeRow = rowCount++;
             backgroundRow = rowCount++;
@@ -2057,6 +2061,7 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
         private final static int TYPE_SAVE_TO_GALLERY = 19;
         private final static int TYPE_APP_ICON = 20;
         private final static int TYPE_CHOOSE_COLOR = 21;
+        private final static int TYPE_SKIN_SELECTOR = 22;
 
         private Context mContext;
         private boolean first = true;
@@ -2075,7 +2080,8 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
             int type = holder.getItemViewType();
             return type == 0 || type == TYPE_TEXT_SETTING || type == TYPE_THEME_TYPE || type == TYPE_TEXT_CHECK ||
                     type == TYPE_NIGHT_THEME || type == TYPE_THEME_LIST || type == TYPE_THEME_ACCENT_LIST ||
-                    type == TYPE_TEXT_PREFERENCE || type == 18 || type == TYPE_APP_ICON || type == TYPE_CHOOSE_COLOR;
+                    type == TYPE_TEXT_PREFERENCE || type == 18 || type == TYPE_APP_ICON || type == TYPE_CHOOSE_COLOR ||
+                    type == TYPE_SKIN_SELECTOR;
         }
 
         private void showOptionsForTheme(Theme.ThemeInfo themeInfo) {
@@ -2456,6 +2462,13 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
                 case TYPE_CHOOSE_COLOR:
                     view = new PeerColorActivity.ChangeNameColorCell(currentAccount, 0, mContext, getResourceProvider());
                     break;
+                case TYPE_SKIN_SELECTOR:
+                    view = new SkinSelectorCell(mContext, skin -> {
+                        listAdapter.notifyDataSetChanged();
+                    });
+                    view.setLayoutParams(new RecyclerView.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                    break;
             }
             return new RecyclerListView.Holder(view);
         }
@@ -2708,6 +2721,11 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
                 case TYPE_CHOOSE_COLOR: {
                     PeerColorActivity.ChangeNameColorCell cell = (PeerColorActivity.ChangeNameColorCell) holder.itemView;
                     cell.set(getUserConfig().getCurrentUser());
+                    break;
+                }
+                case TYPE_SKIN_SELECTOR: {
+                    ((SkinSelectorCell) holder.itemView).refresh();
+                    break;
                 }
             }
         }
@@ -2775,6 +2793,8 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
                 return TYPE_APP_ICON;
             } else if (position == changeUserColor) {
                 return TYPE_CHOOSE_COLOR;
+            } else if (position == skinSelectorRow) {
+                return TYPE_SKIN_SELECTOR;
             }
             return TYPE_TEXT_SETTING;
         }
@@ -2790,7 +2810,7 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
     public ArrayList<ThemeDescription> getThemeDescriptions() {
         ArrayList<ThemeDescription> themeDescriptions = new ArrayList<>();
 
-        themeDescriptions.add(new ThemeDescription(listView, ThemeDescription.FLAG_CELLBACKGROUNDCOLOR, new Class[]{TextSettingsCell.class, TextCheckCell.class, HeaderCell.class, BrightnessControlCell.class, ThemeTypeCell.class, TextSizeCell.class, BubbleRadiusCell.class, ChatListCell.class, NotificationsCheckCell.class, ThemesHorizontalListCell.class, TintRecyclerListView.class, TextCell.class, PeerColorActivity.ChangeNameColorCell.class, SwipeGestureSettingsView.class, DefaultThemesPreviewCell.class, AppIconsSelectorCell.class}, null, null, null, Theme.key_windowBackgroundWhite));
+        themeDescriptions.add(new ThemeDescription(listView, ThemeDescription.FLAG_CELLBACKGROUNDCOLOR, new Class[]{TextSettingsCell.class, TextCheckCell.class, HeaderCell.class, BrightnessControlCell.class, ThemeTypeCell.class, TextSizeCell.class, BubbleRadiusCell.class, ChatListCell.class, NotificationsCheckCell.class, ThemesHorizontalListCell.class, TintRecyclerListView.class, TextCell.class, PeerColorActivity.ChangeNameColorCell.class, SwipeGestureSettingsView.class, DefaultThemesPreviewCell.class, AppIconsSelectorCell.class, SkinSelectorCell.class}, null, null, null, Theme.key_windowBackgroundWhite));
         themeDescriptions.add(new ThemeDescription(fragmentView, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, Theme.key_windowBackgroundGray));
 
 //        themeDescriptions.add(new ThemeDescription(actionBar, ThemeDescription.FLAG_BACKGROUND, null, null, null, null, Theme.key_actionBarDefault));
