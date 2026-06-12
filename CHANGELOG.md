@@ -12,6 +12,8 @@ se indique una versión propia del fork.
 
 - Selector inicial de diseños de interfaz en los ajustes de apariencia.
 - Selector jerárquico de familias y variantes de interfaz.
+- Secciones independientes para los temas generales importables de Telegram y
+  los diseños completos propios del cliente.
 - Familia Android con las variantes Actual, Original, Redesign y Glass.
 - Identificadores persistentes de variante como `android:original`.
 - Definiciones de diseño para Android, Android Redesign, Android Glass, Web,

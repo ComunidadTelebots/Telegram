@@ -43,8 +43,8 @@ public class SkinSelectorCell extends LinearLayout {
         setPadding(0, AndroidUtilities.dp(8), 0, AndroidUtilities.dp(8));
 
         addSectionHeader(
-                getContext().getString(R.string.SkinInterfaceDesign),
-                getContext().getString(R.string.SkinInterfaceDesignInfo));
+                getContext().getString(R.string.SkinCustomDesigns),
+                getContext().getString(R.string.SkinCustomDesignsInfo));
         addFamilySelector();
 
         SkinBase activeSkin = SkinManager.get().getActiveSkin();

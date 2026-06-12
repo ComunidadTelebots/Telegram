@@ -2574,7 +2574,7 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
                         if (currentType == THEME_TYPE_THEMES_BROWSER) {
                             headerCell.setText(getString("BuildMyOwnTheme", R.string.BuildMyOwnTheme));
                         } else {
-                            headerCell.setText(getString("ColorTheme", R.string.ColorTheme));
+                            headerCell.setText(getString(R.string.SkinGeneralDesigns));
                         }
                     } else if (position == textSizeHeaderRow) {
                         headerCell.setText(getString("TextSizeHeader", R.string.TextSizeHeader));
