@@ -10464,6 +10464,7 @@
     <string name="SettingsAccount">Account</string>
     <string name="SettingsAccounts">Accounts</string>
     <string name="SettingsAccountInfo">Number, Username, Bio</string>
+    <string name="OfficialChannel">Official Channel</string>
     <string name="SettingsChat">Chat Settings</string>
     <string name="SettingsChatInfo">Wallpaper, Night Mode, Animations</string>
     <string name="SettingsPrivacySecurity">Privacy &amp; Security</string>

@@ -13431,6 +13431,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     presentFragment(new SettingsActivity());
                 });
             }
+            io.add(R.drawable.msg_channel, getString(R.string.OfficialChannel), () -> {
+                getMessagesController().openByUserName("comunidadtelebots", DialogsActivity.this, 0);
+            });
 
             if (proxyMenuSubItem != null) {
                 proxyMenuSubItem.setOnClickListener(v -> {

@@ -219,6 +219,7 @@ import org.telegram.ui.web.RestrictedDomainsList;
 import org.telegram.ui.web.SearchEngine;
 import org.telegram.ui.web.WebActionBar;
 import org.telegram.ui.web.WebBrowserSettings;
+import org.telegram.ui.web.AmpViewer;
 import org.telegram.ui.web.WebInstantView;
 
 import java.io.File;
@@ -4030,6 +4031,15 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
             protected WebInstantView.Loader getInstantViewLoader() {
                 return pages[0].loadInstant();
             }
+
+            @Override
+            protected String getAmpUrl() {
+                if (!pages[0].isWeb()) return null;
+                BotWebViewContainer.MyWebView wv = pages[0].getWebView();
+                if (wv == null) return null;
+                String u = wv.getUrl();
+                return AmpViewer.isAmpEligible(u) ? u : null;
+            }
         };
         actionBar.occupyStatusBar(sheet != null && !BOTTOM_ACTION_BAR);
         containerView.addView(actionBar, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, BOTTOM_ACTION_BAR ? Gravity.BOTTOM : Gravity.TOP));
@@ -4622,6 +4632,22 @@ public class ArticleViewer implements NotificationCenter.NotificationCenterDeleg
                 WebInstantView.Loader loader = pages[0].currentInstantLoader;
                 if (loader != null && loader.getWebPage() != null) {
                     addPageToStack(loader.getWebPage(), null, 1);
+                }
+            } else if (id == WebActionBar.amp_item) {
+                String ampUrl = actionBar.getAmpUrl();
+                if (ampUrl != null && parentActivity != null) {
+                    FrameLayout ampContainer = new FrameLayout(parentActivity);
+                    AmpViewer ampViewer = new AmpViewer(parentActivity, ampUrl,
+                            pages[0].adapter != null ? pages[0].adapter.currentPage : null,
+                            () -> {
+                                if (windowView != null) windowView.removeView(ampContainer);
+                            });
+                    ampContainer.addView(ampViewer, new FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                    if (windowView != null) {
+                        windowView.addView(ampContainer, new FrameLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                    }
                 }
             }
         });

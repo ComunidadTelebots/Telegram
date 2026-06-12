@@ -693,13 +693,18 @@
             height: 58px;
             display: flex;
             align-items: center;
-            gap: 13px;
-            padding: 0 15px;
+            gap: 0;
+            padding: 0 6px 0 4px;
+        }
+
+        /* Margen sólo entre icono-menú/back y el título */
+        .app-toolbar .icon-button:first-child {
+            margin-right: 4px;
         }
 
         .icon-button {
-            width: 35px;
-            height: 35px;
+            width: 44px;
+            height: 44px;
             display: grid;
             place-items: center;
             flex: 0 0 auto;
@@ -708,7 +713,23 @@
             background: transparent;
             color: inherit;
             cursor: pointer;
-            font-size: 20px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .icon-button:active {
+            background: rgba(255,255,255,0.18);
+        }
+
+        .layout-ios .icon-button:active,
+        .layout-windows .icon-button:active {
+            background: rgba(0,0,0,0.06);
+        }
+
+        .icon-button svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+            display: block;
         }
 
         .toolbar-title {
@@ -725,12 +746,28 @@
         }
 
         .toolbar-title strong {
-            font-size: 19px;
+            font-size: 18px;
         }
 
         .toolbar-title small {
             font-size: 11px;
             opacity: .82;
+        }
+
+        /* Toolbar avatar pequeño en chat */
+        .toolbar-avatar {
+            width: 37px;
+            height: 37px;
+            flex: 0 0 37px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: #73b9e6;
+            color: white;
+            font-weight: 700;
+            font-size: 13px;
+            margin-right: 8px;
+            cursor: pointer;
         }
 
         .app-screen {
@@ -926,6 +963,155 @@
             cursor: pointer;
         }
 
+        /* ── Bloqueo de app ─────────────────────────────────────── */
+        .pin-screen {
+            display: flex; flex-direction: column; align-items: center;
+            padding: 40px 20px 24px; gap: 28px;
+        }
+        .pin-lock-icon { font-size: 44px; opacity: .7; }
+        .pin-title { font-size: 17px; font-weight: 700; color: #19232c; }
+        .pin-dots { display: flex; gap: 14px; }
+        .pin-dot {
+            width: 14px; height: 14px; border-radius: 50%;
+            border: 2px solid #4b9bd6; background: transparent;
+            transition: background .15s;
+        }
+        .pin-dot.filled { background: #4b9bd6; }
+        .pin-pad {
+            display: grid; grid-template-columns: repeat(3, 68px);
+            gap: 12px; justify-content: center;
+        }
+        .pin-key {
+            width: 68px; height: 68px; border-radius: 50%;
+            border: 0; background: #f0f4f7; font-size: 22px; font-weight: 500;
+            color: #19232c; cursor: pointer; transition: background .12s;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .pin-key:active { background: #d8e4ec; }
+        .pin-key small { font-size: 9px; color: #8a9baa; letter-spacing: .5px; font-weight: 400; margin-top: -2px; }
+        .pin-key.pin-del { background: transparent; font-size: 18px; }
+        .pin-key.pin-empty { visibility: hidden; }
+        .pin-biometric { font-size: 13px; color: #4b9bd6; cursor: pointer; }
+        .applock-setting-section { padding: 16px 16px 0; }
+        .applock-setting-section h3 { font-size: 11px; color: #8a9baa; letter-spacing: .5px; text-transform: uppercase; margin: 0 0 8px; }
+        .applock-toggle-row {
+            display: flex; align-items: center; justify-content: space-between;
+            background: white; border-radius: 12px; padding: 14px 16px;
+            margin-bottom: 1px; box-shadow: 0 1px 3px rgb(0 0 0 / 6%);
+        }
+        .applock-toggle-row .row-label { font-size: 15px; color: #19232c; }
+        .applock-toggle-row .row-sub { font-size: 12px; color: #8a9baa; margin-top: 2px; }
+        .timeout-chips { display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 16px; }
+        .timeout-chip {
+            padding: 6px 14px; border-radius: 20px; border: 1.5px solid #d0d8e0;
+            font-size: 13px; background: white; color: #19232c; cursor: pointer;
+        }
+        .timeout-chip.active { border-color: #4b9bd6; background: #eaf3fb; color: #4b9bd6; font-weight: 600; }
+
+        /* ── Carpetas con icono/color ────────────────────────────── */
+        .folder-tab { position: relative; }
+        .folder-tab .folder-icon { font-size: 14px; margin-right: 4px; }
+        .folder-tab-dot {
+            position: absolute; top: 4px; right: 4px;
+            width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid white;
+        }
+        .folders-list { padding: 8px 0; }
+        .folder-edit-row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; background: white; border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+        .folder-edit-row:active { background: #f5f8fb; }
+        .folder-color-dot {
+            width: 42px; height: 42px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; flex-shrink: 0;
+        }
+        .folder-edit-info { flex: 1; }
+        .folder-edit-info strong { font-size: 15px; display: block; }
+        .folder-edit-info span { font-size: 12px; color: #8a9baa; }
+        .folder-icon-picker {
+            display: grid; grid-template-columns: repeat(6, 1fr);
+            gap: 8px; padding: 12px 16px;
+            background: white; border-radius: 12px; margin: 8px 16px;
+        }
+        .folder-icon-btn {
+            width: 42px; height: 42px; border-radius: 10px; border: 2px solid transparent;
+            font-size: 20px; background: #f0f4f7; cursor: pointer;
+        }
+        .folder-icon-btn.selected { border-color: #4b9bd6; background: #eaf3fb; }
+        .color-picker-row {
+            display: flex; gap: 10px; padding: 8px 16px 16px; flex-wrap: wrap;
+        }
+        .color-swatch {
+            width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
+            border: 3px solid transparent; transition: transform .12s;
+        }
+        .color-swatch.selected { border-color: #19232c; transform: scale(1.15); }
+        .auto-archive-section { padding: 8px 16px 0; }
+        .auto-archive-section h3 { font-size: 11px; color: #8a9baa; letter-spacing: .5px; text-transform: uppercase; margin: 8px 0; }
+        .auto-archive-row {
+            background: white; border-radius: 12px;
+            box-shadow: 0 1px 3px rgb(0 0 0 / 6%); overflow: hidden;
+        }
+        .auto-archive-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 16px; border-bottom: 1px solid #f0f4f7; font-size: 15px;
+        }
+        .auto-archive-item:last-child { border-bottom: none; }
+        .aa-time-select {
+            font-size: 13px; color: #4b9bd6; font-weight: 600; cursor: pointer;
+        }
+
+        /* ── Recordatorios ──────────────────────────────────────── */
+        .remind-sheet-backdrop {
+            position: absolute; inset: 0; background: rgba(0,0,0,.35);
+            z-index: 40; opacity: 0; pointer-events: none;
+            transition: opacity .2s;
+        }
+        .remind-sheet-backdrop.visible { opacity: 1; pointer-events: all; }
+        .remind-sheet {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: white; border-radius: 16px 16px 0 0;
+            padding: 20px 16px 28px; z-index: 41;
+            transform: translateY(100%); transition: transform .25s cubic-bezier(.22,1,.36,1);
+        }
+        .remind-sheet-backdrop.visible .remind-sheet { transform: translateY(0); }
+        .remind-sheet h3 { font-size: 16px; font-weight: 700; margin: 0 0 16px; }
+        .remind-chips { display: flex; flex-direction: column; gap: 2px; }
+        .remind-chip {
+            display: flex; align-items: center; gap: 12px;
+            padding: 13px 4px; border: 0; background: transparent;
+            font: inherit; font-size: 15px; color: #19232c;
+            cursor: pointer; border-bottom: 1px solid #f0f4f7; text-align: left;
+        }
+        .remind-chip:last-child { border-bottom: none; }
+        .remind-chip-icon {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: #eaf3fb; display: flex; align-items: center; justify-content: center;
+            font-size: 18px; flex-shrink: 0;
+        }
+        .remind-chip span { font-size: 12px; color: #8a9baa; display: block; }
+        .message-remind-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 11px; color: #4b9bd6; background: #eaf3fb;
+            border-radius: 8px; padding: 2px 7px; margin-top: 4px;
+        }
+        /* Menú contextual de mensaje */
+        .msg-context-menu {
+            position: absolute; background: white; border-radius: 12px;
+            box-shadow: 0 8px 28px rgb(0 0 0 / 18%); z-index: 35;
+            padding: 6px 0; min-width: 160px;
+            animation: fade-up .15s ease both;
+        }
+        .msg-ctx-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 16px; font-size: 14px; color: #19232c;
+            cursor: pointer; border: 0; background: transparent; width: 100%;
+        }
+        .msg-ctx-item:hover { background: #f5f8fb; }
+        .msg-ctx-icon { font-size: 17px; width: 22px; text-align: center; }
+
         .screen-relative {
             min-height: 100%;
             position: relative;
@@ -979,27 +1165,71 @@
 
         .composer-bar {
             display: flex;
-            gap: 7px;
-            padding: 8px;
+            align-items: center;
+            gap: 4px;
+            padding: 7px 8px;
+            background: var(--app-bg, #f1f2f4);
+        }
+
+        .composer-input-wrap {
+            min-width: 0;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0 6px 0 14px;
+            border-radius: 22px;
+            background: white;
+            min-height: 42px;
         }
 
         .composer-input {
             min-width: 0;
             flex: 1;
-            padding: 11px 13px;
+            padding: 10px 4px;
             border: 0;
-            border-radius: 22px;
             outline: 0;
-            background: white;
+            background: transparent;
+            font: inherit;
+            font-size: 14px;
+            color: #1a2530;
+        }
+
+        .composer-attach-btn {
+            width: 32px;
+            height: 32px;
+            display: grid;
+            place-items: center;
+            border: 0;
+            background: transparent;
+            color: #68747e;
+            cursor: pointer;
+            flex: 0 0 32px;
+        }
+
+        .composer-attach-btn svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
         }
 
         .send-button {
-            width: 43px;
+            width: 44px;
+            height: 44px;
+            flex: 0 0 44px;
             border: 0;
             border-radius: 50%;
             background: #3d99d4;
             color: white;
             cursor: pointer;
+            display: grid;
+            place-items: center;
+        }
+
+        .send-button svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
         }
 
         .search-box {
@@ -1073,11 +1303,45 @@
 
         .drawer-item {
             width: 100%;
-            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 0 20px;
+            height: 48px;
             border: 0;
             background: transparent;
             text-align: left;
+            font: inherit;
+            font-size: 15px;
+            color: inherit;
             cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .drawer-item:active {
+            background: rgba(0,0,0,.05);
+        }
+
+        .drawer-item svg {
+            width: 24px;
+            height: 24px;
+            fill: #6c757d;
+            flex: 0 0 24px;
+        }
+
+        .drawer-divider {
+            height: 1px;
+            background: #e9ecef;
+            margin: 6px 0;
+        }
+
+        /* Item canal oficial — destacado */
+        .drawer-item-channel {
+            color: var(--app-accent, #4b9bd6);
+        }
+
+        .drawer-item-channel svg {
+            fill: var(--app-accent, #4b9bd6);
         }
 
         .story-viewer.visible {
@@ -1321,6 +1585,366 @@
             line-height: 1.45;
         }
 
+        /* ── Instant View ── */
+        .iv-screen {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            overflow: hidden;
+        }
+        .iv-toolbar {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 0;
+            padding: 0 4px;
+            height: 52px;
+            background: white;
+            border-bottom: 1px solid #e3e8ec;
+            color: #444d55;
+        }
+
+        .iv-toolbar .icon-button:active {
+            background: rgba(0,0,0,0.06);
+        }
+        .iv-progress {
+            height: 3px;
+            background: #e5eaed;
+            flex: 0 0 auto;
+        }
+        .iv-progress-fill {
+            height: 100%;
+            background: var(--app-accent, #4b9bd6);
+            width: 34%;
+            transition: width .2s;
+        }
+        .iv-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 18px 40px;
+        }
+        .iv-site { font-size: 11px; color: #8a949c; letter-spacing: .4px; text-transform: uppercase; margin-bottom: 10px; }
+        .iv-kicker { font-size: 13px; color: #4b9bd6; font-weight: 700; margin-bottom: 6px; }
+        .iv-title { font-size: 22px; font-weight: 800; line-height: 1.25; margin-bottom: 8px; font-family: Georgia, serif; }
+        .iv-subtitle { font-size: 15px; color: #55636e; line-height: 1.4; margin-bottom: 10px; }
+        .iv-meta { font-size: 12px; color: #8a949c; margin-bottom: 16px; display: flex; gap: 8px; }
+        .iv-cover {
+            margin: 0 -18px 16px;
+            height: 160px;
+            background: linear-gradient(135deg, #c8d8e4, #dde8ee);
+            display: flex;
+            align-items: flex-end;
+        }
+        .iv-cover-caption { padding: 8px 12px; font-size: 11px; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.45)); width: 100%; }
+        .iv-p { font-size: 15px; line-height: 1.65; color: #1a2530; margin-bottom: 14px; }
+        .iv-h2 { font-size: 19px; font-weight: 700; font-family: Georgia, serif; margin: 20px 0 8px; }
+        .iv-h3 { font-size: 16px; font-weight: 700; margin: 16px 0 6px; }
+        .iv-blockquote {
+            margin: 14px 0;
+            padding: 10px 14px;
+            border-left: 3px solid #777;
+            font-style: italic;
+            font-family: Georgia, serif;
+            font-size: 15px;
+            color: #3a4a55;
+            line-height: 1.5;
+        }
+        .iv-pullquote {
+            margin: 18px 0;
+            padding: 14px 16px;
+            border-top: 2px solid #d0d8de;
+            border-bottom: 2px solid #d0d8de;
+            font-size: 18px;
+            font-style: italic;
+            font-family: Georgia, serif;
+            color: #1a2530;
+            line-height: 1.4;
+            text-align: center;
+        }
+        .iv-pre {
+            margin: 12px 0;
+            padding: 12px 14px;
+            background: #f4f6f8;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #2a3c4a;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        .iv-ul { margin: 0 0 14px 20px; font-size: 15px; line-height: 1.7; color: #1a2530; }
+        .iv-ol { margin: 0 0 14px 20px; font-size: 15px; line-height: 1.7; color: #1a2530; }
+        .iv-table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13px; }
+        .iv-table th { background: #f0f4f7; padding: 7px 10px; text-align: left; border: 1px solid #dce3e8; font-weight: 700; }
+        .iv-table td { padding: 6px 10px; border: 1px solid #dce3e8; }
+        .iv-table tr:nth-child(even) td { background: #f8fafb; }
+        .iv-divider { border: none; border-top: 1px solid #dce3e8; margin: 18px 0; }
+        .iv-details { margin: 12px 0; border: 1px solid #dce3e8; border-radius: 8px; overflow: hidden; }
+        .iv-details-summary { padding: 10px 14px; background: #f4f6f8; font-weight: 700; font-size: 14px; cursor: pointer; }
+        .iv-details-body { padding: 10px 14px; font-size: 14px; line-height: 1.6; }
+        .iv-caption { font-size: 12px; color: #8a949c; text-align: center; margin: -10px 0 14px; }
+        .iv-photo { margin: 14px -18px; height: 140px; background: linear-gradient(135deg, #d0dce4, #e4edf2); }
+        .iv-related { margin-top: 24px; padding-top: 16px; border-top: 1px solid #dce3e8; }
+        .iv-related-title { font-size: 13px; font-weight: 700; color: #8a949c; letter-spacing: .4px; text-transform: uppercase; margin-bottom: 10px; }
+        .iv-related-item { padding: 10px 0; border-bottom: 1px solid #edf0f2; font-size: 14px; font-weight: 600; color: #4b9bd6; cursor: pointer; }
+        /* ── Link preview: igual que ChatMessageCell ── */
+        .link-preview {
+            margin: 7px -10px -4px;   /* compensa el padding del .app-message */
+            padding: 0;
+            border-left: 3px solid var(--app-accent, #4b9bd6);
+            background: rgba(75,155,214,.07);
+            border-radius: 0 0 var(--app-radius) 0;
+            overflow: hidden;
+        }
+        .link-preview-body {
+            padding: 8px 10px 9px;
+            font-size: 13px;
+        }
+        .link-preview-site {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--app-accent, #4b9bd6);
+            margin-bottom: 3px;
+        }
+        .link-preview-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1a2530;
+            line-height: 1.3;
+            margin-bottom: 3px;
+        }
+        .link-preview-desc {
+            font-size: 12px;
+            color: #7a848e;
+            line-height: 1.35;
+        }
+
+        /* Separador idéntico al de ChatMessageCell (18% opacidad del color IV) */
+        .link-preview-divider {
+            height: 1px;
+            background: rgba(75,155,214,.22);
+            margin: 0 7px;
+        }
+
+        /* Zona de botones: flex-row, cada botón ocupa el 50% */
+        .link-preview-actions {
+            display: flex;
+        }
+
+        /* Botón base: 36dp alto, radio 6dp, fondo tintado acento, texto centrado */
+        .link-preview-iv,
+        .link-preview-amp {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            height: 36px;
+            border: none;
+            border-radius: 0 0 0 0;      /* Las esquinas las gestiona el contenedor */
+            background: rgba(75,155,214,.12);
+            color: var(--app-accent, #4b9bd6);
+            font-size: 12.5px;
+            font-weight: 700;
+            letter-spacing: .15px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+
+        /* Cuando sólo hay IV sin AMP, ocupa todo el ancho con radio inferior */
+        .link-preview-actions.single .link-preview-iv {
+            border-radius: 0 0 8px 0;
+        }
+
+        /* Con dos botones: el IV tiene radio abajo-derecha 0, el AMP abajo-derecha */
+        .link-preview-actions.dual .link-preview-iv {
+            border-right: 1px solid rgba(75,155,214,.18);
+        }
+        .link-preview-actions.dual .link-preview-amp {
+            background: var(--app-accent, #4b9bd6);
+            color: white;
+            border-radius: 0 0 8px 0;
+        }
+
+        .link-preview-iv:active { background: rgba(75,155,214,.22); }
+        .link-preview-amp:active { filter: brightness(.92); }
+
+        /* ── AMP Viewer ── */
+        .amp-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            background: rgba(0,0,0,.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: amp-fade .15s ease;
+        }
+        .amp-backdrop.visible { display: flex; }
+        @keyframes amp-fade { from { opacity:0 } to { opacity:1 } }
+
+        .amp-container {
+            display: flex;
+            flex-direction: column;
+            width: min(390px, 96vw);
+            height: min(820px, 92vh);
+            background: #fff;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 12px 50px rgba(0,0,0,.4);
+            animation: amp-slide .15s ease;
+        }
+        @keyframes amp-slide { from { transform:translateY(14px);opacity:0 } to { transform:translateY(0);opacity:1 } }
+
+        .amp-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 10px;
+            height: 50px;
+            background: var(--app-accent, #4b9bd6);
+            color: white;
+            flex-shrink: 0;
+        }
+        .amp-badge {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .5px;
+            background: rgba(255,255,255,.25);
+            padding: 2px 6px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+        .amp-origin {
+            flex: 1;
+            font-size: 13px;
+            font-weight: 500;
+            opacity: .9;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .amp-icon-btn {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .amp-icon-btn:active { background: rgba(255,255,255,.18); }
+        .amp-icon-btn.active { background: rgba(255,255,255,.22); }
+
+        .amp-body {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Estado de carga */
+        .amp-loading {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: #8a949c;
+            font-size: 13px;
+            background: white;
+        }
+        .amp-spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #e0e7ec;
+            border-top-color: var(--app-accent, #4b9bd6);
+            border-radius: 50%;
+            animation: amp-spin .7s linear infinite;
+        }
+        @keyframes amp-spin { to { transform: rotate(360deg) } }
+
+        /* Modo iframe simulado */
+        .amp-iframe-sim {
+            position: absolute;
+            inset: 0;
+            overflow-y: auto;
+            padding: 0;
+            background: #f9fafb;
+            display: none;
+        }
+        .amp-iframe-sim.visible { display: block; }
+        .amp-iframe-topbar {
+            padding: 14px 16px 10px;
+            background: white;
+            border-bottom: 1px solid #e5eaed;
+        }
+        .amp-iframe-topbar-logo {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--app-accent, #4b9bd6);
+            letter-spacing: .4px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .amp-iframe-topbar-title {
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.25;
+            color: #1a2530;
+        }
+        .amp-iframe-content { padding: 14px 16px; }
+        .amp-iframe-content p { font-size: 14px; line-height: 1.65; color: #2a3844; margin-bottom: 12px; }
+        .amp-iframe-content img-placeholder {
+            display: block;
+            height: 120px;
+            background: linear-gradient(135deg,#cdd8de,#dde7ec);
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+        .amp-amp-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #2271b3;
+            background: #e8f3fb;
+            padding: 2px 7px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        /* Modo lectura */
+        .amp-reader {
+            position: absolute;
+            inset: 0;
+            overflow-y: auto;
+            padding: 22px 18px 36px;
+            background: white;
+            display: none;
+        }
+        .amp-reader.visible { display: block; }
+        .amp-reader h1 { font-size: 21px; font-weight: 800; line-height: 1.25; margin: 0 0 8px; color: #111; }
+        .amp-reader .amp-reader-site { font-size: 11px; font-weight: 700; color: var(--app-accent,#4b9bd6); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px; }
+        .amp-reader .amp-reader-meta { font-size: 12px; color: #8a949c; margin-bottom: 14px; }
+        .amp-reader p { font-size: 15px; line-height: 1.7; color: #1a2530; margin-bottom: 12px; }
+        .amp-reader blockquote { margin: 12px 0; padding: 4px 0 4px 13px; border-left: 3px solid var(--app-accent,#4b9bd6); font-style: italic; color: #4a5a66; font-size: 14px; }
+        .amp-reader img-ph { display:block; height:110px; background:linear-gradient(135deg,#cdd8de,#dde7ec); border-radius:6px; margin:12px 0; }
+        .amp-reader pre { background:#f4f6f8; border-radius:7px; padding:10px 12px; font-family:monospace; font-size:12px; line-height:1.6; margin:12px 0; overflow-x:auto; color:#2a3c4a; }
+        .amp-reader ul { padding-left:20px; font-size:14px; line-height:1.75; color:#1a2530; margin-bottom:12px; }
+        .amp-reader hr { border:none; border-top:1px solid #dce3e8; margin:16px 0; }
+        .amp-reader .amp-reader-footer { font-size:12px; color:#8a949c; margin-top:20px; padding-top:14px; border-top:1px solid #e5eaed; }
+
+        /* .link-preview-amp ya definido arriba junto a .link-preview-iv */
+
         .compare-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -1380,6 +2004,136 @@
             padding-left: 18px;
             line-height: 1.7;
         }
+
+        /* ── Sección canal oficial en Ajustes ── */
+        .official-channel-section {
+            margin: 0;
+            background: var(--app-surface, white);
+        }
+
+        .official-channel-header {
+            padding: 14px 20px 6px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: .25px;
+            color: var(--app-accent, #4b9bd6);
+            text-transform: uppercase;
+            background: var(--app-bg, #f1f2f4);
+            border-bottom: none;
+        }
+
+        .official-channel-list {
+            background: var(--app-surface, white);
+            border-top: 1px solid #e9ecef;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .official-channel-row {
+            width: 100%;
+            min-height: 72px;
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 10px 14px 10px 14px;
+            border: 0;
+            background: transparent;
+            color: inherit;
+            text-align: left;
+            cursor: pointer;
+            transition: background .15s;
+        }
+
+        .official-channel-row:active {
+            background: rgba(0,0,0,.04);
+        }
+
+        .official-channel-avatar {
+            width: 50px;
+            height: 50px;
+            flex: 0 0 50px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #5b9bd5, #3a7ec4);
+            color: white;
+            font-size: 17px;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(59,126,196,.35);
+        }
+
+        .official-channel-copy {
+            min-width: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .official-channel-copy strong {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1a2530;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .official-channel-copy span {
+            font-size: 12.5px;
+            color: #7a848e;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .official-channel-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 5px;
+        }
+
+        .official-channel-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: var(--app-accent, #4b9bd6);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .3px;
+        }
+
+        /* ── Animaciones de transición de pantalla ── */
+        @keyframes slide-in-right {
+            from { transform: translateX(32px); opacity: 0; }
+            to   { transform: translateX(0);    opacity: 1; }
+        }
+        @keyframes slide-in-left {
+            from { transform: translateX(-20px); opacity: 0; }
+            to   { transform: translateX(0);     opacity: 1; }
+        }
+        @keyframes fade-up {
+            from { transform: translateY(10px); opacity: 0; }
+            to   { transform: translateY(0);    opacity: 1; }
+        }
+
+        .anim-slide-right { animation: slide-in-right .22s cubic-bezier(.22,1,.36,1) both; }
+        .anim-slide-left  { animation: slide-in-left  .22s cubic-bezier(.22,1,.36,1) both; }
+        .anim-fade-up     { animation: fade-up         .2s  ease both; }
+
+        /* Los mensajes del chat entran escalonados */
+        .chat-screen .app-message:nth-child(1) { animation: fade-up .18s .00s ease both; }
+        .chat-screen .app-message:nth-child(2) { animation: fade-up .18s .04s ease both; }
+        .chat-screen .app-message:nth-child(3) { animation: fade-up .18s .08s ease both; }
+        .chat-screen .app-message:nth-child(4) { animation: fade-up .18s .12s ease both; }
+        .chat-screen .app-message:nth-child(5) { animation: fade-up .18s .16s ease both; }
+        .chat-screen .app-message:nth-child(6) { animation: fade-up .18s .20s ease both; }
+        .chat-screen .composer-bar             { animation: fade-up .18s .24s ease both; }
+
+        /* El screen completo hace slide al navegar */
+        #app-screen.entering-chat  { animation: slide-in-right .24s cubic-bezier(.22,1,.36,1) both; }
+        #app-screen.leaving-chat   { animation: slide-in-left  .20s cubic-bezier(.22,1,.36,1) both; }
     </style>
 </head>
 <body>
@@ -1406,12 +2160,35 @@
             <strong>Comunidad Telebots</strong>
             <div style="color:#78828b;font-size:12px;margin-top:4px">@comunidadtelebots</div>
         </div>
-        <button class="drawer-item" data-route="profile">Mi perfil</button>
-        <button class="drawer-item" data-route="contacts">Contactos</button>
-        <button class="drawer-item" data-route="calls">Llamadas</button>
-        <button class="drawer-item" data-route="saved">Mensajes guardados</button>
-        <button class="drawer-item" data-route="settings">Ajustes</button>
-        <button class="drawer-item" data-route="appearance">Apariencia</button>
+        <button class="drawer-item" data-route="profile">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            Mi perfil
+        </button>
+        <button class="drawer-item" data-route="contacts">
+            <svg viewBox="0 0 24 24"><path d="M20 0H4v2h16V0zm0 4H4v2h16V4zM4 24h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2H4C2.9 6 2 6.9 2 8v14c0 1.1.9 2 2 2zm8-13c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm6 10H6v-.57c0-1.63 3.33-2.5 6-2.5s6 .87 6 2.5V21z"/></svg>
+            Contactos
+        </button>
+        <button class="drawer-item" data-route="calls">
+            <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+            Llamadas
+        </button>
+        <button class="drawer-item" data-route="saved">
+            <svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>
+            Mensajes guardados
+        </button>
+        <div class="drawer-divider"></div>
+        <button class="drawer-item" data-route="settings">
+            <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+            Ajustes
+        </button>
+        <button class="drawer-item" data-route="appearance">
+            <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+            Apariencia
+        </button>
+        <button class="drawer-item drawer-item-channel" data-action="open-official-channel">
+            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+            Canal oficial
+        </button>
     </aside>
 </div>
 
@@ -1438,6 +2215,69 @@
             <button class="attachment-item"><span class="attachment-icon">⚙</span>Bot</button>
         </div>
     </section>
+</div>
+
+<div class="amp-backdrop" id="amp-backdrop">
+    <div class="amp-container" id="amp-container">
+        <div class="amp-header" id="amp-header">
+            <span class="amp-badge" id="amp-badge">AMP</span>
+            <span class="amp-origin" id="amp-origin">telegram.org</span>
+            <button class="amp-icon-btn" id="amp-reader-btn" title="Modo lectura">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+            </button>
+            <button class="amp-icon-btn" title="Abrir en navegador">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+            </button>
+            <button class="amp-icon-btn" id="amp-close" title="Cerrar">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </button>
+        </div>
+        <div class="amp-body">
+            <!-- Estado cargando -->
+            <div class="amp-loading" id="amp-loading">
+                <div class="amp-spinner"></div>
+                <span>Cargando versión AMP…</span>
+            </div>
+            <!-- Modo iframe simulado -->
+            <div class="amp-iframe-sim" id="amp-iframe-sim">
+                <div class="amp-iframe-topbar">
+                    <div class="amp-iframe-topbar-logo">⚡ telegram.org</div>
+                    <div class="amp-iframe-topbar-title">Diseños de interfaz intercambiables en Telegram Android</div>
+                </div>
+                <div class="amp-iframe-content">
+                    <div class="amp-amp-label">⚡ AMP</div>
+                    <img-placeholder></img-placeholder>
+                    <p>Telegram para Android introduce un sistema de <strong>skins intercambiables</strong> que permite elegir entre 15 estilos visuales sin perder ninguna función moderna de Telegram.</p>
+                    <p>Los diseños modifican el radio de las burbujas, la cola de los mensajes, la forma de los avatares y la densidad de la lista de chats. Todo sin tocar la capa de datos ni las funciones.</p>
+                    <p>La familia Android incluye 7 variantes históricas: desde el diseño Original de 2013 hasta el Glass de 2026, pasando por Holo, Material, Clásico, Actual y Redesign.</p>
+                    <p>El <code>SkinManager</code> se inicializa al arrancar la app y aplica el radio de burbuja guardado sobreescribiendo <code>SharedConfig.bubbleRadius</code>. Cada skin extiende <code>SkinBase</code>.</p>
+                </div>
+            </div>
+            <!-- Modo lectura -->
+            <div class="amp-reader" id="amp-reader">
+                <div class="amp-reader-site">⚡ Telegram Blog</div>
+                <h1>Diseños de interfaz intercambiables en Telegram Android</h1>
+                <div class="amp-reader-meta">Por Comunidad Telebots · 12 Jun 2026</div>
+                <img-ph></img-ph>
+                <p>Telegram para Android introduce un sistema de <strong>skins intercambiables</strong> que permite elegir entre 15 estilos visuales sin perder ninguna función moderna de Telegram.</p>
+                <blockquote>«Los diseños no son temas de color: modifican burbujas, avatares, colas y densidad de la lista de chats.»</blockquote>
+                <p>La familia Android incluye 7 variantes históricas. El resto cubre Web, iOS, macOS, Desktop, Windows, Telegram X, Aurora y Webogram.</p>
+                <p>El gestor central es un singleton que sobreescribe <code>SharedConfig.bubbleRadius</code> y dispara <code>didSetNewTheme</code> para que todos los componentes se redibújen.</p>
+                <pre>SkinManager.get().applySkin(new WebSkin());
+// bubbleRadius = 18
+// hasBubbleTail = false
+// avatarRadius = 1.0f (círculo)</pre>
+                <ul>
+                    <li>15 diseños nativos sin WebView</li>
+                    <li>Persistencia en SharedPreferences</li>
+                    <li>Integrado en Ajustes → Apariencia</li>
+                    <li>Compatible con temas de color existentes</li>
+                </ul>
+                <hr>
+                <div class="amp-reader-footer">telegram.org/blog/skins · Comunidad Telebots</div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="modal-backdrop" id="modal" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
@@ -1522,7 +2362,13 @@
         directShare: true,
         sensitiveContent: false,
         sendByEnter: false,
-        swipeAction: "archive"
+        swipeAction: "archive",
+        appLockEnabled: false,
+        appLockBio: false,
+        appLockTimeout: "1",
+        autoArchive: false,
+        autoArchiveDays: "30",
+        autoArchiveExclude: true
     };
     let preferences = loadPreferences();
 
@@ -1571,9 +2417,12 @@
         stars: "Telegram Stars",
         business: "Telegram Business",
         help: "Ayuda",
+        iv: "Vista Rápida",
         profile: "Mi perfil",
         saved: "Mensajes guardados",
-        search: "Buscar"
+        search: "Buscar",
+        applock: "Bloqueo de aplicación",
+        folders: "Carpetas de chats"
     };
 
     const settingsCategories = {
@@ -1587,7 +2436,7 @@
             ["Usuarios bloqueados", "Gestiona las cuentas bloqueadas"],
             ["Dispositivos", "Sesiones activas"],
             ["Verificación en dos pasos", "Contraseña adicional"],
-            ["Código de bloqueo", "Protege la aplicación"],
+            ["Bloqueo de aplicación", "Protege la aplicación", "applock"],
             ["Privacidad", "Teléfono, última vez, foto y llamadas"],
             ["Autoeliminar mensajes", "Temporizador global"],
             ["Bots y sitios web", "Permisos y sesiones"],
@@ -1612,13 +2461,6 @@
             ["Streaming", "Reproducir mientras se descarga"],
             ["Llamadas", "Menor uso de datos"],
             ["Proxy", "Configuración de conexión"]
-        ],
-        folders: [
-            ["Crear nueva carpeta", "Agrupa chats y canales"],
-            ["No leídos", "Chats con mensajes pendientes"],
-            ["Personal", "Contactos y conversaciones privadas"],
-            ["Canales", "Todos tus canales"],
-            ["Carpetas recomendadas", "Sugerencias de Telegram"]
         ],
         devices: [
             ["Este dispositivo", "Android · sesión actual"],
@@ -1679,6 +2521,27 @@
         renderApp(options);
     }
 
+    // Navegación con animación de slide (igual que Telegram Android)
+    function navigateWithAnimation(route, options = {}) {
+        const screen = document.querySelector("#app-screen");
+        const prevRoute = currentRoute;
+
+        // Slide out del contenido actual (hacia la izquierda, como en Android)
+        screen.style.transition = "transform .18s cubic-bezier(.4,0,.2,1), opacity .18s ease";
+        screen.style.transform = "translateX(-18px)";
+        screen.style.opacity = "0";
+
+        setTimeout(() => {
+            screen.style.transition = "";
+            screen.style.transform = "";
+            screen.style.opacity = "";
+            navigate(route, options);
+            // Slide-in del nuevo contenido (desde la derecha)
+            screen.classList.add("entering-chat");
+            setTimeout(() => screen.classList.remove("entering-chat"), 280);
+        }, 160);
+    }
+
     function renderApp(options = {}) {
         const shell = document.querySelector("#app-shell");
         const darkMode = preferences.colorMode === "dark" ||
@@ -1693,6 +2556,9 @@
         shell.style.setProperty("--app-accent", active.accent);
         document.body.classList.remove("device-phone", "device-tablet", "device-foldable");
         document.body.classList.add(`device-${preferences.device}`);
+        // IV tiene su propio toolbar integrado
+        document.querySelector("#app-toolbar").parentElement.style.display =
+            currentRoute === "iv" ? "none" : "";
         renderToolbar(options);
         renderScreen(options);
         document.querySelectorAll(".bottom-item").forEach(item => {
@@ -1700,28 +2566,57 @@
         });
     }
 
+    // ── Iconos SVG (Material Design / Telegram style) ────────────────────────
+    const ico = {
+        back: `<svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>`,
+        menu: `<svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>`,
+        search: `<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`,
+        more: `<svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>`,
+        videocall: `<svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>`,
+        compose: `<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`,
+        attach: `<svg viewBox="0 0 24 24"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/></svg>`,
+        emoji: `<svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>`,
+        send: `<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>`,
+        mic: `<svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>`,
+        call: `<svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>`
+    };
+
+    function btn(action, icon, title = "") {
+        return `<button class="icon-button" data-action="${action}" title="${title}">${icon}</button>`;
+    }
+
     function renderToolbar(options) {
         const toolbar = document.querySelector("#app-toolbar");
         if (currentRoute === "chat") {
             const chat = options.chat || currentChat || chats[0];
+            // Real Telegram chat: ← | avatar nombre estado | [flex] | 📹 | 🔍 | ⋮
             toolbar.innerHTML = `
-                <button class="icon-button" data-action="back">‹</button>
-                <div class="list-avatar" style="width:36px;height:36px;flex-basis:36px;background:${chat.color}">${chat.initials}</div>
-                <div class="toolbar-title"><strong>${chat.name}</strong><small>en línea</small></div>
-                <button class="icon-button" data-action="call">⌕</button>
-                <button class="icon-button" data-action="profile">⋮</button>`;
+                ${btn("back", ico.back, "Atrás")}
+                <div class="toolbar-avatar" style="background:${chat.color}">${chat.initials}</div>
+                <div class="toolbar-title">
+                    <strong>${chat.name}</strong>
+                    <small>en línea</small>
+                </div>
+                ${btn("videocall", ico.videocall, "Videollamada")}
+                ${btn("search", ico.search, "Buscar")}
+                ${btn("more", ico.more, "Más opciones")}`;
         } else {
             const backRoutes = [
                 "appearance", "customization", "experiments", "compare", "changelog",
                 "account", "privacy", "notifications", "data", "folders", "devices",
                 "power", "language", "premium", "stars", "business", "help",
-                "profile", "saved", "search"
+                "profile", "saved", "search", "iv", "applock"
             ];
+            const isBack = backRoutes.includes(currentRoute);
+            // Real Telegram main: ☰/← | título | [flex] | 🔍 | ✎(solo en chats) | ⋮(solo en settings)
             toolbar.innerHTML = `
-                <button class="icon-button" data-action="${backRoutes.includes(currentRoute) ? "back" : "menu"}">${backRoutes.includes(currentRoute) ? "‹" : "☰"}</button>
-                <div class="toolbar-title"><strong>${routeTitles[currentRoute] || "Telegram"}</strong></div>
-                <button class="icon-button" data-action="search">⌕</button>
-                ${currentRoute === "settings" ? '<button class="icon-button" data-action="profile">⋮</button>' : ""}`;
+                ${btn(isBack ? "back" : "menu", isBack ? ico.back : ico.menu, isBack ? "Atrás" : "Menú")}
+                <div class="toolbar-title">
+                    <strong>${routeTitles[currentRoute] || "Telegram"}</strong>
+                </div>
+                ${btn("search", ico.search, "Buscar")}
+                ${currentRoute === "chats" ? btn("compose", ico.compose, "Nuevo chat") : ""}
+                ${currentRoute === "settings" ? btn("more", ico.more, "Más opciones") : ""}`;
         }
     }
 
@@ -1741,7 +2636,12 @@
         if (currentRoute === "profile") screen.innerHTML = profileScreen();
         if (currentRoute === "saved") screen.innerHTML = savedScreen();
         if (currentRoute === "search") screen.innerHTML = searchScreen();
+        if (currentRoute === "iv") screen.innerHTML = ivScreen();
+        if (currentRoute === "applock") screen.innerHTML = appLockScreen();
+        if (currentRoute === "folders") screen.innerHTML = foldersScreen();
         bindScreenActions();
+        bindNewFeatureActions();
+        if (currentRoute === "iv") bindIvScroll();
         if (currentRoute === "appearance") {
             renderFamilies();
             renderTimeline();
@@ -1752,8 +2652,11 @@
         return `
             <div class="screen-relative ${active.layout === "original" || active.layout === "holo" ? "compact" : ""}">
                 <div class="folder-tabs">
-                    ${["Todos", "No leídos", "Personal", "Canales"].map(folder =>
-                        `<button class="folder-tab ${folder === currentFolder ? "active" : ""}" data-folder="${folder}">${folder}</button>`
+                    ${folderData.map(f =>
+                        `<button class="folder-tab ${f.name === currentFolder ? "active" : ""}" data-folder="${f.name}" style="${f.name === currentFolder ? `--app-accent:${f.color}` : ""}">
+                            <span class="folder-icon">${f.icon}</span>${f.name}
+                            ${f.name === currentFolder ? `<span class="folder-tab-dot" style="background:${f.color}"></span>` : ""}
+                        </button>`
                     ).join("")}
                 </div>
                 <div class="story-row">
@@ -1781,12 +2684,59 @@
                     <div class="app-message out">El diseño activo se aplica a toda la aplicación.<span class="message-time">12:31 ✓✓</span></div>
                     <div class="app-message">Puedes abrir historias, buscar, llamar y cambiar de skin.<span class="message-time">12:32</span></div>
                     <div class="app-message"><span class="voice-wave"></span> 0:18<span class="message-time">12:35</span></div>
+                    <div class="app-message" data-long-pressable>
+                        Mantén pulsado cualquier mensaje para ver las opciones, incluido el recordatorio.
+                        <div class="message-remind-badge">🔔 Recordatorio · mañana 9:00</div>
+                        <span class="message-time">12:36</span>
+                    </div>
                     <div class="app-message out">Prueba el botón de adjuntar y envía un mensaje.<span class="message-time">12:38 ✓✓</span></div>
+                    <div class="app-message" style="width:82%;max-width:82%;padding:8px 10px 4px">
+                        Mira este artículo sobre los nuevos diseños:
+                        <div class="link-preview">
+                            <div class="link-preview-body">
+                                <div class="link-preview-site">Telegram Blog</div>
+                                <div class="link-preview-title">Diseños de interfaz intercambiables en Telegram Android</div>
+                                <div class="link-preview-desc">15 estilos visuales, un único código base.</div>
+                            </div>
+                            <div class="link-preview-divider"></div>
+                            <div class="link-preview-actions dual">
+                                <button class="link-preview-iv" data-route="iv">
+                                    <svg width="9" height="13" viewBox="0 0 9 13" fill="currentColor"><path d="M5.5 0L0 7.5h3.5L2 13 9 5H5.5L7 0z"/></svg>
+                                    Vista Rápida
+                                </button>
+                                <button class="link-preview-amp" id="open-amp-btn">
+                                    <svg width="9" height="13" viewBox="0 0 9 13" fill="currentColor"><path d="M5.5 0L0 7.5h3.5L2 13 9 5H5.5L7 0z"/></svg>
+                                    AMP
+                                </button>
+                            </div>
+                        </div>
+                        <span class="message-time" style="display:block;text-align:right;margin-top:4px">12:40</span>
+                    </div>
+                </div>
+                <div class="remind-sheet-backdrop" id="remind-backdrop">
+                    <div class="remind-sheet">
+                        <h3>Recordarme este mensaje</h3>
+                        <div class="remind-chips">
+                            ${[["⏰","En 1 hora","Hoy, sobre las ${new Date(Date.now()+3600000).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}","1h"],
+                               ["🌙","Esta tarde","Hoy a las 18:00","tarde"],
+                               ["🌅","Mañana por la mañana","Mañana a las 9:00","manana"],
+                               ["📅","Próxima semana","Lunes a las 9:00","semana"],
+                               ["🔔","Elegir fecha y hora","Personalizar recordatorio","custom"]
+                              ].map(([icon,title,sub,val])=>`
+                            <button class="remind-chip" data-remind="${val}">
+                                <div class="remind-chip-icon">${icon}</div>
+                                <div><strong>${title}</strong><span>${sub}</span></div>
+                            </button>`).join("")}
+                        </div>
+                    </div>
                 </div>
                 <div class="composer-bar">
-                    <button class="icon-button" data-action="attach" style="color:#68747e">＋</button>
-                    <input class="composer-input" id="message-input" placeholder="Mensaje">
-                    <button class="send-button" data-action="send">➤</button>
+                    <button class="icon-button" data-action="attach" style="color:#68747e">${ico.attach}</button>
+                    <div class="composer-input-wrap">
+                        <button class="composer-attach-btn" data-action="emoji" style="color:#68747e">${ico.emoji}</button>
+                        <input class="composer-input" id="message-input" placeholder="Mensaje">
+                    </div>
+                    <button class="send-button" id="send-btn" data-action="send">${ico.mic}</button>
                 </div>
             </div>`;
     }
@@ -1822,9 +2772,11 @@
     }
 
     function settingsScreen() {
-        const mainRows = [
+        const topRows = [
             ["♙", "Mi cuenta", "Número, nombre de usuario y biografía", "account"],
-            ["◌", "Ajustes de chats", "Temas, fondos y comportamiento", "appearance"],
+            ["◌", "Ajustes de chats", "Temas, fondos y comportamiento", "appearance"]
+        ];
+        const mainRows = [
             ["◉", "Privacidad y seguridad", "Bloqueos, sesiones y permisos", "privacy"],
             ["🔔", "Notificaciones y sonidos", "Alertas para chats, grupos y canales", "notifications"],
             ["▣", "Datos y almacenamiento", "Red, caché y descarga automática", "data"],
@@ -1844,6 +2796,31 @@
                 <strong>Comunidad Telebots</strong>
                 <div style="color:#7a858e;font-size:12px;margin-top:4px">@comunidadtelebots · +34 600 000 000</div>
             </div>
+            <div class="settings-list">
+                ${topRows.map(row => `
+                    <button class="setting-row" data-route="${row[3]}">
+                        <span class="setting-icon">${row[0]}</span>
+                        <span class="row-copy"><strong>${row[1]}</strong><span>${row[2]}</span></span>
+                        <span>›</span>
+                    </button>`).join("")}
+            </div>
+
+            <div class="official-channel-section">
+                <div class="official-channel-header">Canal oficial</div>
+                <div class="official-channel-list">
+                    <button class="official-channel-row" data-action="open-official-channel">
+                        <span class="official-channel-avatar">CT</span>
+                        <span class="official-channel-copy">
+                            <strong>Comunidad Telebots</strong>
+                            <span>Fork oficial · diseños, novedades y soporte</span>
+                        </span>
+                        <span class="official-channel-meta">
+                            <span class="official-channel-badge">Canal</span>
+                        </span>
+                    </button>
+                </div>
+            </div>
+
             <div class="settings-list">
                 ${mainRows.map(row => `
                     <button class="setting-row" data-route="${row[3]}">
@@ -1872,7 +2849,7 @@
         return `
             <div class="settings-list">
                 ${rows.map((row, index) => `
-                    <button class="setting-row" data-demo="${route}-${index}">
+                    <button class="setting-row" ${row[2] ? `data-route="${row[2]}"` : `data-demo="${route}-${index}"`}>
                         <span class="setting-icon">${index + 1}</span>
                         <span class="row-copy"><strong>${row[0]}</strong><span>${row[1]}</span></span>
                         <span>›</span>
@@ -2006,6 +2983,108 @@
             </div>`;
     }
 
+    function appLockScreen() {
+        const isSetup = preferences.appLockEnabled;
+        return `
+            <div class="applock-setting-section">
+                <h3>Acceso a la aplicación</h3>
+                <div class="auto-archive-row">
+                    <div class="applock-toggle-row">
+                        <div>
+                            <div class="row-label">Bloqueo con contraseña</div>
+                            <div class="row-sub">Solicitar PIN o huella al abrir</div>
+                        </div>
+                        <span class="switch ${isSetup ? "on" : ""}" data-toggle="appLockEnabled"></span>
+                    </div>
+                    <div class="applock-toggle-row">
+                        <div>
+                            <div class="row-label">Huella dactilar</div>
+                            <div class="row-sub">Desbloquear con sensor biométrico</div>
+                        </div>
+                        <span class="switch ${preferences.appLockBio ? "on" : ""}" data-toggle="appLockBio"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="applock-setting-section" style="margin-top:18px">
+                <h3>Bloquear tras</h3>
+                <div class="timeout-chips">
+                    ${[["inmediatamente","0"],["1 minuto","1"],["5 minutos","5"],["1 hora","60"],["nunca","-1"]].map(([label,val])=>
+                        `<button class="timeout-chip ${(preferences.appLockTimeout||"1")===val?"active":""}" data-pref="appLockTimeout" data-value="${val}">${label}</button>`
+                    ).join("")}
+                </div>
+            </div>
+            ${isSetup ? `
+            <div class="applock-setting-section" style="margin-top:18px">
+                <h3>Vista previa</h3>
+            </div>
+            <div class="pin-screen">
+                <div class="pin-lock-icon">🔒</div>
+                <div class="pin-title">Introduce tu PIN</div>
+                <div class="pin-dots" id="pin-dots">
+                    <div class="pin-dot" id="pd0"></div>
+                    <div class="pin-dot" id="pd1"></div>
+                    <div class="pin-dot" id="pd2"></div>
+                    <div class="pin-dot" id="pd3"></div>
+                </div>
+                <div class="pin-pad">
+                    ${["1","2","3","4","5","6","7","8","9"].map(d=>`
+                        <button class="pin-key" data-pin-digit="${d}">${d}<small>${["","ABC","DEF","GHI","JKL","MNO","PQRS","TUV","WXYZ"][+d]}</small></button>`).join("")}
+                    <button class="pin-key pin-empty"></button>
+                    <button class="pin-key" data-pin-digit="0">0</button>
+                    <button class="pin-key pin-del" data-pin-action="del">⌫</button>
+                </div>
+                <div class="pin-biometric" data-pin-action="bio">☞ Usar huella dactilar</div>
+            </div>` : `<p style="padding:20px 16px;color:#8a9baa;font-size:13px">Activa el bloqueo para configurar el PIN y ver la pantalla de desbloqueo.</p>`}`;
+    }
+
+    function foldersScreen() {
+        const folderIcons = ["💬","📢","👤","💼","🏠","❤️","⭐","🎮","📚","🎵","🤖","🔔","✈️","🛒","🏋️","🎨"];
+        const folderColors = ["#4b9bd6","#e96060","#55a982","#e6a817","#9b6bd6","#e67c17","#17c4e6","#e617b5"];
+        return `
+            <div class="folders-list">
+                <div style="padding:8px 16px 4px;font-size:11px;color:#8a9baa;text-transform:uppercase;letter-spacing:.5px">Mis carpetas</div>
+                ${folderData.map(f => `
+                    <div class="folder-edit-row" data-demo="folder-${f.name}">
+                        <div class="folder-color-dot" style="background:${f.color}20">${f.icon}</div>
+                        <div class="folder-edit-info">
+                            <strong>${f.name}</strong>
+                            <span style="color:${f.color}">${f.color}</span>
+                        </div>
+                        <span style="color:#c0c8d0">›</span>
+                    </div>`).join("")}
+                <div class="folder-edit-row" style="color:#4b9bd6" data-demo="new-folder">
+                    <div class="folder-color-dot" style="background:#eaf3fb">＋</div>
+                    <div class="folder-edit-info"><strong style="color:#4b9bd6">Nueva carpeta</strong></div>
+                </div>
+            </div>
+            <div style="padding:8px 16px 4px;font-size:11px;color:#8a9baa;text-transform:uppercase;letter-spacing:.5px;margin-top:8px">Icono</div>
+            <div class="folder-icon-picker">
+                ${folderIcons.map((ic,i)=>`<button class="folder-icon-btn ${i===0?"selected":""}" data-demo="icon">${ic}</button>`).join("")}
+            </div>
+            <div style="padding:4px 16px 4px;font-size:11px;color:#8a9baa;text-transform:uppercase;letter-spacing:.5px">Color</div>
+            <div class="color-picker-row">
+                ${folderColors.map((c,i)=>`<div class="color-swatch ${i===0?"selected":""}" style="background:${c}" data-demo="color"></div>`).join("")}
+            </div>
+            <div class="auto-archive-section">
+                <h3>Auto-archivar chats inactivos</h3>
+                <div class="auto-archive-row">
+                    <div class="auto-archive-item">
+                        <span>Archivar tras inactividad</span>
+                        <span class="switch ${preferences.autoArchive?"on":""}" data-toggle="autoArchive"></span>
+                    </div>
+                    <div class="auto-archive-item" style="${preferences.autoArchive?"":"opacity:.4;pointer-events:none"}">
+                        <span>Tiempo sin actividad</span>
+                        <span class="aa-time-select" data-demo="archive-time">${preferences.autoArchiveDays||"30"} días</span>
+                    </div>
+                    <div class="auto-archive-item" style="${preferences.autoArchive?"":"opacity:.4;pointer-events:none"}">
+                        <span>Excluir contactos</span>
+                        <span class="switch ${preferences.autoArchiveExclude?"on":""}" data-toggle="autoArchiveExclude"></span>
+                    </div>
+                </div>
+                <p style="font-size:12px;color:#8a9baa;padding:8px 0 0">Los chats archivados se pueden recuperar deslizando hacia abajo en la lista principal.</p>
+            </div>`;
+    }
+
     function experimentsScreen() {
         return `
             ${switchControl("experimentalSkins", "Diseños en desarrollo", "Muestra Glass, Redesign y futuras interfaces incompletas.")}
@@ -2038,6 +3117,17 @@
 
     function changelogScreen() {
         return `
+            <article class="changelog-card">
+                <small>PREVIEW 0.5 · JUNIO 2026</small>
+                <h3>Nuevas funciones propias del fork</h3>
+                <ul>
+                    <li>🔒 <strong>Bloqueo de aplicación</strong> — PIN de 4 dígitos y huella dactilar. Tiempo de espera configurable desde inmediatamente hasta nunca. Acceso desde Ajustes → Privacidad.</li>
+                    <li>🔔 <strong>Recordatorios de mensajes</strong> — Mantén pulsado cualquier mensaje para programar un recordatorio: en 1 hora, esta tarde, mañana, próxima semana o fecha personalizada.</li>
+                    <li>📁 <strong>Carpetas con icono y color</strong> — Cada carpeta muestra un emoji y un color propio en las pestañas de la lista de chats. Editor completo en Ajustes → Carpetas.</li>
+                    <li>📦 <strong>Auto-archivar chats inactivos</strong> — Archiva automáticamente los chats sin actividad tras N días. Opción para excluir contactos guardados.</li>
+                    <li>🏠 <strong>Canal oficial en el menú lateral</strong> — Acceso directo a @comunidadtelebots desde el cajón de navegación (☰).</li>
+                </ul>
+            </article>
             <article class="changelog-card">
                 <small>PREVIEW 0.4 · JUNIO 2026</small>
                 <h3>Personalización completa</h3>
@@ -2122,6 +3212,227 @@
             </div>`;
     }
 
+    function ivScreen() {
+        return `
+        <div class="iv-screen" id="iv-screen">
+            <div class="iv-toolbar">
+                ${btn("back", ico.back, "Atrás")}
+                <span style="flex:1;font-size:12px;color:#7a848e;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">telegram.org/blog/skins</span>
+                ${btn("iv-open", `<svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>`, "Abrir en navegador")}
+                ${btn("iv-more", ico.more, "Más opciones")}
+            </div>
+            <div class="iv-progress"><div class="iv-progress-fill" id="iv-progress-fill"></div></div>
+            <div class="iv-content" id="iv-content">
+                <div class="iv-site">Telegram Blog</div>
+                <div class="iv-kicker">DISEÑO DE INTERFAZ</div>
+                <div class="iv-title">Diseños de interfaz intercambiables en Telegram Android</div>
+                <div class="iv-subtitle">Cómo este fork permite cambiar entre 15 estilos visuales diferentes manteniendo todas las funciones modernas de Telegram.</div>
+                <div class="iv-meta">
+                    <span>Por Comunidad Telebots</span>
+                    <span>·</span>
+                    <span>12 Jun 2026</span>
+                </div>
+                <div class="iv-cover">
+                    <div class="iv-cover-caption">Captura de la pantalla de Apariencia con el selector de diseño</div>
+                </div>
+                <p class="iv-p">Telegram para Android se ha construido históricamente con una única capa visual. Este fork introduce un sistema de <strong>skins intercambiables</strong> que permite al usuario elegir entre diseños nativos que replican la apariencia de distintas plataformas y épocas.</p>
+                <p class="iv-p">Los diseños no son simples temas de color: modifican el <em>radio de las burbujas</em>, la presencia o ausencia de cola en los mensajes, la forma de los avatares y la densidad de la lista de chats.</p>
+
+                <h2 class="iv-h2">Diseños disponibles</h2>
+                <p class="iv-p">El sistema agrupa los diseños en familias. La familia Android cuenta con variantes históricas:</p>
+                <table class="iv-table">
+                    <tr><th>Diseño</th><th>Año</th><th>Radio</th><th>Cola</th></tr>
+                    <tr><td>Original</td><td>2013</td><td>3 dp</td><td>Sí</td></tr>
+                    <tr><td>Holo</td><td>2014</td><td>4 dp</td><td>Sí</td></tr>
+                    <tr><td>Material</td><td>2015</td><td>8 dp</td><td>Sí</td></tr>
+                    <tr><td>Clásico</td><td>2018</td><td>12 dp</td><td>Sí</td></tr>
+                    <tr><td>Actual</td><td>2026</td><td>17 dp</td><td>Sí</td></tr>
+                    <tr><td>Redesign</td><td>2026</td><td>16 dp</td><td>Sí</td></tr>
+                    <tr><td>Glass</td><td>2026</td><td>18 dp</td><td>No</td></tr>
+                </table>
+
+                <h2 class="iv-h2">Otras plataformas</h2>
+                <ul class="iv-ul">
+                    <li><strong>Web</strong> — Sin cola, 18 dp, sin divisores</li>
+                    <li><strong>iOS</strong> — Con cola, 18 dp, barra de navegación inferior</li>
+                    <li><strong>macOS</strong> — Con panel lateral, 18 dp</li>
+                    <li><strong>Telegram Desktop</strong> — Con tail, 6 dp, densidad alta</li>
+                    <li><strong>Windows (Unigram)</strong> — Sin cola, 4 dp, avatares cuadrados</li>
+                    <li><strong>Telegram X</strong> — Con cola, 14 dp, gradientes</li>
+                    <li><strong>Aurora</strong> — Sin cola, 18 dp, fondo degradado oscuro</li>
+                    <li><strong>Webogram</strong> — Con cola, 6 dp, interfaz clásica web</li>
+                </ul>
+
+                <div class="iv-blockquote">«El cambio de diseño no afecta a los chats, mensajes ni funciones. Es una capa puramente visual sobre el mismo núcleo de Telegram.»</div>
+
+                <h2 class="iv-h2">Implementación técnica</h2>
+                <h3 class="iv-h3">SkinManager</h3>
+                <p class="iv-p">El gestor central es un singleton inicializado al arrancar la app, justo después de <code>SharedConfig.loadConfig()</code>. Lee el skin guardado en SharedPreferences y aplica su radio de burbuja sobreescribiendo <code>SharedConfig.bubbleRadius</code>.</p>
+                <div class="iv-pre">SkinManager.get().applySkin(new WebSkin());
+// → SharedConfig.bubbleRadius = 18
+// → NotificationCenter: didSetNewTheme</div>
+
+                <h3 class="iv-h3">SkinBase</h3>
+                <p class="iv-p">Cada skin extiende <code>SkinBase</code> e implementa:</p>
+                <div class="iv-pre">String getId()
+String getDisplayName()
+int getBubbleRadiusDP()
+boolean hasBubbleTail()
+float getAvatarRadiusFactor()
+boolean showChatDividers()</div>
+
+                <hr class="iv-divider">
+
+                <div class="iv-pullquote">«15 diseños distintos. Un único código base. Todas las funciones modernas de Telegram.»</div>
+
+                <h2 class="iv-h2">Vista Rápida desde el repo React</h2>
+                <p class="iv-p">El fork de <a href="#" style="color:#4b9bd6">telegram-react</a> implementa su propio visor de Vista Rápida con características adicionales respecto al oficial:</p>
+                <ul class="iv-ul">
+                    <li>Barra de progreso de lectura (3 px en la parte superior)</li>
+                    <li>Seguimiento de bloques visibles en pantalla</li>
+                    <li>Tipografía editorial: Georgia para cabeceras</li>
+                    <li>Visor de medios integrado (lightbox)</li>
+                    <li>Soporte completo de <code>&lt;details&gt;</code> colapsables</li>
+                    <li>Expansión automática de secciones al navegar a un anchor</li>
+                </ul>
+
+                <div class="iv-details">
+                    <div class="iv-details-summary">▶ Bloques soportados (28+)</div>
+                    <div class="iv-details-body">Párrafo, Título, Subtítulo, Cabecera, Subcabecera, Kicker, Pie, Cita en bloque, Cita destacada, Código, Foto, Vídeo, Audio, Animación, Presentación, Collage, Tabla, Lista, Lista ordenada, Divisor, Detalles, Incrustado, Post incrustado, Mapa, Canal, Artículos relacionados, Ancla, Portada.</div>
+                </div>
+
+                <div class="iv-photo"></div>
+                <div class="iv-caption">Pantalla de selección de skin dentro de Ajustes → Apariencia</div>
+
+                <div class="iv-related">
+                    <div class="iv-related-title">Artículos relacionados</div>
+                    <div class="iv-related-item" data-route="iv">Historia de los diseños de Telegram para Android</div>
+                    <div class="iv-related-item" data-route="iv">Cómo compilar el fork con Android Studio</div>
+                    <div class="iv-related-item" data-route="iv">Diferencias entre SkinBase y ThemeActivity</div>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    function bindIvScroll() {
+        const content = document.querySelector("#iv-content");
+        const fill = document.querySelector("#iv-progress-fill");
+        if (!content || !fill) return;
+        content.addEventListener("scroll", () => {
+            const pct = content.scrollTop / (content.scrollHeight - content.clientHeight) * 100;
+            fill.style.width = Math.min(100, Math.max(0, pct)) + "%";
+        });
+    }
+
+    function bindNewFeatureActions() {
+        // ── PIN pad ──────────────────────────────────────────────────────────
+        let pinEntered = "";
+        document.querySelectorAll("[data-pin-digit]").forEach(btn => {
+            btn.onclick = () => {
+                if (pinEntered.length >= 4) return;
+                pinEntered += btn.dataset.pinDigit;
+                updatePinDots();
+                if (pinEntered.length === 4) {
+                    setTimeout(() => {
+                        showToast("PIN correcto · Acceso permitido");
+                        pinEntered = "";
+                        updatePinDots();
+                    }, 300);
+                }
+            };
+        });
+        document.querySelectorAll("[data-pin-action]").forEach(btn => {
+            btn.onclick = () => {
+                if (btn.dataset.pinAction === "del") {
+                    pinEntered = pinEntered.slice(0, -1);
+                    updatePinDots();
+                }
+                if (btn.dataset.pinAction === "bio") {
+                    showToast("☞ Huella dactilar verificada");
+                }
+            };
+        });
+        function updatePinDots() {
+            for (let i = 0; i < 4; i++) {
+                const dot = document.querySelector(`#pd${i}`);
+                if (dot) dot.classList.toggle("filled", i < pinEntered.length);
+            }
+        }
+
+        // ── Carpetas: icono y color ──────────────────────────────────────────
+        document.querySelectorAll(".folder-icon-btn").forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll(".folder-icon-btn").forEach(b => b.classList.remove("selected"));
+                btn.classList.add("selected");
+                showToast(`Icono ${btn.textContent} seleccionado`);
+            };
+        });
+        document.querySelectorAll(".color-swatch").forEach(swatch => {
+            swatch.onclick = () => {
+                document.querySelectorAll(".color-swatch").forEach(s => s.classList.remove("selected"));
+                swatch.classList.add("selected");
+                showToast("Color actualizado");
+            };
+        });
+
+        // ── Recordatorio ─────────────────────────────────────────────────────
+        document.querySelectorAll("[data-long-pressable]").forEach(msg => {
+            let timer;
+            msg.addEventListener("pointerdown", () => {
+                timer = setTimeout(() => openRemindSheet(), 500);
+            });
+            msg.addEventListener("pointerup",   () => clearTimeout(timer));
+            msg.addEventListener("pointerleave",() => clearTimeout(timer));
+        });
+        document.querySelectorAll("[data-remind]").forEach(chip => {
+            chip.onclick = () => {
+                const labels = { "1h":"En 1 hora", "tarde":"Esta tarde", "manana":"Mañana por la mañana", "semana":"Próxima semana", "custom":"Elegir fecha" };
+                closeRemindSheet();
+                showToast(`🔔 Recordatorio: ${labels[chip.dataset.remind] || chip.dataset.remind}`);
+            };
+        });
+        const remindBackdrop = document.querySelector("#remind-backdrop");
+        if (remindBackdrop) {
+            remindBackdrop.addEventListener("click", e => {
+                if (e.target === remindBackdrop) closeRemindSheet();
+            });
+        }
+
+        // ── Timeout chip (bloqueo) ───────────────────────────────────────────
+        document.querySelectorAll(".timeout-chip").forEach(chip => {
+            chip.onclick = () => {
+                document.querySelectorAll(".timeout-chip").forEach(c => c.classList.remove("active"));
+                chip.classList.add("active");
+                preferences.appLockTimeout = chip.dataset.value;
+                savePreferences();
+            };
+        });
+    }
+
+    function openRemindSheet() {
+        const b = document.querySelector("#remind-backdrop");
+        if (b) b.classList.add("visible");
+    }
+    function closeRemindSheet() {
+        const b = document.querySelector("#remind-backdrop");
+        if (b) b.classList.remove("visible");
+    }
+    function showToast(msg) {
+        const old = document.querySelector(".preview-toast");
+        if (old) old.remove();
+        const t = document.createElement("div");
+        t.className = "preview-toast";
+        t.textContent = msg;
+        Object.assign(t.style, {
+            position:"fixed", left:"50%", bottom:"35px", zIndex:"80",
+            transform:"translateX(-50%)", padding:"10px 16px",
+            borderRadius:"18px", background:"rgba(25,35,44,.92)",
+            color:"white", fontSize:"12px", whiteSpace:"nowrap"
+        });
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 1600);
+    }
+
     function bindScreenActions() {
         document.querySelectorAll("[data-route]").forEach(button => {
             button.onclick = () => navigate(button.dataset.route);
@@ -2138,7 +3449,7 @@
         document.querySelectorAll("[data-chat]").forEach(button => {
             button.onclick = () => {
                 const chat = chats.find(item => item.id === Number(button.dataset.chat)) || chats[0];
-                navigate("chat", { chat });
+                navigateWithAnimation("chat", { chat });
             };
         });
         document.querySelectorAll("[data-contact]").forEach(button => {
@@ -2182,6 +3493,12 @@
             messageInput.onkeydown = event => {
                 if (event.key === "Enter") sendMessage();
             };
+            messageInput.oninput = () => {
+                const sendBtn = document.querySelector("#send-btn");
+                if (sendBtn) {
+                    sendBtn.innerHTML = messageInput.value.trim() ? ico.send : ico.mic;
+                }
+            };
         }
     }
 
@@ -2190,7 +3507,22 @@
             document.querySelector("#drawer-backdrop").classList.add("visible");
         }
         if (action === "back") {
-            navigate(currentRoute === "chat" ? "chats" : currentRoute === "customization" ? "appearance" : "settings");
+            const screen = document.querySelector("#app-screen");
+            // Slide-out hacia la derecha (volver)
+            screen.style.transition = "transform .16s cubic-bezier(.4,0,.2,1), opacity .16s ease";
+            screen.style.transform = "translateX(18px)";
+            screen.style.opacity = "0";
+            setTimeout(() => {
+                screen.style.transition = "";
+                screen.style.transform = "";
+                screen.style.opacity = "";
+                if (currentRoute === "chat") navigate("chats");
+                else if (currentRoute === "iv") navigate("chat", { chat: currentChat || chats[0] });
+                else if (currentRoute === "customization") navigate("appearance");
+                else navigate("settings");
+                screen.classList.add("leaving-chat");
+                setTimeout(() => screen.classList.remove("leaving-chat"), 260);
+            }, 140);
         }
         if (action === "search") navigate("search");
         if (action === "profile") navigate("profile");
@@ -2199,11 +3531,23 @@
                 chat: { name: "Nuevo mensaje", initials: "+", color: "#4b9bd6" }
             });
         }
+        if (action === "open-official-channel") {
+            navigateWithAnimation("chat", {
+                chat: {
+                    id: 99,
+                    name: "Comunidad Telebots",
+                    initials: "CT",
+                    color: "#3a7ec4",
+                    isChannel: true,
+                    message: "Fork oficial · diseños, novedades y soporte"
+                }
+            });
+        }
         if (action === "attach") {
             document.querySelector("#sheet-backdrop").classList.add("visible");
         }
         if (action === "send") sendMessage();
-        if (action === "call" || action === "new-call") showCallState();
+        if (action === "call" || action === "new-call" || action === "videocall") showCallState();
         if (action === "add-contact") {
             navigate("chat", {
                 chat: { name: "Nuevo contacto", initials: "+", color: "#55a982" }
@@ -2236,6 +3580,8 @@
         message.appendChild(time);
         area.appendChild(message);
         input.value = "";
+        const sendBtn = document.querySelector("#send-btn");
+        if (sendBtn) sendBtn.innerHTML = ico.mic;
         area.scrollTop = area.scrollHeight;
     }
 
@@ -2385,6 +3731,74 @@
     } catch {
         // Ignore storage restrictions in local preview mode.
     }
+
+    // ── AMP Viewer ──────────────────────────────────────────────────────────
+    (function () {
+        let readerMode = localStorage.getItem('amp-reader-mode') === '1';
+
+        function openAmp() {
+            const backdrop = document.querySelector('#amp-backdrop');
+            const loading  = document.querySelector('#amp-loading');
+            const iframe   = document.querySelector('#amp-iframe-sim');
+            const reader   = document.querySelector('#amp-reader');
+            const badge    = document.querySelector('#amp-badge');
+            const readerBtn = document.querySelector('#amp-reader-btn');
+
+            backdrop.classList.add('visible');
+
+            // Actualizar color del header con el skin activo
+            document.querySelector('#amp-header').style.background = active.accent;
+
+            function showIframe() {
+                readerMode = false;
+                badge.textContent = 'AMP';
+                readerBtn.classList.remove('active');
+                loading.style.display = 'flex';
+                iframe.classList.remove('visible');
+                reader.classList.remove('visible');
+                // Simular carga de 1s
+                setTimeout(() => {
+                    loading.style.display = 'none';
+                    iframe.classList.add('visible');
+                }, 1000);
+            }
+
+            function showReader() {
+                readerMode = true;
+                badge.textContent = 'LEER';
+                readerBtn.classList.add('active');
+                loading.style.display = 'flex';
+                iframe.classList.remove('visible');
+                reader.classList.remove('visible');
+                setTimeout(() => {
+                    loading.style.display = 'none';
+                    reader.classList.add('visible');
+                }, 600);
+            }
+
+            readerMode ? showReader() : showIframe();
+
+            readerBtn.onclick = () => readerMode ? showIframe() : showReader();
+        }
+
+        function closeAmp() {
+            document.querySelector('#amp-backdrop').classList.remove('visible');
+        }
+
+        document.querySelector('#amp-close').addEventListener('click', closeAmp);
+        document.querySelector('#amp-backdrop').addEventListener('click', e => {
+            if (e.target.id === 'amp-backdrop') closeAmp();
+        });
+
+        // El botón se crea dinámicamente en el chat, así que usamos delegación
+        document.addEventListener('click', e => {
+            if (e.target.id === 'open-amp-btn') openAmp();
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeAmp();
+        });
+    })();
 
     const query = new URLSearchParams(location.search);
     if (["light", "dark", "auto"].includes(query.get("mode"))) {

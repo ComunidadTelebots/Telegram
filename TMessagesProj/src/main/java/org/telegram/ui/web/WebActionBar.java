@@ -128,6 +128,7 @@ public class WebActionBar extends FrameLayout {
     public static final int history_item = 8;
     public static final int forward_item = 9;
     public static final int instant_item = 10;
+    public static final int amp_item = 11;
 
     public WebActionBar(Context context, Theme.ResourcesProvider resourcesProvider) {
         super(context);
@@ -237,6 +238,9 @@ public class WebActionBar extends FrameLayout {
                         item.animate().alpha(item.isEnabled() ? 1f : 0.5f);
                     });
                     o.setOnDismiss(cancel);
+                }
+                if (getAmpUrl() != null) {
+                    o.add(R.drawable.menu_instant_view, "⚡ AMP", click.run(amp_item));
                 }
                 o.add(R.drawable.msg_reset, getString(R.string.Refresh), click.run(reload_item));
                 o.add(R.drawable.msg_search, getString(R.string.Search), click.run(search_item));
@@ -365,6 +369,11 @@ public class WebActionBar extends FrameLayout {
     }
 
     protected WebInstantView.Loader getInstantViewLoader() {
+        return null;
+    }
+
+    /** Devuelve la URL actual si es elegible para AMP, o null si no corresponde mostrar el botón. */
+    protected String getAmpUrl() {
         return null;
     }
 
