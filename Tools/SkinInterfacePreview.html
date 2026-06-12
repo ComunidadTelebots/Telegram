@@ -1512,7 +1512,17 @@
         animations: true,
         adaptiveIcons: true,
         experimentalSkins: false,
-        rememberSkin: true
+        rememberSkin: true,
+        nextMediaTap: true,
+        raiseToListen: true,
+        raiseToSpeak: false,
+        pauseOnRecord: true,
+        pauseOnMedia: false,
+        bluetoothMic: false,
+        directShare: true,
+        sensitiveContent: false,
+        sendByEnter: false,
+        swipeAction: "archive"
     };
     let preferences = loadPreferences();
 
@@ -1545,13 +1555,121 @@
         calls: "Llamadas",
         settings: "Ajustes",
         appearance: "Apariencia",
-        customization: "Personalización",
+        customization: "Tema nocturno automático",
         experiments: "Funciones experimentales",
         compare: "Comparar diseños",
         changelog: "Novedades",
+        account: "Mi cuenta",
+        privacy: "Privacidad y seguridad",
+        notifications: "Notificaciones y sonidos",
+        data: "Datos y almacenamiento",
+        folders: "Carpetas de chats",
+        devices: "Dispositivos",
+        power: "Ahorro de energía",
+        language: "Idioma",
+        premium: "Telegram Premium",
+        stars: "Telegram Stars",
+        business: "Telegram Business",
+        help: "Ayuda",
         profile: "Mi perfil",
         saved: "Mensajes guardados",
         search: "Buscar"
+    };
+
+    const settingsCategories = {
+        account: [
+            ["Información personal", "Número, nombre de usuario y biografía"],
+            ["Cambiar número", "Migra tu cuenta a otro número"],
+            ["Fecha de nacimiento", "Configura quién puede verla"],
+            ["Eliminar mi cuenta", "Opciones de desactivación"]
+        ],
+        privacy: [
+            ["Usuarios bloqueados", "Gestiona las cuentas bloqueadas"],
+            ["Dispositivos", "Sesiones activas"],
+            ["Verificación en dos pasos", "Contraseña adicional"],
+            ["Código de bloqueo", "Protege la aplicación"],
+            ["Privacidad", "Teléfono, última vez, foto y llamadas"],
+            ["Autoeliminar mensajes", "Temporizador global"],
+            ["Bots y sitios web", "Permisos y sesiones"],
+            ["Contactos", "Sincronización y sugerencias"]
+        ],
+        notifications: [
+            ["Chats privados", "Sonido, vibración y prioridad"],
+            ["Grupos", "Notificaciones de grupos"],
+            ["Canales", "Notificaciones de canales"],
+            ["Historias", "Avisos de nuevas historias"],
+            ["Llamadas", "Tono y vibración"],
+            ["Contador de mensajes", "Insignia del icono"],
+            ["Notificaciones en la aplicación", "Sonidos y vista previa"],
+            ["Restablecer notificaciones", "Deshacer todas las excepciones"]
+        ],
+        data: [
+            ["Uso de almacenamiento", "Caché, medios y archivos"],
+            ["Uso de datos", "Red móvil y Wi-Fi"],
+            ["Descarga automática", "Fotos, vídeos y archivos"],
+            ["Guardar en galería", "Chats privados, grupos y canales"],
+            ["Reproducción automática", "GIF y vídeos"],
+            ["Streaming", "Reproducir mientras se descarga"],
+            ["Llamadas", "Menor uso de datos"],
+            ["Proxy", "Configuración de conexión"]
+        ],
+        folders: [
+            ["Crear nueva carpeta", "Agrupa chats y canales"],
+            ["No leídos", "Chats con mensajes pendientes"],
+            ["Personal", "Contactos y conversaciones privadas"],
+            ["Canales", "Todos tus canales"],
+            ["Carpetas recomendadas", "Sugerencias de Telegram"]
+        ],
+        devices: [
+            ["Este dispositivo", "Android · sesión actual"],
+            ["Vincular dispositivo", "Escanea un código QR"],
+            ["Chrome en Windows", "Madrid · activo ahora"],
+            ["Telegram Desktop", "Última actividad: ayer"],
+            ["Cerrar todas las demás sesiones", "Finaliza accesos remotos"]
+        ],
+        power: [
+            ["Modo de ahorro", "Desactivado"],
+            ["Animaciones de stickers", "Control automático"],
+            ["Efectos de interfaz", "Reduce el consumo gráfico"],
+            ["Vídeos en segundo plano", "Pausa cuando ahorra energía"],
+            ["Transiciones", "Animaciones completas"],
+            ["Ahorro con batería baja", "Activar al 15%"]
+        ],
+        language: [
+            ["Español", "Seleccionado"],
+            ["English", "English"],
+            ["Català", "Català"],
+            ["Português", "Português"],
+            ["Mostrar botón Traducir", "Traducción rápida en mensajes"],
+            ["No traducir", "Español"]
+        ],
+        premium: [
+            ["Límites duplicados", "Más carpetas, chats fijados y cuentas"],
+            ["Descargas más rápidas", "Máxima velocidad disponible"],
+            ["Conversión de voz a texto", "Transcribe notas de voz"],
+            ["Stickers y reacciones exclusivas", "Efectos Premium"],
+            ["Gestión avanzada de chats", "Herramientas adicionales"]
+        ],
+        stars: [
+            ["Saldo", "1.250 Stars"],
+            ["Comprar Stars", "Pagos dentro de Telegram"],
+            ["Historial de transacciones", "Compras y regalos"],
+            ["Regalos", "Colección y mejoras"]
+        ],
+        business: [
+            ["Horario", "Muestra cuándo está abierto tu negocio"],
+            ["Ubicación", "Dirección comercial"],
+            ["Respuestas rápidas", "Atajos para mensajes"],
+            ["Mensaje de bienvenida", "Para nuevos clientes"],
+            ["Mensaje de ausencia", "Respuesta automática"],
+            ["Chatbots", "Integra bots empresariales"]
+        ],
+        help: [
+            ["Hacer una pregunta", "Contacta con soporte"],
+            ["Preguntas frecuentes", "Centro de ayuda de Telegram"],
+            ["Funciones de Telegram", "Descubre las novedades"],
+            ["Política de privacidad", "Información legal"]
+        ]
     };
 
     function navigate(route, options = {}) {
@@ -1593,7 +1711,12 @@
                 <button class="icon-button" data-action="call">⌕</button>
                 <button class="icon-button" data-action="profile">⋮</button>`;
         } else {
-            const backRoutes = ["appearance", "customization", "experiments", "compare", "changelog", "profile", "saved", "search"];
+            const backRoutes = [
+                "appearance", "customization", "experiments", "compare", "changelog",
+                "account", "privacy", "notifications", "data", "folders", "devices",
+                "power", "language", "premium", "stars", "business", "help",
+                "profile", "saved", "search"
+            ];
             toolbar.innerHTML = `
                 <button class="icon-button" data-action="${backRoutes.includes(currentRoute) ? "back" : "menu"}">${backRoutes.includes(currentRoute) ? "‹" : "☰"}</button>
                 <div class="toolbar-title"><strong>${routeTitles[currentRoute] || "Telegram"}</strong></div>
@@ -1614,6 +1737,7 @@
         if (currentRoute === "experiments") screen.innerHTML = experimentsScreen();
         if (currentRoute === "compare") screen.innerHTML = compareScreen();
         if (currentRoute === "changelog") screen.innerHTML = changelogScreen();
+        if (settingsCategories[currentRoute]) screen.innerHTML = categoryScreen(currentRoute);
         if (currentRoute === "profile") screen.innerHTML = profileScreen();
         if (currentRoute === "saved") screen.innerHTML = savedScreen();
         if (currentRoute === "search") screen.innerHTML = searchScreen();
@@ -1698,39 +1822,91 @@
     }
 
     function settingsScreen() {
-        const rows = [
-            ["☁", "Mensajes guardados", "saved"],
-            ["♙", "Perfil", "profile"],
-            ["🔔", "Notificaciones y sonidos", ""],
-            ["◉", "Privacidad y seguridad", ""],
-            ["▣", "Datos y almacenamiento", ""],
-            ["◌", "Apariencia", "appearance"],
-            ["⚙", "Personalización de interfaz", "customization"],
-            ["◫", "Comparar diseños", "compare"],
-            ["⚗", "Funciones experimentales", "experiments"],
-            ["★", "Novedades", "changelog"],
-            ["文", "Idioma", ""],
-            ["?", "Ayuda", ""]
+        const mainRows = [
+            ["♙", "Mi cuenta", "Número, nombre de usuario y biografía", "account"],
+            ["◌", "Ajustes de chats", "Temas, fondos y comportamiento", "appearance"],
+            ["◉", "Privacidad y seguridad", "Bloqueos, sesiones y permisos", "privacy"],
+            ["🔔", "Notificaciones y sonidos", "Alertas para chats, grupos y canales", "notifications"],
+            ["▣", "Datos y almacenamiento", "Red, caché y descarga automática", "data"],
+            ["▤", "Carpetas de chats", "Organiza tus conversaciones", "folders"],
+            ["▱", "Dispositivos", "Gestiona las sesiones activas", "devices"],
+            ["⚡", "Ahorro de energía", "Rendimiento y animaciones", "power"],
+            ["文", "Idioma", "Español", "language"]
+        ];
+        const serviceRows = [
+            ["★", "Telegram Premium", "", "premium"],
+            ["✦", "Telegram Stars", "1.250", "stars"],
+            ["▣", "Telegram Business", "", "business"]
         ];
         return `
             <div class="settings-hero">
                 <div class="settings-avatar">CT</div>
                 <strong>Comunidad Telebots</strong>
-                <div style="color:#7a858e;font-size:12px;margin-top:4px">+34 600 000 000</div>
+                <div style="color:#7a858e;font-size:12px;margin-top:4px">@comunidadtelebots · +34 600 000 000</div>
             </div>
             <div class="settings-list">
-                ${rows.map(row => `
-                    <button class="setting-row" ${row[2] ? `data-route="${row[2]}"` : ""}>
+                ${mainRows.map(row => `
+                    <button class="setting-row" data-route="${row[3]}">
                         <span class="setting-icon">${row[0]}</span>
-                        <span class="row-copy"><strong>${row[1]}</strong></span>
+                        <span class="row-copy"><strong>${row[1]}</strong><span>${row[2]}</span></span>
                         <span>›</span>
                     </button>`).join("")}
+                <div style="height:10px;background:#edf0f2"></div>
+                ${serviceRows.map(row => `
+                    <button class="setting-row" data-route="${row[3]}">
+                        <span class="setting-icon">${row[0]}</span>
+                        <span class="row-copy"><strong>${row[1]}</strong></span>
+                        <span>${row[2] || "›"}</span>
+                    </button>`).join("")}
+                <div style="height:10px;background:#edf0f2"></div>
+                <button class="setting-row" data-route="help">
+                    <span class="setting-icon">?</span>
+                    <span class="row-copy"><strong>Ayuda</strong><span>Soporte, FAQ y privacidad</span></span>
+                    <span>›</span>
+                </button>
             </div>`;
+    }
+
+    function categoryScreen(route) {
+        const rows = settingsCategories[route] || [];
+        return `
+            <div class="settings-list">
+                ${rows.map((row, index) => `
+                    <button class="setting-row" data-demo="${route}-${index}">
+                        <span class="setting-icon">${index + 1}</span>
+                        <span class="row-copy"><strong>${row[0]}</strong><span>${row[1]}</span></span>
+                        <span>›</span>
+                    </button>`).join("")}
+            </div>
+            <p class="feature-note">Esta pantalla reproduce la categoría y navegación presentes en el cliente Android del repositorio.</p>`;
     }
 
     function appearanceScreen() {
         return `
-            <section class="section" style="margin-top:0">
+            <section class="section">
+                <h2 class="section-title">DISEÑOS PROPIOS</h2>
+                <p class="section-description">Diseños completos de interfaz incluidos con este cliente.</p>
+                <div class="carousel" id="families"></div>
+                <h2 class="section-title" style="margin-top:12px">VERSIONES DE ANDROID</h2>
+                <p class="section-description">Diseños históricos con las funciones actuales de Telegram.</p>
+                <div class="timeline" id="timeline"></div>
+            </section>
+            <section class="section">
+                <h2 class="section-title">TAMAÑO DEL TEXTO</h2>
+                <div style="padding:4px 14px 14px">
+                    <div class="app-message" style="margin:4px 0 12px">Así se verá el texto de los mensajes.</div>
+                    <input type="range" min="12" max="30" value="16" style="width:100%;accent-color:#409bd5">
+                </div>
+                <button class="setting-row" data-demo="background">
+                    <span class="setting-icon">▧</span>
+                    <span class="row-copy"><strong>Cambiar fondo de chat</strong></span><span>›</span>
+                </button>
+                <button class="setting-row" data-demo="user-color">
+                    <span class="setting-icon">●</span>
+                    <span class="row-copy"><strong>Cambiar color del nombre</strong></span><span>›</span>
+                </button>
+            </section>
+            <section class="section">
                 <h2 class="section-title">DISEÑOS GENERALES</h2>
                 <p class="section-description">Temas de Telegram que se pueden crear, compartir e importar mediante enlaces.</p>
                 <div class="themes">
@@ -1741,28 +1917,60 @@
                 </div>
             </section>
             <section class="section">
-                <h2 class="section-title">DISEÑOS PROPIOS</h2>
-                <p class="section-description">Diseños completos de interfaz incluidos con este cliente.</p>
-                <div class="carousel" id="families"></div>
-                <h2 class="section-title" style="margin-top:12px">VERSIONES DE ANDROID</h2>
-                <p class="section-description">Diseños históricos con las funciones actuales de Telegram.</p>
-                <div class="timeline" id="timeline"></div>
+                <h2 class="section-title">ESQUINAS DE LOS MENSAJES</h2>
+                <div style="padding:5px 14px 16px">
+                    <div class="app-message out" style="margin:4px 0 12px auto;border-radius:${radiusStyle(active.radius)}">Vista previa de burbuja</div>
+                    <input type="range" min="0" max="18" value="${active.radius}" style="width:100%;accent-color:#409bd5">
+                </div>
+                <h2 class="section-title">LISTA DE CHATS</h2>
+                ${segmentedControl("density", [["compact", "Dos líneas"], ["normal", "Tres líneas"]])}
+                <p class="feature-note">Elige cuánta información aparece debajo del nombre de cada chat.</p>
             </section>
             <section class="section">
-                <div class="row"><span>Tamaño del texto</span><span class="row-value">16</span></div>
-                <div class="row"><span>Fondo de chat</span><span class="row-value">›</span></div>
-                <div class="row"><span>Esquinas de mensajes</span><span class="row-value" id="corner-value">${active.radius}</span></div>
+                <h2 class="section-title">ICONO DE LA APLICACIÓN</h2>
+                <div class="themes">
+                    <button class="theme current"><span class="theme-dot"></span>Clásico</button>
+                    <button class="theme"><span class="theme-dot"></span>Negro</button>
+                    <button class="theme"><span class="theme-dot"></span>Turbo</button>
+                    <button class="theme"><span class="theme-dot"></span>Vintage</button>
+                </div>
+                <h2 class="section-title" style="margin-top:12px">GESTO AL DESLIZAR EN CHATS</h2>
+                ${segmentedControl("swipeAction", [["archive", "Archivar"], ["read", "Leer"], ["mute", "Silenciar"]])}
             </section>
             <section class="section">
                 <button class="setting-row" data-route="customization">
-                    <span class="setting-icon">⚙</span>
-                    <span class="row-copy"><strong>Personalización avanzada</strong><span>Modo, densidad y dispositivo</span></span>
-                    <span>›</span>
+                    <span class="setting-icon">☾</span>
+                    <span class="row-copy"><strong>Tema nocturno automático</strong><span>Desactivado</span></span><span>›</span>
                 </button>
-                <button class="setting-row" data-route="compare">
-                    <span class="setting-icon">◫</span>
-                    <span class="row-copy"><strong>Comparar interfaces</strong><span>Diseño histórico y moderno</span></span>
-                    <span>›</span>
+                <button class="setting-row" data-demo="browser">
+                    <span class="setting-icon">◎</span>
+                    <span class="row-copy"><strong>Navegador integrado</strong><span>Abrir enlaces dentro de Telegram</span></span><span class="switch on"></span>
+                </button>
+                <button class="setting-row" data-route="power">
+                    <span class="setting-icon">⚡</span>
+                    <span class="row-copy"><strong>Modo de ahorro</strong><span>Rendimiento y animaciones</span></span><span>›</span>
+                </button>
+                <button class="setting-row" data-demo="stickers">
+                    <span class="setting-icon">☆</span>
+                    <span class="row-copy"><strong>Stickers y emoji</strong><span>Sugerencias, bucle y conjuntos</span></span><span>›</span>
+                </button>
+            </section>
+            <section class="section">
+                <h2 class="section-title">MULTIMEDIA Y SONIDO</h2>
+                ${switchControl("nextMediaTap", "Tocar para el siguiente contenido", "Avanza entre fotos y vídeos.")}
+                ${switchControl("raiseToListen", "Acercar para escuchar", "Reproduce audios al acercar el teléfono.")}
+                ${switchControl("raiseToSpeak", "Acercar para hablar", "Graba una respuesta después de escuchar.")}
+                ${switchControl("pauseOnRecord", "Pausar música al grabar", "Detiene temporalmente otras aplicaciones.")}
+                ${switchControl("pauseOnMedia", "Pausar música al reproducir", "Evita mezclar sonidos.")}
+                ${switchControl("bluetoothMic", "Micrófono para mensajes de voz", "Usar auriculares Bluetooth.")}
+            </section>
+            <section class="section">
+                <h2 class="section-title">OTROS AJUSTES</h2>
+                ${switchControl("directShare", "Compartir directamente", "Muestra chats recientes en el menú de Android.")}
+                ${switchControl("sensitiveContent", "Mostrar contenido sensible", "Desactiva el filtrado cuando esté disponible.")}
+                ${switchControl("sendByEnter", "Enviar con Enter", "La tecla Enter enviará el mensaje.")}
+                <button class="setting-row" data-demo="distance">
+                    <span class="row-copy"><strong>Unidades de distancia</strong><span>Automático</span></span><span>›</span>
                 </button>
             </section>`;
     }
@@ -1770,22 +1978,32 @@
     function customizationScreen() {
         return `
             <div class="control-block">
-                <strong>Modo de color</strong>
-                ${segmentedControl("colorMode", [["light", "Claro"], ["dark", "Oscuro"], ["auto", "Automático"]])}
+                <strong>Modo</strong>
+                ${segmentedControl("colorMode", [
+                    ["light", "Desactivado"], ["scheduled", "Programado"],
+                    ["auto", "Adaptativo"], ["dark", "Sistema"]
+                ])}
             </div>
             <div class="control-block">
-                <strong>Densidad de la interfaz</strong>
-                ${segmentedControl("density", [["compact", "Compacta"], ["normal", "Normal"]])}
+                <strong>Programación</strong>
+                <button class="setting-row" data-demo="sunset">
+                    <span class="row-copy"><strong>Desde el atardecer hasta el amanecer</strong><span>Usar ubicación aproximada</span></span>
+                    <span class="switch ${preferences.colorMode === "scheduled" ? "on" : ""}"></span>
+                </button>
             </div>
             <div class="control-block">
-                <strong>Vista del dispositivo</strong>
-                ${segmentedControl("device", [["phone", "Móvil"], ["tablet", "Tablet"], ["foldable", "Plegable"]])}
+                <strong>Brillo</strong>
+                <input type="range" min="0" max="100" value="35" style="width:100%;accent-color:#409bd5">
+                <p class="feature-note" style="padding:8px 0 0">El tema nocturno adaptativo se activará por debajo de este nivel.</p>
             </div>
-            ${switchControl("instantApply", "Aplicar cambios al instante", "No requiere reiniciar la aplicación.")}
-            ${switchControl("animations", "Animaciones de interfaz", "Transiciones adaptadas a cada diseño.")}
-            ${switchControl("adaptiveIcons", "Iconos adaptativos", "Usa el estilo de iconos propio de cada versión.")}
-            ${switchControl("rememberSkin", "Recordar diseño seleccionado", "Guarda la selección como una preferencia Android.")}
-            <p class="feature-note">Estas opciones afectan a toda la preview y se conservan al volver a abrir el archivo.</p>`;
+            <div class="control-block">
+                <strong>Tema nocturno preferido</strong>
+                <div class="themes">
+                    <button class="theme current"><span class="theme-dot"></span>Oscuro</button>
+                    <button class="theme"><span class="theme-dot"></span>Noche</button>
+                    <button class="theme"><span class="theme-dot"></span>Ártico</button>
+                </div>
+            </div>`;
     }
 
     function experimentsScreen() {
@@ -1956,6 +2174,9 @@
                 renderApp();
             };
         });
+        document.querySelectorAll("[data-demo]").forEach(button => {
+            button.onclick = () => showDemoFeedback(button);
+        });
         const messageInput = document.querySelector("#message-input");
         if (messageInput) {
             messageInput.onkeydown = event => {
@@ -1969,7 +2190,7 @@
             document.querySelector("#drawer-backdrop").classList.add("visible");
         }
         if (action === "back") {
-            navigate(currentRoute === "chat" ? "chats" : "settings");
+            navigate(currentRoute === "chat" ? "chats" : currentRoute === "customization" ? "appearance" : "settings");
         }
         if (action === "search") navigate("search");
         if (action === "profile") navigate("profile");
@@ -2028,6 +2249,28 @@
         }, 1600);
     }
 
+    function showDemoFeedback(button) {
+        const oldToast = document.querySelector(".preview-toast");
+        if (oldToast) oldToast.remove();
+        const toast = document.createElement("div");
+        toast.className = "preview-toast";
+        toast.textContent = `${button.querySelector("strong")?.textContent || "Opción"} abierta`;
+        Object.assign(toast.style, {
+            position: "fixed",
+            left: "50%",
+            bottom: "35px",
+            zIndex: "80",
+            transform: "translateX(-50%)",
+            padding: "10px 16px",
+            borderRadius: "18px",
+            background: "rgba(25, 35, 44, .92)",
+            color: "white",
+            fontSize: "12px"
+        });
+        document.body.appendChild(toast);
+        window.setTimeout(() => toast.remove(), 1300);
+    }
+
     function loadPreferences() {
         try {
             const stored = JSON.parse(localStorage.getItem("telegramPreviewPreferences") || "{}");
@@ -2081,9 +2324,7 @@
         const container = document.querySelector("#timeline");
         if (!container) return;
         container.innerHTML = "";
-        androidVersions
-            .filter(skin => preferences.experimentalSkins || !["android:redesign", "android:glass"].includes(skin.id))
-            .forEach(skin => {
+        androidVersions.forEach(skin => {
             const button = document.createElement("button");
             button.className = `timeline-card ${active.id === skin.id ? "active" : ""}`;
             button.innerHTML = `<strong>${skin.name}</strong><span>${skin.year}</span>`;
@@ -2159,7 +2400,8 @@
     const availableScreens = [
         "chats", "chat", "contacts", "calls", "settings", "appearance",
         "customization", "experiments", "compare", "changelog",
-        "profile", "saved", "search"
+        "profile", "saved", "search",
+        ...Object.keys(settingsCategories)
     ];
     if (availableScreens.includes(requestedScreen)) currentRoute = requestedScreen;
     if (currentRoute === "chat") currentChat = chats[0];
