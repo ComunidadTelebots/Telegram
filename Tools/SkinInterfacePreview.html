@@ -627,45 +627,604 @@
         .dialog-actions .apply {
             background: #e7f4fc;
         }
+
+        .app-shell {
+            --app-accent: #4b9bd6;
+            --app-surface: #fff;
+            --app-bg: #f1f2f4;
+            --app-radius: 17px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: var(--app-bg);
+        }
+
+        .app-shell.layout-original,
+        .app-shell.layout-holo {
+            --app-accent: #397bad;
+            --app-radius: 3px;
+            font-family: Arial, sans-serif;
+        }
+
+        .app-shell.layout-ios {
+            --app-accent: #f9f9fb;
+            --app-bg: #f2f2f7;
+            --app-radius: 18px;
+            color: #111;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .app-shell.layout-windows {
+            --app-accent: #f3f3f3;
+            --app-bg: #ededed;
+            --app-radius: 3px;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        .app-shell.layout-aurora {
+            --app-accent: linear-gradient(90deg, #5d76df, #b462d0);
+            --app-bg: linear-gradient(145deg, #e5eaf7, #f2e6f5);
+            --app-radius: 18px;
+        }
+
+        .app-top {
+            flex: 0 0 85px;
+            color: white;
+            background: var(--app-accent);
+        }
+
+        .layout-ios .app-top,
+        .layout-windows .app-top {
+            color: #111;
+            border-bottom: 1px solid #d7d9dc;
+        }
+
+        .app-status {
+            height: 27px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 7px 19px 0;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .app-toolbar {
+            height: 58px;
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 0 15px;
+        }
+
+        .icon-button {
+            width: 35px;
+            height: 35px;
+            display: grid;
+            place-items: center;
+            flex: 0 0 auto;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            color: inherit;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .toolbar-title {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .toolbar-title strong,
+        .toolbar-title small {
+            display: block;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .toolbar-title strong {
+            font-size: 19px;
+        }
+
+        .toolbar-title small {
+            font-size: 11px;
+            opacity: .82;
+        }
+
+        .app-screen {
+            min-height: 0;
+            flex: 1;
+            overflow: auto;
+            background: var(--app-bg);
+        }
+
+        .app-bottom {
+            display: none;
+            flex: 0 0 53px;
+            align-items: center;
+            justify-content: space-around;
+            border-top: 1px solid #d9dde0;
+            background: var(--app-surface);
+        }
+
+        .layout-ios .app-bottom,
+        .layout-windows .app-bottom {
+            display: flex;
+        }
+
+        .bottom-item {
+            border: 0;
+            background: transparent;
+            color: #75808a;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        .bottom-item.active {
+            color: #2989c8;
+            font-weight: 700;
+        }
+
+        .folder-tabs {
+            display: flex;
+            overflow-x: auto;
+            background: var(--app-surface);
+            border-bottom: 1px solid #e3e6e8;
+            scrollbar-width: none;
+        }
+
+        .folder-tab {
+            flex: 0 0 auto;
+            padding: 12px 17px 10px;
+            border: 0;
+            border-bottom: 2px solid transparent;
+            background: transparent;
+            color: #747e87;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .folder-tab.active {
+            border-color: #378dcc;
+            color: #2583c2;
+            font-weight: 700;
+        }
+
+        .story-row {
+            display: flex;
+            gap: 13px;
+            overflow-x: auto;
+            padding: 11px 13px 9px;
+            background: var(--app-surface);
+            border-bottom: 1px solid #e5e8ea;
+            scrollbar-width: none;
+        }
+
+        .story-button {
+            width: 52px;
+            flex: 0 0 52px;
+            border: 0;
+            background: transparent;
+            color: #555f68;
+            font-size: 9px;
+            cursor: pointer;
+        }
+
+        .story-avatar {
+            width: 39px;
+            height: 39px;
+            margin: 0 auto 4px;
+            border: 2px solid #378dcc;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #75c4ed, #9a7cdd);
+            box-shadow: inset 0 0 0 3px white;
+        }
+
+        .chat-list,
+        .contact-list,
+        .call-list,
+        .settings-list {
+            background: var(--app-surface);
+        }
+
+        .chat-row,
+        .contact-row,
+        .call-row,
+        .setting-row {
+            width: 100%;
+            min-height: 66px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 14px;
+            border: 0;
+            border-bottom: 1px solid #edf0f2;
+            background: transparent;
+            color: inherit;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .compact .chat-row {
+            min-height: 55px;
+            padding-block: 5px;
+        }
+
+        .list-avatar {
+            width: 46px;
+            height: 46px;
+            flex: 0 0 46px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: #73b9e6;
+            color: white;
+            font-weight: 700;
+        }
+
+        .layout-windows .list-avatar,
+        .layout-aurora .list-avatar {
+            border-radius: 8px;
+        }
+
+        .row-copy {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .row-copy strong,
+        .row-copy span {
+            display: block;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .row-copy strong {
+            font-size: 14px;
+        }
+
+        .row-copy span {
+            margin-top: 4px;
+            color: #7d8790;
+            font-size: 12px;
+        }
+
+        .row-meta {
+            color: #83909a;
+            font-size: 10px;
+            text-align: right;
+        }
+
+        .badge {
+            display: inline-grid;
+            min-width: 19px;
+            height: 19px;
+            place-items: center;
+            margin-top: 6px;
+            padding: 0 5px;
+            border-radius: 10px;
+            background: #3d99d4;
+            color: white;
+            font-size: 10px;
+        }
+
+        .fab {
+            position: absolute;
+            right: 23px;
+            bottom: 23px;
+            width: 54px;
+            height: 54px;
+            border: 0;
+            border-radius: 50%;
+            background: #3d99d4;
+            color: white;
+            box-shadow: 0 5px 14px rgb(0 0 0 / 25%);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .screen-relative {
+            min-height: 100%;
+            position: relative;
+            padding-bottom: 82px;
+        }
+
+        .chat-screen {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, #d8e4e8, #edf1f3);
+        }
+
+        .message-area {
+            min-height: 0;
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px;
+        }
+
+        .app-message {
+            width: fit-content;
+            max-width: 82%;
+            margin-bottom: 9px;
+            padding: 8px 10px;
+            border-radius: var(--app-radius);
+            background: white;
+            font-size: 13px;
+            line-height: 1.35;
+            box-shadow: 0 1px 1px rgb(0 0 0 / 8%);
+        }
+
+        .app-message.out {
+            margin-left: auto;
+            background: #9ddd8b;
+        }
+
+        .message-time {
+            margin-left: 8px;
+            color: #7c878f;
+            font-size: 9px;
+        }
+
+        .voice-wave {
+            display: inline-block;
+            width: 92px;
+            height: 15px;
+            vertical-align: middle;
+            background: repeating-linear-gradient(90deg, #4e9dcd 0 2px, transparent 2px 5px);
+        }
+
+        .composer-bar {
+            display: flex;
+            gap: 7px;
+            padding: 8px;
+        }
+
+        .composer-input {
+            min-width: 0;
+            flex: 1;
+            padding: 11px 13px;
+            border: 0;
+            border-radius: 22px;
+            outline: 0;
+            background: white;
+        }
+
+        .send-button {
+            width: 43px;
+            border: 0;
+            border-radius: 50%;
+            background: #3d99d4;
+            color: white;
+            cursor: pointer;
+        }
+
+        .search-box {
+            margin: 11px 13px;
+            padding: 10px 13px;
+            border: 0;
+            border-radius: 12px;
+            width: calc(100% - 26px);
+            outline: 0;
+            background: #e9edf0;
+        }
+
+        .settings-hero {
+            padding: 25px 20px 20px;
+            background: var(--app-surface);
+            text-align: center;
+        }
+
+        .settings-avatar {
+            width: 76px;
+            height: 76px;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 10px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #58aee2, #7f83dc);
+            color: white;
+            font-size: 25px;
+            font-weight: 700;
+        }
+
+        .setting-icon {
+            width: 34px;
+            height: 34px;
+            display: grid;
+            place-items: center;
+            flex: 0 0 34px;
+            border-radius: 9px;
+            background: #4b9bd6;
+            color: white;
+        }
+
+        .drawer-backdrop,
+        .story-viewer,
+        .sheet-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 40;
+            display: none;
+            background: rgb(8 17 24 / 48%);
+        }
+
+        .drawer-backdrop.visible,
+        .story-viewer.visible,
+        .sheet-backdrop.visible {
+            display: block;
+        }
+
+        .drawer {
+            width: min(320px, 82vw);
+            height: 100%;
+            padding: 28px 0;
+            background: white;
+            box-shadow: 10px 0 32px rgb(0 0 0 / 25%);
+        }
+
+        .drawer-profile {
+            padding: 18px 20px;
+            border-bottom: 1px solid #e4e7e9;
+        }
+
+        .drawer-item {
+            width: 100%;
+            padding: 14px 20px;
+            border: 0;
+            background: transparent;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .story-viewer.visible {
+            display: grid;
+            place-items: center;
+        }
+
+        .story-card {
+            width: min(390px, 90vw);
+            height: min(690px, 84vh);
+            position: relative;
+            overflow: hidden;
+            border-radius: 22px;
+            background: linear-gradient(155deg, #234563, #8c6fc5 58%, #f29a86);
+            color: white;
+        }
+
+        .story-progress {
+            height: 3px;
+            margin: 13px;
+            background: rgb(255 255 255 / 35%);
+        }
+
+        .story-progress::after {
+            content: "";
+            display: block;
+            width: 68%;
+            height: 100%;
+            background: white;
+        }
+
+        .story-copy {
+            position: absolute;
+            left: 25px;
+            right: 25px;
+            bottom: 80px;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .close-overlay {
+            position: absolute;
+            top: 25px;
+            right: 20px;
+            border: 0;
+            background: transparent;
+            color: white;
+            font-size: 25px;
+            cursor: pointer;
+        }
+
+        .sheet-backdrop.visible {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .attachment-sheet {
+            width: min(420px, 100%);
+            padding: 20px;
+            border-radius: 22px 22px 0 0;
+            background: white;
+        }
+
+        .attachment-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px 8px;
+        }
+
+        .attachment-item {
+            border: 0;
+            background: transparent;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .attachment-icon {
+            width: 45px;
+            height: 45px;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 5px;
+            border-radius: 50%;
+            background: #4b9bd6;
+            color: white;
+            font-size: 20px;
+        }
     </style>
 </head>
 <body>
 <main class="phone">
-    <div class="status-bar"><span>12:47</span><span>5G&nbsp;&nbsp;93%</span></div>
-    <header class="app-bar">
-        <span class="back">‹</span>
-        <span class="app-title">Apariencia</span>
-    </header>
-
-    <div class="content">
-        <section class="section">
-            <h2 class="section-title">DISEÑOS GENERALES</h2>
-            <p class="section-description">Temas de Telegram que se pueden crear, compartir e importar mediante enlaces.</p>
-            <div class="themes">
-                <button class="theme current"><span class="theme-dot"></span>Azul</button>
-                <button class="theme"><span class="theme-dot"></span>Clásico</button>
-                <button class="theme"><span class="theme-dot"></span>Ártico</button>
-                <button class="theme"><span class="theme-dot"></span>+ Tema</button>
-            </div>
-        </section>
-
-        <section class="section">
-            <h2 class="section-title">DISEÑOS PROPIOS</h2>
-            <p class="section-description">Diseños completos de interfaz incluidos con este cliente.</p>
-            <div class="carousel" id="families"></div>
-
-            <h2 class="section-title" style="margin-top:12px">VERSIONES DE ANDROID</h2>
-            <p class="section-description">Diseños históricos con las funciones actuales de Telegram.</p>
-            <div class="timeline" id="timeline"></div>
-        </section>
-
-        <section class="section">
-            <div class="row"><span>Tamaño del texto</span><span class="row-value">16</span></div>
-            <div class="row"><span>Fondo de chat</span><span class="row-value">›</span></div>
-            <div class="row"><span>Esquinas de mensajes</span><span class="row-value" id="corner-value">17</span></div>
-        </section>
+    <div class="app-shell layout-classic" id="app-shell">
+        <header class="app-top">
+            <div class="app-status"><span>12:47</span><span>5G&nbsp;&nbsp;93%</span></div>
+            <div class="app-toolbar" id="app-toolbar"></div>
+        </header>
+        <div class="app-screen" id="app-screen"></div>
+        <nav class="app-bottom" id="app-bottom">
+            <button class="bottom-item active" data-route="chats">Chats</button>
+            <button class="bottom-item" data-route="contacts">Contactos</button>
+            <button class="bottom-item" data-route="calls">Llamadas</button>
+            <button class="bottom-item" data-route="settings">Ajustes</button>
+        </nav>
     </div>
 </main>
+
+<div class="drawer-backdrop" id="drawer-backdrop">
+    <aside class="drawer">
+        <div class="drawer-profile">
+            <div class="settings-avatar" style="width:58px;height:58px;margin:0 0 10px">CT</div>
+            <strong>Comunidad Telebots</strong>
+            <div style="color:#78828b;font-size:12px;margin-top:4px">@comunidadtelebots</div>
+        </div>
+        <button class="drawer-item" data-route="profile">Mi perfil</button>
+        <button class="drawer-item" data-route="contacts">Contactos</button>
+        <button class="drawer-item" data-route="calls">Llamadas</button>
+        <button class="drawer-item" data-route="saved">Mensajes guardados</button>
+        <button class="drawer-item" data-route="settings">Ajustes</button>
+        <button class="drawer-item" data-route="appearance">Apariencia</button>
+    </aside>
+</div>
+
+<div class="story-viewer" id="story-viewer">
+    <article class="story-card">
+        <div class="story-progress"></div>
+        <button class="close-overlay" id="close-story">×</button>
+        <div style="padding:8px 20px;font-weight:700">Marina · ahora</div>
+        <div class="story-copy">Las historias también se adaptan a cada diseño.</div>
+    </article>
+</div>
+
+<div class="sheet-backdrop" id="sheet-backdrop">
+    <section class="attachment-sheet">
+        <h3 style="margin:0 0 18px">Adjuntar</h3>
+        <div class="attachment-grid">
+            <button class="attachment-item"><span class="attachment-icon">▧</span>Galería</button>
+            <button class="attachment-item"><span class="attachment-icon">▤</span>Archivo</button>
+            <button class="attachment-item"><span class="attachment-icon">⌖</span>Ubicación</button>
+            <button class="attachment-item"><span class="attachment-icon">♙</span>Contacto</button>
+            <button class="attachment-item"><span class="attachment-icon">♫</span>Música</button>
+            <button class="attachment-item"><span class="attachment-icon">▣</span>Encuesta</button>
+            <button class="attachment-item"><span class="attachment-icon">☆</span>Historia</button>
+            <button class="attachment-item"><span class="attachment-icon">⚙</span>Bot</button>
+        </div>
+    </section>
+</div>
 
 <div class="modal-backdrop" id="modal" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
     <article class="dialog">
@@ -728,6 +1287,376 @@
 
     let active = androidVersions[4];
     let pending = active;
+    let currentRoute = "chats";
+    let currentFolder = "Todos";
+    let currentChat = null;
+
+    const chats = [
+        { id: 1, name: "Comunidad Telebots", initials: "CT", message: "Nueva versión disponible para probar", time: "12:42", unread: 4, color: "#5b9bd5" },
+        { id: 2, name: "Marina", initials: "M", message: "He subido una historia nueva", time: "12:18", unread: 1, color: "#9b77cf" },
+        { id: 3, name: "Noticias Telegram", initials: "NT", message: "Telegram 12.7.3: novedades y mejoras", time: "11:05", unread: 0, color: "#55a982" },
+        { id: 4, name: "Equipo de diseño", initials: "ED", message: "El mockup completo ya está listo", time: "10:46", unread: 2, color: "#d98b5f" },
+        { id: 5, name: "Bot de compilación", initials: "BC", message: "BUILD SUCCESSFUL in 48s", time: "09:31", unread: 0, color: "#607d8b" },
+        { id: 6, name: "Familia", initials: "F", message: "Foto", time: "Ayer", unread: 0, color: "#d06d8c" }
+    ];
+
+    const contacts = [
+        { name: "Alejandro", status: "en línea", initials: "A" },
+        { name: "Marina", status: "en línea", initials: "M" },
+        { name: "Sofía", status: "últ. vez recientemente", initials: "S" },
+        { name: "Daniel", status: "últ. vez ayer", initials: "D" },
+        { name: "Lucía", status: "últ. vez esta semana", initials: "L" }
+    ];
+
+    const calls = [
+        { name: "Marina", detail: "Saliente · 12:10", symbol: "↗" },
+        { name: "Alejandro", detail: "Entrante · Ayer", symbol: "↙" },
+        { name: "Equipo de diseño", detail: "Videollamada grupal · Lunes", symbol: "▣" }
+    ];
+
+    const routeTitles = {
+        chats: "Telegram",
+        contacts: "Contactos",
+        calls: "Llamadas",
+        settings: "Ajustes",
+        appearance: "Apariencia",
+        profile: "Mi perfil",
+        saved: "Mensajes guardados",
+        search: "Buscar"
+    };
+
+    function navigate(route, options = {}) {
+        currentRoute = route;
+        if (route === "chat" && options.chat) currentChat = options.chat;
+        closeDrawer();
+        renderApp(options);
+    }
+
+    function renderApp(options = {}) {
+        const shell = document.querySelector("#app-shell");
+        shell.className = `app-shell layout-${active.layout}`;
+        shell.style.setProperty("--app-radius", radiusStyle(active.radius));
+        shell.style.setProperty("--app-accent", active.accent);
+        renderToolbar(options);
+        renderScreen(options);
+        document.querySelectorAll(".bottom-item").forEach(item => {
+            item.classList.toggle("active", item.dataset.route === currentRoute);
+        });
+    }
+
+    function renderToolbar(options) {
+        const toolbar = document.querySelector("#app-toolbar");
+        if (currentRoute === "chat") {
+            const chat = options.chat || chats[0];
+            toolbar.innerHTML = `
+                <button class="icon-button" data-action="back">‹</button>
+                <div class="list-avatar" style="width:36px;height:36px;flex-basis:36px;background:${chat.color}">${chat.initials}</div>
+                <div class="toolbar-title"><strong>${chat.name}</strong><small>en línea</small></div>
+                <button class="icon-button" data-action="call">⌕</button>
+                <button class="icon-button" data-action="profile">⋮</button>`;
+        } else {
+            const backRoutes = ["appearance", "profile", "saved", "search"];
+            toolbar.innerHTML = `
+                <button class="icon-button" data-action="${backRoutes.includes(currentRoute) ? "back" : "menu"}">${backRoutes.includes(currentRoute) ? "‹" : "☰"}</button>
+                <div class="toolbar-title"><strong>${routeTitles[currentRoute] || "Telegram"}</strong></div>
+                <button class="icon-button" data-action="search">⌕</button>
+                ${currentRoute === "settings" ? '<button class="icon-button" data-action="profile">⋮</button>' : ""}`;
+        }
+    }
+
+    function renderScreen(options) {
+        const screen = document.querySelector("#app-screen");
+        if (currentRoute === "chats") screen.innerHTML = chatsScreen();
+        if (currentRoute === "chat") screen.innerHTML = chatScreen(options.chat || currentChat || chats[0]);
+        if (currentRoute === "contacts") screen.innerHTML = contactsScreen();
+        if (currentRoute === "calls") screen.innerHTML = callsScreen();
+        if (currentRoute === "settings") screen.innerHTML = settingsScreen();
+        if (currentRoute === "appearance") screen.innerHTML = appearanceScreen();
+        if (currentRoute === "profile") screen.innerHTML = profileScreen();
+        if (currentRoute === "saved") screen.innerHTML = savedScreen();
+        if (currentRoute === "search") screen.innerHTML = searchScreen();
+        bindScreenActions();
+        if (currentRoute === "appearance") {
+            renderFamilies();
+            renderTimeline();
+        }
+    }
+
+    function chatsScreen() {
+        return `
+            <div class="screen-relative ${active.layout === "original" || active.layout === "holo" ? "compact" : ""}">
+                <div class="folder-tabs">
+                    ${["Todos", "No leídos", "Personal", "Canales"].map(folder =>
+                        `<button class="folder-tab ${folder === currentFolder ? "active" : ""}" data-folder="${folder}">${folder}</button>`
+                    ).join("")}
+                </div>
+                <div class="story-row">
+                    ${["Mi historia", "Marina", "Alex", "Noticias", "Diseño"].map((name, index) =>
+                        `<button class="story-button" data-story="${index}"><span class="story-avatar"></span>${name}</button>`
+                    ).join("")}
+                </div>
+                <div class="chat-list">
+                    ${chats.map(chat => `
+                        <button class="chat-row" data-chat="${chat.id}">
+                            <span class="list-avatar" style="background:${chat.color}">${chat.initials}</span>
+                            <span class="row-copy"><strong>${chat.name}</strong><span>${chat.message}</span></span>
+                            <span class="row-meta">${chat.time}${chat.unread ? `<span class="badge">${chat.unread}</span>` : ""}</span>
+                        </button>`).join("")}
+                </div>
+                <button class="fab" data-action="compose">✎</button>
+            </div>`;
+    }
+
+    function chatScreen(chat) {
+        return `
+            <div class="chat-screen">
+                <div class="message-area" id="message-area">
+                    <div class="app-message">Bienvenido a la preview completa de Telegram.<span class="message-time">12:30</span></div>
+                    <div class="app-message out">El diseño activo se aplica a toda la aplicación.<span class="message-time">12:31 ✓✓</span></div>
+                    <div class="app-message">Puedes abrir historias, buscar, llamar y cambiar de skin.<span class="message-time">12:32</span></div>
+                    <div class="app-message"><span class="voice-wave"></span> 0:18<span class="message-time">12:35</span></div>
+                    <div class="app-message out">Prueba el botón de adjuntar y envía un mensaje.<span class="message-time">12:38 ✓✓</span></div>
+                </div>
+                <div class="composer-bar">
+                    <button class="icon-button" data-action="attach" style="color:#68747e">＋</button>
+                    <input class="composer-input" id="message-input" placeholder="Mensaje">
+                    <button class="send-button" data-action="send">➤</button>
+                </div>
+            </div>`;
+    }
+
+    function contactsScreen() {
+        return `
+            <div class="screen-relative">
+                <input class="search-box" placeholder="Buscar contactos">
+                <div class="contact-list">
+                    ${contacts.map(contact => `
+                        <button class="contact-row" data-contact="${contact.name}">
+                            <span class="list-avatar">${contact.initials}</span>
+                            <span class="row-copy"><strong>${contact.name}</strong><span>${contact.status}</span></span>
+                        </button>`).join("")}
+                </div>
+                <button class="fab" data-action="add-contact">＋</button>
+            </div>`;
+    }
+
+    function callsScreen() {
+        return `
+            <div class="screen-relative">
+                <div class="call-list">
+                    ${calls.map(call => `
+                        <button class="call-row" data-call="${call.name}">
+                            <span class="list-avatar">${call.symbol}</span>
+                            <span class="row-copy"><strong>${call.name}</strong><span>${call.detail}</span></span>
+                            <span style="color:#348dcc">☎</span>
+                        </button>`).join("")}
+                </div>
+                <button class="fab" data-action="new-call">☎</button>
+            </div>`;
+    }
+
+    function settingsScreen() {
+        const rows = [
+            ["☁", "Mensajes guardados", "saved"],
+            ["♙", "Perfil", "profile"],
+            ["🔔", "Notificaciones y sonidos", ""],
+            ["◉", "Privacidad y seguridad", ""],
+            ["▣", "Datos y almacenamiento", ""],
+            ["◌", "Apariencia", "appearance"],
+            ["文", "Idioma", ""],
+            ["?", "Ayuda", ""]
+        ];
+        return `
+            <div class="settings-hero">
+                <div class="settings-avatar">CT</div>
+                <strong>Comunidad Telebots</strong>
+                <div style="color:#7a858e;font-size:12px;margin-top:4px">+34 600 000 000</div>
+            </div>
+            <div class="settings-list">
+                ${rows.map(row => `
+                    <button class="setting-row" ${row[2] ? `data-route="${row[2]}"` : ""}>
+                        <span class="setting-icon">${row[0]}</span>
+                        <span class="row-copy"><strong>${row[1]}</strong></span>
+                        <span>›</span>
+                    </button>`).join("")}
+            </div>`;
+    }
+
+    function appearanceScreen() {
+        return `
+            <section class="section" style="margin-top:0">
+                <h2 class="section-title">DISEÑOS GENERALES</h2>
+                <p class="section-description">Temas de Telegram que se pueden crear, compartir e importar mediante enlaces.</p>
+                <div class="themes">
+                    <button class="theme current"><span class="theme-dot"></span>Azul</button>
+                    <button class="theme"><span class="theme-dot"></span>Clásico</button>
+                    <button class="theme"><span class="theme-dot"></span>Ártico</button>
+                    <button class="theme"><span class="theme-dot"></span>+ Tema</button>
+                </div>
+            </section>
+            <section class="section">
+                <h2 class="section-title">DISEÑOS PROPIOS</h2>
+                <p class="section-description">Diseños completos de interfaz incluidos con este cliente.</p>
+                <div class="carousel" id="families"></div>
+                <h2 class="section-title" style="margin-top:12px">VERSIONES DE ANDROID</h2>
+                <p class="section-description">Diseños históricos con las funciones actuales de Telegram.</p>
+                <div class="timeline" id="timeline"></div>
+            </section>
+            <section class="section">
+                <div class="row"><span>Tamaño del texto</span><span class="row-value">16</span></div>
+                <div class="row"><span>Fondo de chat</span><span class="row-value">›</span></div>
+                <div class="row"><span>Esquinas de mensajes</span><span class="row-value" id="corner-value">${active.radius}</span></div>
+            </section>`;
+    }
+
+    function profileScreen() {
+        return `
+            <div class="settings-hero" style="padding-top:42px">
+                <div class="settings-avatar" style="width:104px;height:104px;font-size:34px">CT</div>
+                <h2 style="margin:8px 0 2px">Comunidad Telebots</h2>
+                <div style="color:#7c8790">@comunidadtelebots</div>
+            </div>
+            <div class="settings-list">
+                <div class="setting-row"><span class="setting-icon">☎</span><span class="row-copy"><strong>+34 600 000 000</strong><span>Teléfono</span></span></div>
+                <div class="setting-row"><span class="setting-icon">@</span><span class="row-copy"><strong>@comunidadtelebots</strong><span>Nombre de usuario</span></span></div>
+                <div class="setting-row"><span class="setting-icon">i</span><span class="row-copy"><strong>Desarrollo, bots y Telegram</strong><span>Biografía</span></span></div>
+            </div>`;
+    }
+
+    function savedScreen() {
+        return `
+            <div class="chat-screen">
+                <div class="message-area">
+                    <div class="app-message out">Ideas para la próxima versión<span class="message-time">Lun</span></div>
+                    <div class="app-message out">https://github.com/ComunidadTelebots/Telegram<span class="message-time">Mar</span></div>
+                    <div class="app-message out">Implementar todos los diseños históricos<span class="message-time">Hoy</span></div>
+                </div>
+                <div class="composer-bar"><input class="composer-input" placeholder="Mensaje"><button class="send-button">➤</button></div>
+            </div>`;
+    }
+
+    function searchScreen() {
+        return `
+            <div>
+                <input class="search-box" id="global-search" placeholder="Buscar mensajes, chats y usuarios" autofocus>
+                <div class="chat-list" id="search-results">
+                    ${chats.slice(0, 3).map(chat => `
+                        <button class="chat-row" data-chat="${chat.id}">
+                            <span class="list-avatar" style="background:${chat.color}">${chat.initials}</span>
+                            <span class="row-copy"><strong>${chat.name}</strong><span>${chat.message}</span></span>
+                        </button>`).join("")}
+                </div>
+            </div>`;
+    }
+
+    function bindScreenActions() {
+        document.querySelectorAll("[data-route]").forEach(button => {
+            button.onclick = () => navigate(button.dataset.route);
+        });
+        document.querySelectorAll("[data-folder]").forEach(button => {
+            button.onclick = () => {
+                currentFolder = button.dataset.folder;
+                renderApp();
+            };
+        });
+        document.querySelectorAll("[data-story]").forEach(button => {
+            button.onclick = openStory;
+        });
+        document.querySelectorAll("[data-chat]").forEach(button => {
+            button.onclick = () => {
+                const chat = chats.find(item => item.id === Number(button.dataset.chat)) || chats[0];
+                navigate("chat", { chat });
+            };
+        });
+        document.querySelectorAll("[data-contact]").forEach(button => {
+            button.onclick = () => {
+                const name = button.dataset.contact;
+                navigate("chat", { chat: { name, initials: name[0], color: "#73b9e6" } });
+            };
+        });
+        const search = document.querySelector("#global-search");
+        if (search) {
+            search.addEventListener("input", () => {
+                const query = search.value.toLowerCase();
+                document.querySelectorAll("#search-results .chat-row").forEach(row => {
+                    row.hidden = !row.textContent.toLowerCase().includes(query);
+                });
+            });
+        }
+        document.querySelectorAll("[data-action]").forEach(button => {
+            button.onclick = () => handleAction(button.dataset.action);
+        });
+        const messageInput = document.querySelector("#message-input");
+        if (messageInput) {
+            messageInput.onkeydown = event => {
+                if (event.key === "Enter") sendMessage();
+            };
+        }
+    }
+
+    function handleAction(action) {
+        if (action === "menu") {
+            document.querySelector("#drawer-backdrop").classList.add("visible");
+        }
+        if (action === "back") {
+            navigate(currentRoute === "chat" ? "chats" : "settings");
+        }
+        if (action === "search") navigate("search");
+        if (action === "profile") navigate("profile");
+        if (action === "compose") {
+            navigate("chat", {
+                chat: { name: "Nuevo mensaje", initials: "+", color: "#4b9bd6" }
+            });
+        }
+        if (action === "attach") {
+            document.querySelector("#sheet-backdrop").classList.add("visible");
+        }
+        if (action === "send") sendMessage();
+        if (action === "call" || action === "new-call") showCallState();
+        if (action === "add-contact") {
+            navigate("chat", {
+                chat: { name: "Nuevo contacto", initials: "+", color: "#55a982" }
+            });
+        }
+    }
+
+    function closeDrawer() {
+        document.querySelector("#drawer-backdrop").classList.remove("visible");
+    }
+
+    function openStory(event) {
+        const storyNames = ["Mi historia", "Marina", "Alex", "Noticias", "Diseño"];
+        const storyIndex = Number(event.currentTarget.dataset.story);
+        document.querySelector(".story-card > div:nth-of-type(2)").textContent =
+            `${storyNames[storyIndex] || "Historia"} · ahora`;
+        document.querySelector("#story-viewer").classList.add("visible");
+    }
+
+    function sendMessage() {
+        const input = document.querySelector("#message-input");
+        const area = document.querySelector("#message-area");
+        if (!input || !area || !input.value.trim()) return;
+        const message = document.createElement("div");
+        message.className = "app-message out";
+        message.textContent = input.value.trim();
+        const time = document.createElement("span");
+        time.className = "message-time";
+        time.textContent = "ahora ✓✓";
+        message.appendChild(time);
+        area.appendChild(message);
+        input.value = "";
+        area.scrollTop = area.scrollHeight;
+    }
+
+    function showCallState() {
+        const title = document.querySelector(".toolbar-title");
+        if (!title) return;
+        const previous = title.innerHTML;
+        title.innerHTML = "<strong>Llamando…</strong><small>conexión segura</small>";
+        window.setTimeout(() => {
+            if (document.body.contains(title)) title.innerHTML = previous;
+        }, 1600);
+    }
 
     function radiusStyle(radius) {
         return `${Math.min(radius, 18)}px`;
@@ -735,6 +1664,7 @@
 
     function renderFamilies() {
         const container = document.querySelector("#families");
+        if (!container) return;
         container.innerHTML = "";
         families.forEach(skin => {
             const button = document.createElement("button");
@@ -757,6 +1687,7 @@
 
     function renderTimeline() {
         const container = document.querySelector("#timeline");
+        if (!container) return;
         container.innerHTML = "";
         androidVersions.forEach(skin => {
             const button = document.createElement("button");
@@ -789,19 +1720,35 @@
     document.querySelector("#cancel").addEventListener("click", closePreview);
     document.querySelector("#apply").addEventListener("click", () => {
         active = pending;
-        document.querySelector("#corner-value").textContent = active.radius;
-        renderFamilies();
-        renderTimeline();
+        renderApp(currentRoute === "chat" ? { chat: currentChat || chats[0] } : {});
         closePreview();
     });
     document.querySelector("#modal").addEventListener("click", event => {
         if (event.target.id === "modal") closePreview();
     });
 
-    renderFamilies();
-    renderTimeline();
+    document.querySelector("#drawer-backdrop").addEventListener("click", event => {
+        if (event.target.id === "drawer-backdrop") closeDrawer();
+    });
+    document.querySelector("#close-story").addEventListener("click", () => {
+        document.querySelector("#story-viewer").classList.remove("visible");
+    });
+    document.querySelector("#story-viewer").addEventListener("click", event => {
+        if (event.target.id === "story-viewer") event.currentTarget.classList.remove("visible");
+    });
+    document.querySelector("#sheet-backdrop").addEventListener("click", event => {
+        if (event.target.id === "sheet-backdrop" || event.target.closest(".attachment-item")) {
+            event.currentTarget.classList.remove("visible");
+        }
+    });
+    const query = new URLSearchParams(location.search);
+    const requestedScreen = query.get("screen");
+    const availableScreens = ["chats", "chat", "contacts", "calls", "settings", "appearance", "profile", "saved", "search"];
+    if (availableScreens.includes(requestedScreen)) currentRoute = requestedScreen;
+    if (currentRoute === "chat") currentChat = chats[0];
+    renderApp(currentRoute === "chat" ? { chat: currentChat } : {});
 
-    const requestedPreview = new URLSearchParams(location.search).get("preview");
+    const requestedPreview = query.get("preview");
     if (requestedPreview) {
         const requestedSkin =
             androidVersions.find(skin => skin.id === `android:${requestedPreview}`) ||
