@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Telegram Custom Designs Preview</title>
+    <style>
+        :root {
+            color-scheme: light;
+            font-family: Inter, Roboto, Arial, sans-serif;
+            background: #e9edf2;
+            color: #202124;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            display: grid;
+            place-items: center;
+            padding: 28px;
+        }
+
+        button {
+            font: inherit;
+        }
+
+        .phone {
+            width: min(420px, 100%);
+            height: min(860px, calc(100vh - 56px));
+            overflow: hidden;
+            background: #f1f2f4;
+            border: 1px solid #d7dce1;
+            border-radius: 30px;
+            box-shadow: 0 24px 70px rgb(31 42 55 / 24%);
+        }
+
+        .status-bar {
+            height: 27px;
+            padding: 8px 20px 0;
+            display: flex;
+            justify-content: space-between;
+            background: #4b9bd6;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .app-bar {
+            height: 58px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 0 18px;
+            background: #4b9bd6;
+            color: white;
+            box-shadow: 0 2px 6px rgb(0 0 0 / 15%);
+        }
+
+        .back {
+            font-size: 28px;
+            line-height: 1;
+        }
+
+        .app-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .content {
+            height: calc(100% - 85px);
+            overflow: auto;
+            padding-bottom: 28px;
+        }
+
+        .section {
+            margin-top: 12px;
+            padding: 13px 0 10px;
+            background: white;
+            border-block: 1px solid #e2e5e8;
+        }
+
+        .section-title {
+            margin: 0;
+            padding: 0 20px;
+            color: #3286c5;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: .25px;
+        }
+
+        .section-description {
+            margin: 5px 0 12px;
+            padding: 0 20px;
+            color: #7c848c;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .themes {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            padding: 0 14px;
+        }
+
+        .theme {
+            min-height: 62px;
+            padding: 8px 4px;
+            border: 0;
+            border-radius: 12px;
+            background: #f3f5f7;
+            color: #65717b;
+            font-size: 11px;
+        }
+
+        .theme.current {
+            outline: 2px solid #4094d0;
+            color: #2584c4;
+            background: #eaf5fc;
+        }
+
+        .theme-dot {
+            width: 24px;
+            height: 24px;
+            margin: 0 auto 5px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #d2eaff 50%, #86bfeb 50%);
+        }
+
+        .carousel {
+            display: flex;
+            gap: 7px;
+            overflow-x: auto;
+            padding: 2px 13px 7px;
+            scrollbar-width: none;
+        }
+
+        .carousel::-webkit-scrollbar {
+            display: none;
+        }
+
+        .skin-card {
+            flex: 0 0 87px;
+            padding: 6px;
+            border: 0;
+            border-radius: 12px;
+            background: transparent;
+            color: #737c84;
+            cursor: pointer;
+        }
+
+        .skin-card.active {
+            color: #2788c9;
+            background: #eaf5fc;
+        }
+
+        .mini-chat {
+            display: block;
+            height: 55px;
+            position: relative;
+            border-radius: 9px;
+            background: #e8edf0;
+            overflow: hidden;
+        }
+
+        .mini-bubble {
+            position: absolute;
+            width: 47px;
+            height: 17px;
+        }
+
+        .mini-bubble.in {
+            left: 7px;
+            top: 29px;
+            background: white;
+        }
+
+        .mini-bubble.out {
+            right: 7px;
+            top: 8px;
+            background: #9edc8c;
+        }
+
+        .skin-name {
+            display: block;
+            min-height: 28px;
+            padding-top: 6px;
+            font-size: 11px;
+            line-height: 1.15;
+        }
+
+        .timeline {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 0 13px 8px;
+            scrollbar-width: none;
+        }
+
+        .timeline-card {
+            flex: 0 0 104px;
+            padding: 9px 7px;
+            border: 1px solid #dce1e5;
+            border-radius: 13px;
+            background: white;
+            color: #59636d;
+            cursor: pointer;
+        }
+
+        .timeline-card.active {
+            border-color: #348dca;
+            background: #ecf7fd;
+            color: #2583c2;
+        }
+
+        .timeline-card strong,
+        .timeline-card span {
+            display: block;
+        }
+
+        .timeline-card strong {
+            font-size: 12px;
+        }
+
+        .timeline-card span {
+            margin-top: 2px;
+            font-size: 10px;
+        }
+
+        .row {
+            min-height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            background: white;
+            border-bottom: 1px solid #edf0f2;
+            font-size: 15px;
+        }
+
+        .row-value {
+            color: #8a9299;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            display: none;
+            place-items: center;
+            padding: 20px;
+            background: rgb(12 21 28 / 48%);
+            z-index: 20;
+        }
+
+        .modal-backdrop.visible {
+            display: grid;
+        }
+
+        .dialog {
+            width: min(360px, 100%);
+            overflow: hidden;
+            border-radius: 18px;
+            background: white;
+            box-shadow: 0 24px 80px rgb(0 0 0 / 34%);
+        }
+
+        .dialog-title {
+            margin: 0;
+            padding: 20px 22px 12px;
+            font-size: 20px;
+        }
+
+        .preview {
+            margin: 0 18px;
+            overflow: hidden;
+            border-radius: 15px;
+            background: #dce4e9;
+        }
+
+        .preview-header {
+            height: 48px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 13px;
+            background: #4b9bd6;
+            color: white;
+        }
+
+        .avatar {
+            width: 30px;
+            height: 30px;
+            background: #73b9e6;
+        }
+
+        .contact strong,
+        .contact small {
+            display: block;
+        }
+
+        .contact small {
+            opacity: .82;
+        }
+
+        .stories {
+            height: 55px;
+            display: flex;
+            gap: 13px;
+            align-items: center;
+            padding: 0 14px;
+            background: white;
+        }
+
+        .story {
+            width: 31px;
+            height: 31px;
+            border: 2px solid #3597d4;
+            border-radius: 50%;
+            background: #dbeef9;
+        }
+
+        .messages {
+            min-height: 194px;
+            padding: 14px;
+            background: linear-gradient(135deg, #dbe4e8, #eef1f2);
+        }
+
+        .bubble {
+            width: fit-content;
+            max-width: 82%;
+            margin-bottom: 11px;
+            padding: 9px 11px;
+            font-size: 12px;
+            line-height: 1.35;
+        }
+
+        .bubble.incoming {
+            background: white;
+        }
+
+        .bubble.outgoing {
+            margin-left: auto;
+            background: #9edc8c;
+        }
+
+        .reaction {
+            display: inline-block;
+            margin: -6px 0 10px 8px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            background: white;
+            color: #287eb5;
+            font-size: 10px;
+        }
+
+        .composer {
+            margin: 0 10px 10px;
+            padding: 10px 14px;
+            border-radius: 20px;
+            background: white;
+            color: #a0a7ad;
+            font-size: 12px;
+        }
+
+        .dialog-info {
+            margin: 12px 22px 6px;
+            color: #737c84;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .dialog-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            padding: 10px 14px 14px;
+        }
+
+        .dialog-actions button {
+            padding: 9px 13px;
+            border: 0;
+            border-radius: 9px;
+            background: transparent;
+            color: #2586c7;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .dialog-actions .apply {
+            background: #e7f4fc;
+        }
+    </style>
+</head>
+<body>
+<main class="phone">
+    <div class="status-bar"><span>12:47</span><span>5G&nbsp;&nbsp;93%</span></div>
+    <header class="app-bar">
+        <span class="back">‹</span>
+        <span class="app-title">Apariencia</span>
+    </header>
+
+    <div class="content">
+        <section class="section">
+            <h2 class="section-title">DISEÑOS GENERALES</h2>
+            <p class="section-description">Temas de Telegram que se pueden crear, compartir e importar mediante enlaces.</p>
+            <div class="themes">
+                <button class="theme current"><span class="theme-dot"></span>Azul</button>
+                <button class="theme"><span class="theme-dot"></span>Clásico</button>
+                <button class="theme"><span class="theme-dot"></span>Ártico</button>
+                <button class="theme"><span class="theme-dot"></span>+ Tema</button>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">DISEÑOS PROPIOS</h2>
+            <p class="section-description">Diseños completos de interfaz incluidos con este cliente.</p>
+            <div class="carousel" id="families"></div>
+
+            <h2 class="section-title" style="margin-top:12px">VERSIONES DE ANDROID</h2>
+            <p class="section-description">Diseños históricos con las funciones actuales de Telegram.</p>
+            <div class="timeline" id="timeline"></div>
+        </section>
+
+        <section class="section">
+            <div class="row"><span>Tamaño del texto</span><span class="row-value">16</span></div>
+            <div class="row"><span>Fondo de chat</span><span class="row-value">›</span></div>
+            <div class="row"><span>Esquinas de mensajes</span><span class="row-value" id="corner-value">17</span></div>
+        </section>
+    </div>
+</main>
+
+<div class="modal-backdrop" id="modal" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+    <article class="dialog">
+        <h2 class="dialog-title" id="dialog-title"></h2>
+        <div class="preview">
+            <div class="preview-header">
+                <div class="avatar" id="preview-avatar"></div>
+                <div class="contact"><strong>Telegram</strong><small>en línea</small></div>
+            </div>
+            <div class="stories"><div class="story"></div><div class="story"></div><div class="story"></div><div class="story"></div></div>
+            <div class="messages">
+                <div class="bubble incoming">Telegram actual con una interfaz histórica.</div>
+                <span class="reaction">👍 3</span>
+                <div class="bubble outgoing">Las funciones modernas siguen disponibles.</div>
+                <div class="composer">Mensaje</div>
+            </div>
+        </div>
+        <p class="dialog-info">Vista previa real e interactiva. El diseño no cambia hasta pulsar Aplicar.</p>
+        <footer class="dialog-actions">
+            <button id="cancel">CANCELAR</button>
+            <button class="apply" id="apply">APLICAR</button>
+        </footer>
+    </article>
+</div>
+
+<script>
+    const families = [
+        { id: "android", name: "Android", radius: 17 },
+        { id: "web", name: "Web", radius: 18 },
+        { id: "webogram", name: "Webogram", radius: 6 },
+        { id: "ios", name: "iOS", radius: 18 },
+        { id: "macos", name: "macOS", radius: 18 },
+        { id: "tdesktop", name: "Desktop", radius: 6 },
+        { id: "unigram", name: "Windows", radius: 4 },
+        { id: "telegramx", name: "Telegram X", radius: 14 },
+        { id: "aurora", name: "Aurora", radius: 18 }
+    ];
+
+    const androidVersions = [
+        { id: "android:original", name: "Original", year: 2013, radius: 4, tail: true },
+        { id: "android:holo", name: "Holo", year: 2014, radius: 5, tail: true },
+        { id: "android:material", name: "Material", year: 2015, radius: 8, tail: true },
+        { id: "android:classic", name: "Clásico", year: 2018, radius: 12, tail: true },
+        { id: "android:current", name: "Actual", year: 2026, radius: 17, tail: true },
+        { id: "android:redesign", name: "Redesign", year: 2026, radius: 16, tail: true },
+        { id: "android:glass", name: "Glass", year: 2026, radius: 18, tail: false }
+    ];
+
+    let active = androidVersions[4];
+    let pending = active;
+
+    function radiusStyle(radius) {
+        return `${Math.min(radius, 18)}px`;
+    }
+
+    function renderFamilies() {
+        const container = document.querySelector("#families");
+        container.innerHTML = "";
+        families.forEach(skin => {
+            const button = document.createElement("button");
+            button.className = `skin-card ${active.id.startsWith(skin.id) ? "active" : ""}`;
+            button.innerHTML = `
+                <span class="mini-chat">
+                    <span class="mini-bubble out" style="border-radius:${radiusStyle(skin.radius)}"></span>
+                    <span class="mini-bubble in" style="border-radius:${radiusStyle(skin.radius)}"></span>
+                </span>
+                <span class="skin-name">${skin.name}</span>`;
+            button.addEventListener("click", () => {
+                const candidate = skin.id === "android"
+                    ? androidVersions.find(item => item.id === active.id) || androidVersions[4]
+                    : { ...skin, year: null, tail: false };
+                openPreview(candidate);
+            });
+            container.appendChild(button);
+        });
+    }
+
+    function renderTimeline() {
+        const container = document.querySelector("#timeline");
+        container.innerHTML = "";
+        androidVersions.forEach(skin => {
+            const button = document.createElement("button");
+            button.className = `timeline-card ${active.id === skin.id ? "active" : ""}`;
+            button.innerHTML = `<strong>${skin.name}</strong><span>${skin.year}</span>`;
+            button.addEventListener("click", () => openPreview(skin));
+            container.appendChild(button);
+        });
+    }
+
+    function openPreview(skin) {
+        pending = skin;
+        document.querySelector("#dialog-title").textContent =
+            `${skin.name}${skin.year ? ` · ${skin.year}` : ""}`;
+        document.querySelectorAll(".bubble").forEach(bubble => {
+            bubble.style.borderRadius = radiusStyle(skin.radius);
+        });
+        document.querySelector("#preview-avatar").style.borderRadius =
+            skin.id === "unigram" || skin.id === "android:glass" ? "7px" : "50%";
+        document.querySelector("#modal").classList.add("visible");
+    }
+
+    function closePreview() {
+        document.querySelector("#modal").classList.remove("visible");
+    }
+
+    document.querySelector("#cancel").addEventListener("click", closePreview);
+    document.querySelector("#apply").addEventListener("click", () => {
+        active = pending;
+        document.querySelector("#corner-value").textContent = active.radius;
+        renderFamilies();
+        renderTimeline();
+        closePreview();
+    });
+    document.querySelector("#modal").addEventListener("click", event => {
+        if (event.target.id === "modal") closePreview();
+    });
+
+    renderFamilies();
+    renderTimeline();
+
+    const requestedPreview = new URLSearchParams(location.search).get("preview");
+    if (requestedPreview) {
+        const requestedSkin = androidVersions.find(skin => skin.id === `android:${requestedPreview}`);
+        if (requestedSkin) {
+            openPreview(requestedSkin);
+        }
+    }
+</script>
+</body>
+</html>
