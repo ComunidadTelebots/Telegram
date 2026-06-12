@@ -8,6 +8,9 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.ui.skins.skins.AndroidGlassSkin;
+import org.telegram.ui.skins.skins.AndroidClassicSkin;
+import org.telegram.ui.skins.skins.AndroidHoloSkin;
+import org.telegram.ui.skins.skins.AndroidMaterialSkin;
 import org.telegram.ui.skins.skins.AndroidOriginalSkin;
 import org.telegram.ui.skins.skins.AndroidRedesignSkin;
 import org.telegram.ui.skins.skins.AndroidSkin;
@@ -39,6 +42,9 @@ public class SkinManager {
     private SkinManager() {
         skins.add(new AndroidSkin());
         skins.add(new AndroidOriginalSkin());
+        skins.add(new AndroidHoloSkin());
+        skins.add(new AndroidMaterialSkin());
+        skins.add(new AndroidClassicSkin());
         skins.add(new AndroidRedesignSkin());
         skins.add(new AndroidGlassSkin());
         skins.add(new WebSkin());
@@ -88,6 +94,8 @@ public class SkinManager {
                 variants.add(skin);
             }
         }
+        Collections.sort(variants, (left, right) ->
+                Integer.compare(left.getTimelineOrder(), right.getTimelineOrder()));
         return variants;
     }
 

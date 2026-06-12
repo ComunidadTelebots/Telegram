@@ -19,6 +19,14 @@ public abstract class SkinBase {
         return getDisplayName();
     }
 
+    public int getReleaseYear() {
+        return 0;
+    }
+
+    public int getTimelineOrder() {
+        return Integer.MAX_VALUE;
+    }
+
     // Burbujas
     public abstract int getBubbleRadiusDP();
     public abstract boolean hasBubbleTail();

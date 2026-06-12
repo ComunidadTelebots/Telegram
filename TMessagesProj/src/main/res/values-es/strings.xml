@@ -346,6 +346,13 @@
     <string name="SkinCustomDesignsInfo">Diseños completos de interfaz incluidos con este cliente</string>
     <string name="SkinAndroidVersions">VERSIONES DE ANDROID</string>
     <string name="SkinAndroidVersionsInfo">Usa un diseño histórico de Android con las funciones más recientes de Telegram</string>
+    <string name="SkinApplyDesign">Aplicar</string>
+    <string name="SkinPreviewModernFeatures">Esta vista previa combina el estilo de interfaz seleccionado con funciones actuales como historias, reacciones, bots y el compositor moderno.</string>
+    <string name="SkinPreviewStories">Historias</string>
+    <string name="SkinPreviewIncomingLine1">Telegram actual</string>
+    <string name="SkinPreviewIncomingLine2">con una interfaz histórica.</string>
+    <string name="SkinPreviewOutgoingLine1">Las funciones modernas siguen</string>
+    <string name="SkinPreviewOutgoingLine2">disponibles en cada diseño.</string>
     <string name="ChatBackground">Fondo de pantalla</string>
     <string name="ResetChatBackgrounds">Restablecer fondos de pantalla</string>
     <string name="ResetChatBackgroundsInfo">Elimina todos los fondos de pantalla subidos y restaura los preinstalados.</string>

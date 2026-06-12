@@ -2234,6 +2234,13 @@
     <string name="SkinCustomDesignsInfo">Complete interface designs included with this client</string>
     <string name="SkinAndroidVersions">ANDROID VERSIONS</string>
     <string name="SkinAndroidVersionsInfo">Use a historical Android design with the latest Telegram features</string>
+    <string name="SkinApplyDesign">Apply</string>
+    <string name="SkinPreviewModernFeatures">This preview combines the selected interface style with current features such as stories, reactions, bots and the modern message composer.</string>
+    <string name="SkinPreviewStories">Stories</string>
+    <string name="SkinPreviewIncomingLine1">Welcome to current Telegram</string>
+    <string name="SkinPreviewIncomingLine2">with a historical interface.</string>
+    <string name="SkinPreviewOutgoingLine1">Modern features stay available</string>
+    <string name="SkinPreviewOutgoingLine2">in every design.</string>
     <string name="DeleteThemeTitle">Delete theme</string>
     <string name="DeleteThemeAlert">Are you sure you want to delete this theme?</string>
     <string name="IncorrectTheme">Incorrect theme file</string>

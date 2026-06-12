@@ -16,6 +16,7 @@ import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.skins.SkinBase;
 import org.telegram.ui.skins.SkinManager;
+import org.telegram.ui.skins.SkinPreviewDialog;
 
 import java.util.List;
 
@@ -83,10 +84,7 @@ public class SkinSelectorCell extends LinearLayout {
                     previewSkin,
                     family.getFamilyDisplayName(),
                     manager.isFamilyActive(family),
-                    () -> {
-                        manager.applyFamily(family.getFamilyId());
-                        selectionChanged();
-                    }));
+                    () -> showSkinPreview(previewSkin)));
         }
         addHorizontalRow(row);
     }
@@ -95,16 +93,24 @@ public class SkinSelectorCell extends LinearLayout {
         LinearLayout row = createHorizontalRow();
         SkinManager manager = SkinManager.get();
         for (SkinBase skin : variants) {
+            String label = skin.getVariantDisplayName();
+            if (skin.getReleaseYear() > 0) {
+                label += " · " + skin.getReleaseYear();
+            }
             row.addView(createSkinCard(
                     skin,
-                    skin.getVariantDisplayName(),
+                    label,
                     manager.isActive(skin),
-                    () -> {
-                        manager.applySkin(skin);
-                        selectionChanged();
-                    }));
+                    () -> showSkinPreview(skin)));
         }
         addHorizontalRow(row);
+    }
+
+    private void showSkinPreview(SkinBase skin) {
+        SkinPreviewDialog.show(getContext(), skin, () -> {
+            SkinManager.get().applySkin(skin);
+            selectionChanged();
+        });
     }
 
     private LinearLayout createHorizontalRow() {
@@ -137,7 +143,7 @@ public class SkinSelectorCell extends LinearLayout {
         name.setTextSize(11);
         name.setGravity(Gravity.CENTER);
         name.setPadding(0, AndroidUtilities.dp(4), 0, 0);
-        name.setMaxLines(1);
+        name.setMaxLines(2);
         name.setTextColor(Theme.getColor(active
                 ? Theme.key_windowBackgroundWhiteBlueText
                 : Theme.key_windowBackgroundWhiteGrayText));

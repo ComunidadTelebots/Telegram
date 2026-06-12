@@ -15,6 +15,9 @@ se indique una versión propia del fork.
 - Secciones independientes para los temas generales importables de Telegram y
   los diseños completos propios del cliente.
 - Familia Android con las variantes Actual, Original, Redesign y Glass.
+- Línea histórica Android con Original 2013, Holo 2014, Material 2015,
+  Clásico 2018 y Actual 2026.
+- Vista previa completa con confirmación antes de aplicar un diseño.
 - Identificadores persistentes de variante como `android:original`.
 - Definiciones de diseño para Android, Android Redesign, Android Glass, Web,
   Webogram, iOS, macOS, Telegram Desktop, Unigram, Telegram X y Aurora.
