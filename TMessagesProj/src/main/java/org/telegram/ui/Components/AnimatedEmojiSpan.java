@@ -161,7 +161,6 @@ public class AnimatedEmojiSpan extends ReplacementSpan {
     public AnimatedEmojiSpan(long documentId, Paint.FontMetricsInt fontMetrics) {
         this(documentId, 1.2f, fontMetrics);
     }
-
     public AnimatedEmojiSpan(long documentId, float scale, Paint.FontMetricsInt fontMetrics) {
         this.documentId = documentId;
         this.scale = scale;
@@ -756,7 +755,7 @@ public class AnimatedEmojiSpan extends ReplacementSpan {
             holders.add(holder);
             SpansChunk chunkByLayout = groupedByLayout.get(layout);
             if (chunkByLayout == null) {
-                chunkByLayout = new SpansChunk(holder.view, layout, holder.invalidateInParent);
+                chunkByLayout = new SpansChunk(holder.view, layout, false);
                 groupedByLayout.put(layout, chunkByLayout);
                 backgroundDrawingArray.add(chunkByLayout);
             }
@@ -841,7 +840,7 @@ public class AnimatedEmojiSpan extends ReplacementSpan {
         final View view;
         ArrayList<AnimatedEmojiHolder> holders = new ArrayList<>();
         DrawingInBackgroundThreadDrawable backgroundThreadDrawable;
-        private boolean allowBackgroundRendering;
+        private final boolean allowBackgroundRendering;
 
         public SpansChunk(View view, Layout layout, boolean allowBackgroundRendering) {
             this.layout = layout;
@@ -983,7 +982,7 @@ public class AnimatedEmojiSpan extends ReplacementSpan {
     public static AnimatedEmojiSpan cloneSpan(AnimatedEmojiSpan span, Paint.FontMetricsInt fontMetricsInt) {
         AnimatedEmojiSpan animatedEmojiSpan;
         if (span.document != null) {
-            animatedEmojiSpan = new AnimatedEmojiSpan(span.document, fontMetricsInt != null ? fontMetricsInt : span.fontMetrics);
+            animatedEmojiSpan = new AnimatedEmojiSpan(span.document, span.scale, fontMetricsInt != null ? fontMetricsInt : span.fontMetrics);
         } else {
             animatedEmojiSpan = new AnimatedEmojiSpan(span.documentId, span.scale, fontMetricsInt != null ? fontMetricsInt : span.fontMetrics);
         }

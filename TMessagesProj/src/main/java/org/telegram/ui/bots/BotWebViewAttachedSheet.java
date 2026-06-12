@@ -120,11 +120,11 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
         }
         String str;
         if (currentBot.show_in_side_menu && currentBot.show_in_attach_menu) {
-            str = LocaleController.formatString("BotAttachMenuShortcatAddedAttachAndSide", R.string.BotAttachMenuShortcatAddedAttachAndSide, user.first_name);
+            str = LocaleController.formatString(R.string.BotAttachMenuShortcatAddedAttachAndSide, user.first_name);
         } else if (currentBot.show_in_side_menu) {
-            str = LocaleController.formatString("BotAttachMenuShortcatAddedSide", R.string.BotAttachMenuShortcatAddedSide, user.first_name);
+            str = LocaleController.formatString(R.string.BotAttachMenuShortcatAddedSide, user.first_name);
         } else {
-            str = LocaleController.formatString("BotAttachMenuShortcatAddedAttach", R.string.BotAttachMenuShortcatAddedAttach, user.first_name);
+            str = LocaleController.formatString( R.string.BotAttachMenuShortcatAddedAttach, user.first_name);
         }
         AndroidUtilities.runOnUIThread(() -> {
             BulletinFactory.of(windowView, resourcesProvider)
@@ -582,7 +582,7 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
                     DialogsActivity dialogsActivity = new DialogsActivity(args);
                     AndroidUtilities.hideKeyboard(windowView);
                     OverlayActionBarLayoutDialog overlayActionBarLayoutDialog = new OverlayActionBarLayoutDialog(getContext(), resourcesProvider);
-                    dialogsActivity.setDelegate((fragment, dids, message1, param, notify, scheduleDate, topicsFragment) -> {
+                    dialogsActivity.setDelegate((fragment, dids, message1, param, notify, scheduleDate, scheduleRepeatPeriod, topicsFragment) -> {
                         long did = dids.get(0).dialogId;
 
                         Bundle args1 = new Bundle();
@@ -620,13 +620,13 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
             }
 
             @Override
-            public void onSetupMainButton(boolean isVisible, boolean isActive, String text, int color, int textColor, boolean isProgressVisible, boolean hasShineEffect) {
-                botButtons.setMainState(BotButtons.ButtonState.of(isVisible, isActive, isProgressVisible, hasShineEffect, text, color, textColor), true);
+            public void onSetupMainButton(boolean isVisible, boolean isActive, String text, long emojiId, int color, int textColor, boolean isProgressVisible, boolean hasShineEffect) {
+                botButtons.setMainState(BotButtons.ButtonState.of(isVisible, isActive, isProgressVisible, hasShineEffect, text, emojiId, color, textColor), true);
             }
 
             @Override
-            public void onSetupSecondaryButton(boolean isVisible, boolean isActive, String text, int color, int textColor, boolean isProgressVisible, boolean hasShineEffect, String position) {
-                botButtons.setSecondaryState(BotButtons.ButtonState.of(isVisible, isActive, isProgressVisible, hasShineEffect, text, color, textColor, position), true);
+            public void onSetupSecondaryButton(boolean isVisible, boolean isActive, String text, long emojiId, int color, int textColor, boolean isProgressVisible, boolean hasShineEffect, String position) {
+                botButtons.setSecondaryState(BotButtons.ButtonState.of(isVisible, isActive, isProgressVisible, hasShineEffect, text, emojiId, color, textColor, position), true);
             }
 
             @Override
@@ -1234,7 +1234,7 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
                     req.platform = "android";
                     req.bot = MessagesController.getInstance(currentAccount).getInputUser(props.botId);
                     req.peer = fragment instanceof ChatActivity ? ((ChatActivity) fragment).getCurrentUser() != null ? MessagesController.getInputPeer(((ChatActivity) fragment).getCurrentUser()) : MessagesController.getInputPeer(((ChatActivity) fragment).getCurrentChat())
-                            : MessagesController.getInputPeer(props.botUser);
+                            : MessagesController.getInstance(currentAccount).getInputPeer(props.peerId);
                     req.compact = props.compact;
                     req.fullscreen = props.fullscreen;
 
@@ -1301,7 +1301,7 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
             if (user != null && user.photo != null) {
                 File f = FileLoader.getInstance(currentAccount).getPathToAttach(user.photo.photo_small, true);
                 if (!f.exists()) {
-                    MediaDataController.getInstance(currentAccount).preloadImage(ImageLocation.getForUser(user, ImageLocation.TYPE_SMALL), FileLoader.PRIORITY_LOW);
+                    MediaDataController.getInstance(currentAccount).preloadImage(ImageLocation.getForUser(currentAccount, user, ImageLocation.TYPE_SMALL), FileLoader.PRIORITY_LOW);
                 }
             }
         }
@@ -1700,7 +1700,7 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
 
             clipPath.rewind();
             float radius = dp(16) * (AndroidUtilities.isTablet() ? 1f : 1f - actionBarTransitionProgress);
-            final float r = lerp(radius, dp(10), progress);
+            final float r = lerp(radius, dp(18), progress);
             rect.set(clipRect);
             if (opening) {
                 rect.top -= dp(16) * (1f - actionBarTransitionProgress);
@@ -1925,4 +1925,8 @@ public class BotWebViewAttachedSheet implements NotificationCenter.NotificationC
         return true;
     }
 
+    @Override
+    public BulletinFactory getBulletinFactory() {
+        return BulletinFactory.of(windowView, resourcesProvider);
+    }
 }

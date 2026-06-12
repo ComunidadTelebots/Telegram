@@ -217,6 +217,7 @@ public class SharedConfig {
     public static byte[] pushAuthKeyId;
     public static boolean forceForumTabs;
     public static boolean fastWallpaperDisabled;
+    public static boolean frameMetricsEnabled;
 
     public static String directShareHash;
 
@@ -322,6 +323,10 @@ public class SharedConfig {
     public static int emojiInteractionsHintCount;
     public static int dayNightThemeSwitchHintCount;
     public static int callEncryptionHintDisplayedCount;
+    public static boolean shadowsInSections;
+    public static boolean debugViewMetrics;
+    public static boolean photoHighQualityDefault;
+    public static boolean photoLiveDefault;
 
     public static TLRPC.TL_help_appUpdate pendingAppUpdate;
     public static int pendingAppUpdateBuildVersion;
@@ -346,8 +351,6 @@ public class SharedConfig {
     public static int fastScrollHintCount = 3;
     public static boolean dontAskManageStorage;
     public static boolean multipleReactionsPromoShowed;
-
-    public static boolean translateChats = true;
 
     public static boolean isFloatingDebugActive;
     public static LiteMode liteMode;
@@ -592,7 +595,7 @@ public class SharedConfig {
             nextMediaTap = preferences.getBoolean("next_media_on_tap", true);
             recordViaSco = preferences.getBoolean("record_via_sco", false);
             customTabs = preferences.getBoolean("custom_tabs", true);
-            inappBrowser = preferences.getBoolean("inapp_browser", true);
+            inappBrowser = preferences.getBoolean("inapp_browser", false);
             adaptableColorInBrowser = preferences.getBoolean("adaptableBrowser", false);
             onlyLocalInstantView = preferences.getBoolean("onlyLocalInstantView", BuildVars.DEBUG_PRIVATE_VERSION);
             directShare = preferences.getBoolean("direct_share", true);
@@ -611,6 +614,7 @@ public class SharedConfig {
             useSystemBoldFont = preferences.getBoolean("useSystemBoldFont", false);
             forceForumTabs = preferences.getBoolean("forceForumTabs", false);
             fastWallpaperDisabled = preferences.getBoolean("fastWallpaperDisabled", false);
+            frameMetricsEnabled = preferences.getBoolean("frameMetricsEnabled", false);
             if (useSystemBoldFont) {
                 AndroidUtilities.mediumTypeface = null;
             }
@@ -672,6 +676,10 @@ public class SharedConfig {
             multipleReactionsPromoShowed = preferences.getBoolean("multipleReactionsPromoShowed", false);
             callEncryptionHintDisplayedCount = preferences.getInt("callEncryptionHintDisplayedCount", 0);
             debugVideoQualities = preferences.getBoolean("debugVideoQualities", false);
+            shadowsInSections = preferences.getBoolean("shadowsInSections", false);
+            debugViewMetrics = preferences.getBoolean("debugViewMetrics", false);
+            photoHighQualityDefault = preferences.getBoolean("photoHighQualityDefault", false);
+            photoLiveDefault = preferences.getBoolean("photoLiveDefault", false);
 
             loadDebugConfig(preferences);
 
@@ -1127,6 +1135,14 @@ public class SharedConfig {
         SharedPreferences preferences = MessagesController.getGlobalMainSettings();
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean("fastWallpaperDisabled", fastWallpaperDisabled);
+        editor.apply();
+    }
+
+    public static void toggleFrameMetricsEnabled() {
+        frameMetricsEnabled = !frameMetricsEnabled;
+        SharedPreferences preferences = MessagesController.getGlobalMainSettings();
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean("frameMetricsEnabled", frameMetricsEnabled);
         editor.apply();
     }
 
