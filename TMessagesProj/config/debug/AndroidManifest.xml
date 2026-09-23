@@ -60,6 +60,10 @@
             android:enabled="false"
             android:exported="false" />
 
+        <!-- Debug-only preview, launchable by adb shell but not ordinary apps. -->
+        <activity android:name="org.telegram.ui.ClientDesignPreviewActivity"
+            android:exported="true" android:permission="android.permission.DUMP"
+            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
     </application>
 
 </manifest>

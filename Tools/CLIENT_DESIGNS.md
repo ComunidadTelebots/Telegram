@@ -88,3 +88,18 @@ las cuatro arquitecturas configuradas.
 - Probar abrir/cerrar pantallas con cada animación y con animaciones del sistema
   desactivadas; probar también gestos Atrás y vistas previas.
 - Generar y probar el APK en dispositivos antes de promoverlo a `rc`.
+
+## Capturas del selector sin cuenta
+
+La variante debug incluye `ClientDesignPreviewActivity`, un anfitrión del mismo
+`SkinPreviewDialog` usado en el selector. Se abre mediante adb, protegido por el
+permiso de sistema `android.permission.DUMP`; no se incluye en release.
+
+```powershell
+adb shell am start -S -n org.telegram.messenger.beta/org.telegram.ui.ClientDesignPreviewActivity --es skin ios
+```
+
+Valores: `ios`, `telegramx`, `unigram`, `web`, `webk`, `macos`. Son capturas de una
+vista previa nativa con contenido dibujado de ejemplo, no de chats autenticados.
+El anfitrión no cambia la selección guardada ni inicia sesión. Permite inspeccionar
+la navegación implementada sin presentar la demostración como equivalencia completa.
