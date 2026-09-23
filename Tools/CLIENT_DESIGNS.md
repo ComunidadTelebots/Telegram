@@ -103,3 +103,29 @@ Valores: `ios`, `telegramx`, `unigram`, `web`, `webk`, `macos`. Son capturas de 
 vista previa nativa con contenido dibujado de ejemplo, no de chats autenticados.
 El anfitrión no cambia la selección guardada ni inicia sesión. Permite inspeccionar
 la navegación implementada sin presentar la demostración como equivalencia completa.
+
+## Historial documentado por cliente
+
+La revisión estructural está en [CLIENT_DESIGN_AUDIT.md](CLIENT_DESIGN_AUDIT.md).
+El selector y la vista previa incluyen «Versiones del diseño» para siete familias:
+Android, iOS, Telegram X, Unigram, macOS, Web A y Web K. El primer catálogo contiene
+15 hitos curados y se distribuye sin conexión en
+`TMessagesProj/src/main/assets/client_design_history.json`.
+
+Cada ficha muestra qué cambió y enlaza el commit, la comparación con su padre y
+la publicación/etiqueta cuando está verificada. Las instantáneas sin etiqueta se
+identifican por fecha y SHA; no se les asignan números de versión inventados.
+
+**Guardar referencia no aplica una apariencia histórica.** Las quince entradas
+están pendientes de reproducción. La elección se conserva por familia en
+`client_design_history`, separada del diseño activo y las animaciones. Las
+variantes Android anteriores se identifican como estilos aproximados, no como
+releases verificadas. Los demás temas sin catálogo no muestran hitos inventados.
+
+Se corrigió el avatar normal de Unigram a circular según `ProfilePicture.cs`;
+esto no implica que el resto del perfil ya reproduzca Unigram.
+
+Validación de esta revisión: APK ARM64 compilado, tres pruebas de integridad del
+catálogo y recursos inglés/español correctos. En el emulador Pixel 6 se verificaron
+la lista de Web A, su ficha y la persistencia de la referencia tras reiniciar el
+proceso. Esto valida el selector, no la fidelidad visual de los hitos históricos.

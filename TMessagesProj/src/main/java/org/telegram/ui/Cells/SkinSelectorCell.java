@@ -19,6 +19,8 @@ import org.telegram.ui.skins.SkinManager;
 import org.telegram.ui.skins.SkinPreviewDialog;
 import org.telegram.ui.skins.MotionController;
 import org.telegram.ui.skins.MotionStyle;
+import org.telegram.ui.skins.ClientDesignHistory;
+import org.telegram.ui.skins.ClientDesignHistoryDialog;
 
 import java.util.List;
 
@@ -57,6 +59,23 @@ public class SkinSelectorCell extends LinearLayout {
                     getContext().getString(R.string.SkinAndroidVersions),
                     getContext().getString(R.string.SkinAndroidVersionsInfo));
             addVariantSelector(variants);
+        }
+        if (!ClientDesignHistory.forFamily(activeSkin.getFamilyId()).isEmpty()) {
+            addSectionHeader(getContext().getString(R.string.SkinHistoryTitle),
+                    getContext().getString(R.string.SkinHistoryInfo));
+            TextView history = new TextView(getContext());
+            ClientDesignHistory.Milestone selected = ClientDesignHistory.selected(activeSkin.getFamilyId());
+            history.setText(selected == null ? getContext().getString(R.string.SkinHistoryChoose)
+                    : selected.title() + " · " + selected.version());
+            history.setTextSize(14);
+            history.setMinHeight(AndroidUtilities.dp(48));
+            history.setGravity(Gravity.CENTER_VERTICAL);
+            history.setPadding(AndroidUtilities.dp(21), AndroidUtilities.dp(8), AndroidUtilities.dp(21), AndroidUtilities.dp(8));
+            history.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueText));
+            history.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_listSelector), 2, 0));
+            history.setOnClickListener(v -> ClientDesignHistoryDialog.show(getContext(),
+                    activeSkin.getFamilyId(), activeSkin.getFamilyDisplayName(), this::rebuild));
+            addView(history, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
         }
         addSectionHeader(getContext().getString(R.string.SkinMotionTitle),
                 getContext().getString(R.string.SkinMotionInfo));

@@ -8,6 +8,17 @@ se indique una versión propia del fork.
 
 ## [Sin publicar]
 
+### Auditoría y versiones de referencia
+
+- Auditoría de estructura, listas, carpetas y compositores de seis clientes,
+  con fuentes fijadas a commits y discrepancias documentadas.
+- Selector de 15 hitos de diseño para siete familias, con cambios, fuentes y
+  persistencia independiente por cliente. Son referencias pendientes de portar;
+  seleccionarlas no aplica una apariencia histórica inexistente.
+- Corregidos los avatares normales de Unigram a circulares según sus fuentes.
+- Los textos del selector identifican los perfiles como adaptaciones experimentales
+  y distinguen estilos Android de versiones históricas verificadas.
+
 ### Navegación de clientes en desarrollo
 
 - Contenedores inferiores para iOS/macOS, superiores para Telegram X y laterales

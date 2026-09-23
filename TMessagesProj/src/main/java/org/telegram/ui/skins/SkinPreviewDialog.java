@@ -64,6 +64,10 @@ public final class SkinPreviewDialog {
         builder.setTitle(buildTitle(skin));
         builder.setView(content);
         builder.setNegativeButton(context.getString(R.string.Cancel), null);
+        if (!ClientDesignHistory.forFamily(skin.getFamilyId()).isEmpty()) {
+            builder.setNeutralButton(context.getString(R.string.SkinHistoryTitle), (dialog, which) ->
+                    ClientDesignHistoryDialog.show(context, skin.getFamilyId(), skin.getFamilyDisplayName(), null));
+        }
         builder.setPositiveButton(context.getString(R.string.SkinApplyDesign), (dialog, which) -> {
             if (onApply != null) {
                 onApply.run();

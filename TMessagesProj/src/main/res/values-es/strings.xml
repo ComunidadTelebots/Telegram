@@ -343,9 +343,9 @@
     <string name="SkinGeneralDesigns">DISEÑOS GENERALES</string>
     <string name="SkinGeneralDesignsInfo">Temas de Telegram que se pueden crear, compartir e importar mediante enlaces</string>
     <string name="SkinCustomDesigns">DISEÑOS PROPIOS</string>
-    <string name="SkinCustomDesignsInfo">Diseños completos de interfaz incluidos con este cliente</string>
-    <string name="SkinAndroidVersions">VERSIONES DE ANDROID</string>
-    <string name="SkinAndroidVersionsInfo">Usa un diseño histórico de Android con las funciones más recientes de Telegram</string>
+    <string name="SkinCustomDesignsInfo">Adaptaciones experimentales de interfaz; la fidelidad visual aún no está completa</string>
+    <string name="SkinAndroidVersions">ESTILOS ANDROID</string>
+    <string name="SkinAndroidVersionsInfo">Estilos inspirados en Android; no son versiones históricas verificadas</string>
     <string name="SkinApplyDesign">Aplicar</string>
     <string name="SkinPreviewModernFeatures">Esta vista previa combina el estilo de interfaz seleccionado con funciones actuales como historias, reacciones, bots y el compositor moderno.</string>
     <string name="SkinPreviewStories">Historias</string>
@@ -1336,4 +1336,12 @@
     <string name="SkinMotionQuick">Rápida</string>
     <string name="SkinMotionFade">Fundido</string>
     <string name="SkinMotionNone">Ninguna</string>
+    <string name="SkinHistoryTitle">Versiones del diseño</string>
+    <string name="SkinHistoryInfo">Hitos visuales documentados en sus fuentes. Las apariencias históricas aún no están implementadas.</string>
+    <string name="SkinHistoryChoose">Elegir versión de referencia</string>
+    <string name="SkinHistoryPending">Solo referencia. Este diseño histórico no está implementado. Guardar la selección no cambia la apariencia activa.</string>
+    <string name="SkinHistorySelect">Guardar referencia</string>
+    <string name="SkinHistorySource">Ver commit original</string>
+    <string name="SkinHistoryDiff">Ver cambios en el repositorio</string>
+    <string name="SkinHistoryRelease">Ver publicación o etiqueta</string>
 </resources>

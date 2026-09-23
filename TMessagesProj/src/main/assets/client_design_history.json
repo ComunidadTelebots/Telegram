@@ -1,0 +1,451 @@
+{
+  "schemaVersion": 1,
+  "reviewedOn": "2026-09-23",
+  "scope": "curated-design-milestones",
+  "milestones": [
+    {
+      "id": "android:702d37ce69fc",
+      "family": "android",
+      "title": {
+        "es": "Historias y visor",
+        "en": "Stories and viewer"
+      },
+      "changes": {
+        "es": "Cambios en historias, lista de visualizaciones y presentación Premium. La etiqueta dice 10.0.0; el mensaje del commit dice 10.0.1 (3793).",
+        "en": "Changes to stories, viewer lists and Premium presentation. The tag says 10.0.0; the commit message says 10.0.1 (3793)."
+      },
+      "date": "2023-08-14",
+      "commit": "702d37ce69fca77e78072ad408e9d29dfd2d2be8",
+      "tag": "release-10.0.0_3793",
+      "repository": "https://github.com/DrKLO/Telegram",
+      "sourceUrl": "https://github.com/DrKLO/Telegram/commit/702d37ce69fca77e78072ad408e9d29dfd2d2be8",
+      "compareUrl": "https://github.com/DrKLO/Telegram/compare/0bcf4fe5566e457290225ccda93de5a1a6993f5a...702d37ce69fca77e78072ad408e9d29dfd2d2be8",
+      "releaseUrl": "https://github.com/DrKLO/Telegram/releases/tag/release-10.0.0_3793",
+      "implementation": "reference-only",
+      "verifiedBy": "source-diff",
+      "evidencePaths": [
+        "TMessagesProj/src/main/java/org/telegram/ui/Components/EmojiTabsStrip.java",
+        "TMessagesProj/src/main/java/org/telegram/ui/Components/Premium/StoriesPageView.java",
+        "TMessagesProj/src/main/java/org/telegram/ui/Stories/DarkThemeResourceProvider.java",
+        "TMessagesProj/src/main/java/org/telegram/ui/Stories/DialogStoriesCell.java",
+        "TMessagesProj/src/main/java/org/telegram/ui/Stories/PeerStoriesView.java",
+        "TMessagesProj/src/main/java/org/telegram/ui/Stories/SelfStoriesPreviewView.java",
+        "TMessagesProj/src/main/java/org/telegram/ui/Stories/SelfStoryViewsPage.java",
+        "TMessagesProj/src/main/java/org/telegram/ui/Stories/SelfStoryViewsView.java",
+        "TMessagesProj/src/main/java/org/telegram/ui/Stories/StealthModeAlert.java",
+        "TMessagesProj/src/main/java/org/telegram/ui/Stories/StoriesController.java",
+        "TMessagesProj/src/main/java/org/telegram/ui/Stories/StoriesLikeButton.java",
+        "TMessagesProj/src/main/java/org/telegram/ui/Stories/StoriesListPlaceProvider.java"
+      ]
+    },
+    {
+      "id": "android:fa4e8aa0ddbd",
+      "family": "android",
+      "title": {
+        "es": "Navegación inferior",
+        "en": "Bottom navigation"
+      },
+      "changes": {
+        "es": "Incorpora MainTabsActivity y la navegación principal por pestañas en la actualización 12.4.0 (6506).",
+        "en": "Adds MainTabsActivity and tab-based root navigation in update 12.4.0 (6506)."
+      },
+      "date": "2026-02-14",
+      "commit": "fa4e8aa0ddbd2416c382d36eaab6ec1c08e9fa00",
+      "tag": "",
+      "repository": "https://github.com/DrKLO/Telegram",
+      "sourceUrl": "https://github.com/DrKLO/Telegram/commit/fa4e8aa0ddbd2416c382d36eaab6ec1c08e9fa00",
+      "compareUrl": "https://github.com/DrKLO/Telegram/compare/d7deedfa33ddfa51c72a5634d1f07ad2d7ad58a4...fa4e8aa0ddbd2416c382d36eaab6ec1c08e9fa00",
+      "releaseUrl": "",
+      "implementation": "reference-only",
+      "verifiedBy": "source-diff",
+      "evidencePaths": [
+        "TMessagesProj/src/main/java/org/telegram/ui/ActionBar/BottomSheetTabs.java",
+        "TMessagesProj/src/main/java/org/telegram/ui/Components/FilterTabsView.java",
+        "TMessagesProj/src/main/java/org/telegram/ui/Components/PagerSlidingTabStrip.java",
+        "TMessagesProj/src/main/java/org/telegram/ui/Components/TableView.java",
+        "TMessagesProj/src/main/java/org/telegram/ui/Components/TopicsTabsView.java",
+        "TMessagesProj/src/main/java/org/telegram/ui/Components/glass/GlassTabView.java",
+        "TMessagesProj/src/main/java/org/telegram/ui/Components/glass/GlassTabsView.java",
+        "TMessagesProj/src/main/java/org/telegram/ui/MainTabsActivity.java"
+      ]
+    },
+    {
+      "id": "ios:cd436e8210a6",
+      "family": "ios",
+      "title": {
+        "es": "Glass: pestañas",
+        "en": "Glass: tabs"
+      },
+      "changes": {
+        "es": "Ajusta la geometría e insets de la barra Glass. Instantánea de desarrollo; no se atribuye una versión de tienda.",
+        "en": "Adjusts Glass tab bar geometry and insets. Development snapshot; no store version is asserted."
+      },
+      "date": "2025-12-01",
+      "commit": "cd436e8210a64c59ced3c421e556c9de07b845b1",
+      "tag": "",
+      "repository": "https://github.com/TelegramMessenger/Telegram-iOS",
+      "sourceUrl": "https://github.com/TelegramMessenger/Telegram-iOS/commit/cd436e8210a64c59ced3c421e556c9de07b845b1",
+      "compareUrl": "https://github.com/TelegramMessenger/Telegram-iOS/compare/557af859bb32f10be39d859d94b2468656a2c1a8...cd436e8210a64c59ced3c421e556c9de07b845b1",
+      "releaseUrl": "",
+      "implementation": "reference-only",
+      "verifiedBy": "source-diff",
+      "evidencePaths": [
+        "submodules/TabBarUI/Sources/TabBarContollerNode.swift",
+        "submodules/TelegramUI/Components/Chat/ChatTextInputPanelNode/Sources/ChatTextInputPanelComponent.swift",
+        "submodules/TelegramUI/Components/ChatEntityKeyboardInputNode/Sources/ChatEntityKeyboardInputNode.swift",
+        "submodules/TelegramUI/Components/ChatList/ChatListTabsComponent/BUILD",
+        "submodules/TelegramUI/Components/ChatList/ChatListTabsComponent/Sources/ChatListTabsComponent.swift",
+        "submodules/TelegramUI/Components/Stories/StoryContainerScreen/Sources/StoryItemSetContainerViewSendMessage.swift",
+        "submodules/TelegramUI/Components/TabBarComponent/Sources/TabBarComponent.swift",
+        "submodules/TelegramUI/Sources/TelegramRootController.swift"
+      ]
+    },
+    {
+      "id": "ios:ca6fdc162913",
+      "family": "ios",
+      "title": {
+        "es": "Glass: paneles",
+        "en": "Glass: panels"
+      },
+      "changes": {
+        "es": "Actualiza el tratamiento Glass de paneles y botones, incluyendo tipos de tinte para los controles del compositor.",
+        "en": "Updates Glass panels and buttons, including tint types for composer controls."
+      },
+      "date": "2026-01-24",
+      "commit": "ca6fdc1629130f7c7b1fb393564a29653a632080",
+      "tag": "",
+      "repository": "https://github.com/TelegramMessenger/Telegram-iOS",
+      "sourceUrl": "https://github.com/TelegramMessenger/Telegram-iOS/commit/ca6fdc1629130f7c7b1fb393564a29653a632080",
+      "compareUrl": "https://github.com/TelegramMessenger/Telegram-iOS/compare/0431273d7f90b38503d96f115d308b80dc266b99...ca6fdc1629130f7c7b1fb393564a29653a632080",
+      "releaseUrl": "",
+      "implementation": "reference-only",
+      "verifiedBy": "source-diff",
+      "evidencePaths": [
+        "submodules/TelegramUI/Components/Chat/ChatChannelSubscriberInputPanelNode/Sources/ChatChannelSubscriberInputPanelNode.swift",
+        "submodules/TelegramUI/Components/Chat/ChatMessageSelectionInputPanelNode/Sources/ChatMessageSelectionInputPanelNode.swift",
+        "submodules/TelegramUI/Components/Chat/ChatTextInputActionButtonsNode/Sources/ChatTextInputActionButtonsNode.swift",
+        "submodules/TelegramUI/Components/Chat/ChatTextInputPanelNode/Sources/ChatTextInputPanelComponent.swift",
+        "submodules/TelegramUI/Components/Chat/ChatTextInputPanelNode/Sources/ChatTextInputPanelNode.swift",
+        "submodules/TelegramUI/Components/Chat/ChatTextInputPanelNode/Sources/InputIconButtonComponent.swift",
+        "submodules/TelegramUI/Components/Chat/ChatTextInputPanelNode/Sources/StarReactionButtonComponent.swift",
+        "submodules/TelegramUI/Components/ChatEntityKeyboardInputNode/Sources/ChatEntityKeyboardInputNode.swift",
+        "submodules/TelegramUI/Components/ChatList/ChatListFilterTabContainerNode/Sources/ChatListFilterTabContainerNode.swift",
+        "submodules/TelegramUI/Components/ChatTextInputMediaRecordingButton/Sources/ChatTextInputMediaRecordingButton.swift",
+        "submodules/TelegramUI/Components/MessageInputActionButtonComponent/Sources/MessageInputActionButtonComponent.swift",
+        "submodules/TelegramUI/Components/MessageInputPanelComponent/Sources/MessageInputPanelComponent.swift"
+      ]
+    },
+    {
+      "id": "macos:de6517e0d4e9",
+      "family": "macos",
+      "title": {
+        "es": "Panel lateral",
+        "en": "Sidebar"
+      },
+      "changes": {
+        "es": "Cambio de navegación identificado como sidebar en el repositorio Swift de macOS.",
+        "en": "Navigation change identified as sidebar in the macOS Swift repository."
+      },
+      "date": "2020-04-09",
+      "commit": "de6517e0d4e954a44af28a98aa032a43bfae3b4b",
+      "tag": "",
+      "repository": "https://github.com/overtake/TelegramSwift",
+      "sourceUrl": "https://github.com/overtake/TelegramSwift/commit/de6517e0d4e954a44af28a98aa032a43bfae3b4b",
+      "compareUrl": "https://github.com/overtake/TelegramSwift/compare/abfab510263e7b99a08169a20298df2d2e6680ab...de6517e0d4e954a44af28a98aa032a43bfae3b4b",
+      "releaseUrl": "",
+      "implementation": "reference-only",
+      "verifiedBy": "source-diff",
+      "evidencePaths": [
+        "Telegram-Mac/Assets.xcassets/Icon_Sidebar_AllChats.imageset/Contents.json",
+        "Telegram-Mac/Assets.xcassets/Icon_Sidebar_AllChats.imageset/ic_allchats.png",
+        "Telegram-Mac/Assets.xcassets/Icon_Sidebar_AllChats.imageset/ic_allchats@2x.png",
+        "Telegram-Mac/Assets.xcassets/Icon_Sidebar_Animal.imageset/Contents.json",
+        "Telegram-Mac/Assets.xcassets/Icon_Sidebar_Animal.imageset/ic_animal.png",
+        "Telegram-Mac/Assets.xcassets/Icon_Sidebar_Animal.imageset/ic_animal@2x.png",
+        "Telegram-Mac/Assets.xcassets/Icon_Sidebar_Book.imageset/Contents.json",
+        "Telegram-Mac/Assets.xcassets/Icon_Sidebar_Book.imageset/ic_book.png",
+        "Telegram-Mac/Assets.xcassets/Icon_Sidebar_Book.imageset/ic_book@2x.png",
+        "Telegram-Mac/Assets.xcassets/Icon_Sidebar_Bot.imageset/Contents.json",
+        "Telegram-Mac/Assets.xcassets/Icon_Sidebar_Bot.imageset/ic_bot.png",
+        "Telegram-Mac/Assets.xcassets/Icon_Sidebar_Bot.imageset/ic_bot@2x.png"
+      ]
+    },
+    {
+      "id": "macos:d579adcf4fd3",
+      "family": "macos",
+      "title": {
+        "es": "Nueva navegación",
+        "en": "New navigation"
+      },
+      "changes": {
+        "es": "Reorganiza la navegación principal y sus controladores. Instantánea por commit, sin etiqueta de publicación.",
+        "en": "Reorganizes root navigation and its controllers. Commit snapshot without a release tag."
+      },
+      "date": "2022-11-15",
+      "commit": "d579adcf4fd388f891ac2f85b3e16bf19107970c",
+      "tag": "",
+      "repository": "https://github.com/overtake/TelegramSwift",
+      "sourceUrl": "https://github.com/overtake/TelegramSwift/commit/d579adcf4fd388f891ac2f85b3e16bf19107970c",
+      "compareUrl": "https://github.com/overtake/TelegramSwift/compare/1a680e1f68b9a83631c67fcd4bb403ca17d4a545...d579adcf4fd388f891ac2f85b3e16bf19107970c",
+      "releaseUrl": "",
+      "implementation": "reference-only",
+      "verifiedBy": "source-diff",
+      "evidencePaths": [
+        "Telegram-Mac/MainViewController.swift",
+        "packages/TGUIKit/Sources/TableView.swift"
+      ]
+    },
+    {
+      "id": "telegramx:7bc96dbf0fad",
+      "family": "telegramx",
+      "title": {
+        "es": "Carpetas personalizables",
+        "en": "Customizable folders"
+      },
+      "changes": {
+        "es": "La publicación incorpora carpetas, posición y estilo de pestañas, iconos y filtros locales y globales.",
+        "en": "The release adds folders, tab position and style, icons, and local and global filters."
+      },
+      "date": "2024-06-10",
+      "commit": "7bc96dbf0fadfab1625a0ec0acfaf4c0d52751fb",
+      "tag": "v0.26.9.1730",
+      "repository": "https://github.com/TGX-Android/Telegram-X",
+      "sourceUrl": "https://github.com/TGX-Android/Telegram-X/commit/7bc96dbf0fadfab1625a0ec0acfaf4c0d52751fb",
+      "compareUrl": "https://github.com/TGX-Android/Telegram-X/compare/551e7a787e504e756e8b9830d8c5eb61957ef97c...7bc96dbf0fadfab1625a0ec0acfaf4c0d52751fb",
+      "releaseUrl": "https://github.com/TGX-Android/Telegram-X/releases/tag/v0.26.9.1730",
+      "implementation": "reference-only",
+      "verifiedBy": "release-notes",
+      "evidencePaths": []
+    },
+    {
+      "id": "telegramx:603e81ad0edb",
+      "family": "telegramx",
+      "title": {
+        "es": "Pantalla completa",
+        "en": "Edge-to-edge"
+      },
+      "changes": {
+        "es": "La publicación adapta la aplicación a toda la pantalla desde Android 11, cambia el visor multimedia y añade soporte de gestos del sistema.",
+        "en": "The release adopts edge-to-edge on Android 11+, changes the media viewer and supports system navigation gestures."
+      },
+      "date": "2025-10-31",
+      "commit": "603e81ad0edb9e99f768b6f5d44d78f668f85886",
+      "tag": "v0.28.1.1771",
+      "repository": "https://github.com/TGX-Android/Telegram-X",
+      "sourceUrl": "https://github.com/TGX-Android/Telegram-X/commit/603e81ad0edb9e99f768b6f5d44d78f668f85886",
+      "compareUrl": "https://github.com/TGX-Android/Telegram-X/compare/573a8e492d7b38434ebf4cb3b17253577db5cc61...603e81ad0edb9e99f768b6f5d44d78f668f85886",
+      "releaseUrl": "https://github.com/TGX-Android/Telegram-X/releases/tag/v0.28.1.1771",
+      "implementation": "reference-only",
+      "verifiedBy": "release-notes",
+      "evidencePaths": []
+    },
+    {
+      "id": "unigram:b1551c2afe89",
+      "family": "unigram",
+      "title": {
+        "es": "Transiciones de carpetas",
+        "en": "Folder transitions"
+      },
+      "changes": {
+        "es": "Añade animación al cambiar entre carpetas y modifica el tratamiento de selección de sus pestañas.",
+        "en": "Adds animated folder switching and changes tab selection treatment."
+      },
+      "date": "2023-12-17",
+      "commit": "b1551c2afe89e21497563ad244ede291afbc01ea",
+      "tag": "",
+      "repository": "https://github.com/UnigramDev/Unigram",
+      "sourceUrl": "https://github.com/UnigramDev/Unigram/commit/b1551c2afe89e21497563ad244ede291afbc01ea",
+      "compareUrl": "https://github.com/UnigramDev/Unigram/compare/4c5bc3cbefeb791346f753fd350f221ec5e80bfc...b1551c2afe89e21497563ad244ede291afbc01ea",
+      "releaseUrl": "",
+      "implementation": "reference-only",
+      "verifiedBy": "source-diff",
+      "evidencePaths": [
+        "Telegram/ViewModels/MainViewModel.cs",
+        "Telegram/Views/MainPage.xaml",
+        "Telegram/Views/MainPage.xaml.cs"
+      ]
+    },
+    {
+      "id": "unigram:7569e701c053",
+      "family": "unigram",
+      "title": {
+        "es": "Barra de título",
+        "en": "Title bar"
+      },
+      "changes": {
+        "es": "Revisa la distribución y el diseño de la barra de título de la ventana.",
+        "en": "Revises the window title bar layout and styling."
+      },
+      "date": "2025-12-19",
+      "commit": "7569e701c0535a6d210a2c55386a00c0a84e730b",
+      "tag": "",
+      "repository": "https://github.com/UnigramDev/Unigram",
+      "sourceUrl": "https://github.com/UnigramDev/Unigram/commit/7569e701c0535a6d210a2c55386a00c0a84e730b",
+      "compareUrl": "https://github.com/UnigramDev/Unigram/compare/34be3705efa54a2fb9d27a547123935534b10933...7569e701c0535a6d210a2c55386a00c0a84e730b",
+      "releaseUrl": "",
+      "implementation": "reference-only",
+      "verifiedBy": "source-diff",
+      "evidencePaths": [
+        "Telegram/Controls/Cells/ActiveStoriesCell.xaml.cs",
+        "Telegram/Controls/Stories/StoriesStrip.xaml.cs",
+        "Telegram/Views/MainPage.xaml",
+        "Telegram/Views/MainPage.xaml.cs"
+      ]
+    },
+    {
+      "id": "web:682ec32dd205",
+      "family": "web",
+      "title": {
+        "es": "Carpetas verticales",
+        "en": "Vertical folders"
+      },
+      "changes": {
+        "es": "Añade el modo de barra vertical de carpetas, con su componente y reglas de distribución.",
+        "en": "Adds vertical folder sidebar mode with its component and layout rules."
+      },
+      "date": "2025-11-17",
+      "commit": "682ec32dd205073ea1e596a1624b5121c4bb2a8e",
+      "tag": "",
+      "repository": "https://github.com/Ajaxy/telegram-tt",
+      "sourceUrl": "https://github.com/Ajaxy/telegram-tt/commit/682ec32dd205073ea1e596a1624b5121c4bb2a8e",
+      "compareUrl": "https://github.com/Ajaxy/telegram-tt/compare/aff179d66687103282593bd139748681f73c3632...682ec32dd205073ea1e596a1624b5121c4bb2a8e",
+      "releaseUrl": "",
+      "implementation": "reference-only",
+      "verifiedBy": "source-diff",
+      "evidencePaths": [
+        "src/components/common/MainMenuDropdown.tsx",
+        "src/components/left/main/ChatFolders.tsx",
+        "src/components/left/main/LeftMain.scss",
+        "src/components/left/main/LeftMain.tsx",
+        "src/components/left/main/LeftMainHeader.scss",
+        "src/components/left/main/LeftMainHeader.tsx",
+        "src/components/left/settings/folders/SettingsFoldersMain.tsx",
+        "src/components/main/FoldersSidebar.module.scss",
+        "src/components/main/FoldersSidebar.tsx",
+        "src/components/main/Main.scss",
+        "src/components/main/Main.tsx",
+        "src/components/ui/Tab.tsx"
+      ]
+    },
+    {
+      "id": "web:68478f6b5ee4",
+      "family": "web",
+      "title": {
+        "es": "Paneles rediseñados",
+        "en": "Redesigned panels"
+      },
+      "changes": {
+        "es": "Rediseña el panel izquierdo y la cabecera central; cambia composición, márgenes y estados de las carpetas.",
+        "en": "Redesigns the left panel and middle header, changing composition, margins and folder states."
+      },
+      "date": "2026-06-23",
+      "commit": "68478f6b5ee44ceee29b46fb18b32ed5ed5ae8a7",
+      "tag": "",
+      "repository": "https://github.com/Ajaxy/telegram-tt",
+      "sourceUrl": "https://github.com/Ajaxy/telegram-tt/commit/68478f6b5ee44ceee29b46fb18b32ed5ed5ae8a7",
+      "compareUrl": "https://github.com/Ajaxy/telegram-tt/compare/0df85b8d071e712e03c2e172a27d3b6708902263...68478f6b5ee44ceee29b46fb18b32ed5ed5ae8a7",
+      "releaseUrl": "",
+      "implementation": "reference-only",
+      "verifiedBy": "source-diff",
+      "evidencePaths": [
+        "src/components/left/main/ChatFolderTabList.module.scss",
+        "src/components/left/main/ChatFolderTabList.tsx",
+        "src/components/left/main/ChatFolders.tsx",
+        "src/components/left/main/LeftMain.scss",
+        "src/components/left/main/LeftMain.tsx",
+        "src/components/main/FoldersSidebar.module.scss",
+        "src/components/main/FoldersSidebar.tsx",
+        "src/components/main/Main.scss",
+        "src/components/main/Main.tsx"
+      ]
+    },
+    {
+      "id": "web:6a0d49f9fe30",
+      "family": "web",
+      "title": {
+        "es": "Nuevo compositor",
+        "en": "New composer"
+      },
+      "changes": {
+        "es": "Rediseña el compositor y las máscaras de paneles del chat, con ajustes del teclado en móvil.",
+        "en": "Redesigns the composer and chat panel masks, including mobile keyboard layout adjustments."
+      },
+      "date": "2026-07-01",
+      "commit": "6a0d49f9fe3065d3d9ac011ffd24df5f9b71dbff",
+      "tag": "",
+      "repository": "https://github.com/Ajaxy/telegram-tt",
+      "sourceUrl": "https://github.com/Ajaxy/telegram-tt/commit/6a0d49f9fe3065d3d9ac011ffd24df5f9b71dbff",
+      "compareUrl": "https://github.com/Ajaxy/telegram-tt/compare/55557c22e35e1a1a6d67e0f4fb61909a62861369...6a0d49f9fe3065d3d9ac011ffd24df5f9b71dbff",
+      "releaseUrl": "",
+      "implementation": "reference-only",
+      "verifiedBy": "source-diff",
+      "evidencePaths": [
+        "src/components/main/Main.scss"
+      ]
+    },
+    {
+      "id": "webk:80279b7b8798",
+      "family": "webk",
+      "title": {
+        "es": "Barra de carpetas",
+        "en": "Folder sidebar"
+      },
+      "changes": {
+        "es": "Añade una barra de carpetas y sus componentes y estilos propios.",
+        "en": "Adds a folder sidebar with its own components and styles."
+      },
+      "date": "2024-12-22",
+      "commit": "80279b7b8798142c0bd6219e2d35e3f7aa51f26d",
+      "tag": "",
+      "repository": "https://github.com/morethanwords/tweb",
+      "sourceUrl": "https://github.com/morethanwords/tweb/commit/80279b7b8798142c0bd6219e2d35e3f7aa51f26d",
+      "compareUrl": "https://github.com/morethanwords/tweb/compare/b8339541622bf66ccb6fb780e59b7f0913d41684...80279b7b8798142c0bd6219e2d35e3f7aa51f26d",
+      "releaseUrl": "",
+      "implementation": "reference-only",
+      "verifiedBy": "source-diff",
+      "evidencePaths": [
+        "src/components/sidebarLeft/foldersSidebarContent/folderItem.tsx",
+        "src/components/sidebarLeft/foldersSidebarContent/index.tsx",
+        "src/components/sidebarLeft/foldersSidebarContent/types.ts",
+        "src/components/sidebarLeft/foldersSidebarContent/utils.ts",
+        "src/components/sidebarLeft/index.ts",
+        "src/components/sidebarLeft/solidjsHotReloadGuard.ts",
+        "src/components/sidebarLeft/solidjsHotReloadGuardProvider.tsx",
+        "src/scss/partials/_foldersSidebar.scss",
+        "src/scss/partials/_leftSidebar.scss"
+      ]
+    },
+    {
+      "id": "webk:0973fea0be8b",
+      "family": "webk",
+      "title": {
+        "es": "Columnas y cabecera",
+        "en": "Columns and top bar"
+      },
+      "changes": {
+        "es": "Unifica los anchos de columnas y modifica la barra de carpetas y la cabecera de llamadas.",
+        "en": "Unifies column widths and changes the folder sidebar and call top bar."
+      },
+      "date": "2026-05-17",
+      "commit": "0973fea0be8b03315812e35be0f154f8bee62adc",
+      "tag": "",
+      "repository": "https://github.com/morethanwords/tweb",
+      "sourceUrl": "https://github.com/morethanwords/tweb/commit/0973fea0be8b03315812e35be0f154f8bee62adc",
+      "compareUrl": "https://github.com/morethanwords/tweb/compare/9618fa11e189c95de0873f31b4e3128a0993178c...0973fea0be8b03315812e35be0f154f8bee62adc",
+      "releaseUrl": "",
+      "implementation": "reference-only",
+      "verifiedBy": "source-diff",
+      "evidencePaths": [
+        "src/components/forumTab/forumTab.ts",
+        "src/components/sidebarLeft/constants.ts",
+        "src/components/sidebarLeft/foldersSidebarContent/index.tsx",
+        "src/components/sidebarLeft/index.ts",
+        "src/components/sidebarRight/index.ts",
+        "src/scss/partials/_foldersSidebar.scss",
+        "src/scss/partials/_leftSidebar.scss",
+        "src/scss/partials/_rightSidebar.scss",
+        "src/stores/foldersSidebar.ts"
+      ]
+    }
+  ]
+}

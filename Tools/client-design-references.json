@@ -7,7 +7,20 @@
       "commit": "6ad963e5b62d354da79040f388ae2b9132fb17b8",
       "rootSource": "submodules/TelegramUI/Sources/TelegramRootController.swift",
       "sourceUrl": "https://github.com/TelegramMessenger/Telegram-iOS/blob/6ad963e5b62d354da79040f388ae2b9132fb17b8/submodules/TelegramUI/Sources/TelegramRootController.swift",
-      "visualParityVerified": false
+      "visualParityVerified": false,
+      "examinedSources": [
+        {
+          "path": "submodules/ChatListUI/Sources/Node/ChatListItem.swift",
+          "sourceUrl": "https://github.com/TelegramMessenger/Telegram-iOS/blob/6ad963e5b62d354da79040f388ae2b9132fb17b8/submodules/ChatListUI/Sources/Node/ChatListItem.swift",
+          "sha256": "14b0b93598d303cda9633fed35661b524efdec5cf60064f31055935786d4844c"
+        },
+        {
+          "path": "submodules/TelegramUI/Components/Chat/ChatTextInputPanelNode/Sources/ChatTextInputPanelNode.swift",
+          "sourceUrl": "https://github.com/TelegramMessenger/Telegram-iOS/blob/6ad963e5b62d354da79040f388ae2b9132fb17b8/submodules/TelegramUI/Components/Chat/ChatTextInputPanelNode/Sources/ChatTextInputPanelNode.swift",
+          "sha256": "189de6c9a26777cf0c84cf6d2d45e558639dfd68d05cab00b4a2ddec08034f37"
+        }
+      ],
+      "auditStatus": "structural-mismatch"
     },
     {
       "client": "Unigram",
@@ -15,7 +28,30 @@
       "commit": "55c94e0fb3e42fe06fee8f70f6ef94ec7b10fd1b",
       "rootSource": "Telegram/Views/MainPage.xaml",
       "sourceUrl": "https://github.com/UnigramDev/Unigram/blob/55c94e0fb3e42fe06fee8f70f6ef94ec7b10fd1b/Telegram/Views/MainPage.xaml",
-      "visualParityVerified": false
+      "visualParityVerified": false,
+      "examinedSources": [
+        {
+          "path": "Telegram/Controls/Cells/ChatCell.xaml",
+          "sourceUrl": "https://github.com/UnigramDev/Unigram/blob/55c94e0fb3e42fe06fee8f70f6ef94ec7b10fd1b/Telegram/Controls/Cells/ChatCell.xaml",
+          "sha256": "6a6d6ba16a6ff62f93b39db7a008c62091a552e8222356b2f81aa3ae783172c5"
+        },
+        {
+          "path": "Telegram/Views/ChatPage.xaml",
+          "sourceUrl": "https://github.com/UnigramDev/Unigram/blob/55c94e0fb3e42fe06fee8f70f6ef94ec7b10fd1b/Telegram/Views/ChatPage.xaml",
+          "sha256": "cd1b4bc295e5ea89dfe969391447616e7665d43c5cf05364a2306a091ebdc9be"
+        },
+        {
+          "path": "Telegram/Controls/ProfilePicture.cs",
+          "sourceUrl": "https://github.com/UnigramDev/Unigram/blob/55c94e0fb3e42fe06fee8f70f6ef94ec7b10fd1b/Telegram/Controls/ProfilePicture.cs",
+          "sha256": "9019d50682e0706ec0f9639403d06c6ac3c8219c49a8a326be9c290fa8a83c1b"
+        },
+        {
+          "path": "Telegram/Views/ChatView.xaml",
+          "sourceUrl": "https://github.com/UnigramDev/Unigram/blob/55c94e0fb3e42fe06fee8f70f6ef94ec7b10fd1b/Telegram/Views/ChatView.xaml",
+          "sha256": "7778e97d82dddf3a91c28cfbd79080290e6f03f047eb4878f272ef6e8330d1bc"
+        }
+      ],
+      "auditStatus": "structural-mismatch"
     },
     {
       "client": "Telegram X",
@@ -23,7 +59,20 @@
       "commit": "9312ace35291f68fdd66ddff348d7321bee2a4bd",
       "rootSource": "app/src/main/java/org/thunderdog/challegram/ui/MainController.java",
       "sourceUrl": "https://github.com/TGX-Android/Telegram-X/blob/9312ace35291f68fdd66ddff348d7321bee2a4bd/app/src/main/java/org/thunderdog/challegram/ui/MainController.java",
-      "visualParityVerified": false
+      "visualParityVerified": false,
+      "examinedSources": [
+        {
+          "path": "app/src/main/java/org/thunderdog/challegram/component/dialogs/ChatView.java",
+          "sourceUrl": "https://github.com/TGX-Android/Telegram-X/blob/9312ace35291f68fdd66ddff348d7321bee2a4bd/app/src/main/java/org/thunderdog/challegram/component/dialogs/ChatView.java",
+          "sha256": "3a0953f63f89d5742aaed279ef5938d4677ac006b1bb7403f099276e5eeee266"
+        },
+        {
+          "path": "app/src/main/java/org/thunderdog/challegram/ui/ChatsController.java",
+          "sourceUrl": "https://github.com/TGX-Android/Telegram-X/blob/9312ace35291f68fdd66ddff348d7321bee2a4bd/app/src/main/java/org/thunderdog/challegram/ui/ChatsController.java",
+          "sha256": "7b6aeff3a8302d1d56e0c1782c093b7cccf4d87144e38bdd2e3f89aa092c151d"
+        }
+      ],
+      "auditStatus": "structural-mismatch"
     },
     {
       "client": "macOS",
@@ -31,7 +80,25 @@
       "commit": "579cebbf0c01fd41b712eff3647fa7f69db9665d",
       "rootSource": "Telegram-Mac/MainViewController.swift",
       "sourceUrl": "https://github.com/overtake/TelegramSwift/blob/579cebbf0c01fd41b712eff3647fa7f69db9665d/Telegram-Mac/MainViewController.swift",
-      "visualParityVerified": false
+      "visualParityVerified": false,
+      "examinedSources": [
+        {
+          "path": "Telegram-Mac/ChatListRowView.swift",
+          "sourceUrl": "https://github.com/overtake/TelegramSwift/blob/579cebbf0c01fd41b712eff3647fa7f69db9665d/Telegram-Mac/ChatListRowView.swift",
+          "sha256": "1e3e8f248a6de0f8633d644aabbba50eb67580aea8c940053883a0bd8d4d1fe7"
+        },
+        {
+          "path": "Telegram-Mac/ChatInputView.swift",
+          "sourceUrl": "https://github.com/overtake/TelegramSwift/blob/579cebbf0c01fd41b712eff3647fa7f69db9665d/Telegram-Mac/ChatInputView.swift",
+          "sha256": "6dd394c3fa3415564e73bd6fca35c2f33ee0fddddaea3cad16250b012429c04b"
+        },
+        {
+          "path": "Telegram-Mac/ChatListRowItem.swift",
+          "sourceUrl": "https://github.com/overtake/TelegramSwift/blob/579cebbf0c01fd41b712eff3647fa7f69db9665d/Telegram-Mac/ChatListRowItem.swift",
+          "sha256": "d319441320634a215f7ff7ccc35276d8ca874c766a9bbcf795d9fb74de8a19b9"
+        }
+      ],
+      "auditStatus": "structural-mismatch"
     },
     {
       "client": "Web A",
@@ -39,7 +106,40 @@
       "commit": "ea0d226147a80f05253bf1a6ffef08d694b8e6e4",
       "rootSource": "src/components/left/main/LeftMain.tsx",
       "sourceUrl": "https://github.com/Ajaxy/telegram-tt/blob/ea0d226147a80f05253bf1a6ffef08d694b8e6e4/src/components/left/main/LeftMain.tsx",
-      "visualParityVerified": false
+      "visualParityVerified": false,
+      "examinedSources": [
+        {
+          "path": "src/components/left/main/LeftMain.scss",
+          "sourceUrl": "https://github.com/Ajaxy/telegram-tt/blob/ea0d226147a80f05253bf1a6ffef08d694b8e6e4/src/components/left/main/LeftMain.scss",
+          "sha256": "bb9ed22bdbad4b562d89c7dfb97504da6eeaab9bc27a28d0654efba533b66c8c"
+        },
+        {
+          "path": "src/components/left/main/Chat.scss",
+          "sourceUrl": "https://github.com/Ajaxy/telegram-tt/blob/ea0d226147a80f05253bf1a6ffef08d694b8e6e4/src/components/left/main/Chat.scss",
+          "sha256": "3acb4da8d2ff6d3f16fefc62c939ccc7a42bf3bd8e1c0292ee74081800657975"
+        },
+        {
+          "path": "src/components/main/Main.scss",
+          "sourceUrl": "https://github.com/Ajaxy/telegram-tt/blob/ea0d226147a80f05253bf1a6ffef08d694b8e6e4/src/components/main/Main.scss",
+          "sha256": "d69608185a8e7ac765eecb45a1e1df03d4efc16b81d94872f202e10ed4f6019b"
+        },
+        {
+          "path": "src/components/middle/message/Message.scss",
+          "sourceUrl": "https://github.com/Ajaxy/telegram-tt/blob/ea0d226147a80f05253bf1a6ffef08d694b8e6e4/src/components/middle/message/Message.scss",
+          "sha256": "ae0efeb519cf6706c42688d0de42867724e1904cde34a156774835154bdbfd9c"
+        },
+        {
+          "path": "src/components/left/main/LeftMainHeader.tsx",
+          "sourceUrl": "https://github.com/Ajaxy/telegram-tt/blob/ea0d226147a80f05253bf1a6ffef08d694b8e6e4/src/components/left/main/LeftMainHeader.tsx",
+          "sha256": "47ee98f645efdcfc647ff2458b0b770d0e6b0fb195d130a3344f9783ea2fe005"
+        },
+        {
+          "path": "src/components/main/FoldersSidebar.tsx",
+          "sourceUrl": "https://github.com/Ajaxy/telegram-tt/blob/ea0d226147a80f05253bf1a6ffef08d694b8e6e4/src/components/main/FoldersSidebar.tsx",
+          "sha256": "366f97582d79a0c347f0f6770c2242395b6396c129e422b683f185632b87480e"
+        }
+      ],
+      "auditStatus": "structural-mismatch"
     },
     {
       "client": "Web K",
@@ -47,7 +147,21 @@
       "commit": "cac8174ea6833147fc89991629e6c34296f32eb8",
       "rootSource": "src/scss/partials/_leftSidebar.scss",
       "sourceUrl": "https://github.com/morethanwords/tweb/blob/cac8174ea6833147fc89991629e6c34296f32eb8/src/scss/partials/_leftSidebar.scss",
-      "visualParityVerified": false
+      "visualParityVerified": false,
+      "examinedSources": [
+        {
+          "path": "src/scss/partials/_chat.scss",
+          "sourceUrl": "https://github.com/morethanwords/tweb/blob/cac8174ea6833147fc89991629e6c34296f32eb8/src/scss/partials/_chat.scss",
+          "sha256": "daf46cb49cec2c97e7714c6571787d9f707f9cdff7524d057d6de35812ed99c6"
+        },
+        {
+          "path": "src/scss/partials/_sidebar.scss",
+          "sourceUrl": "https://github.com/morethanwords/tweb/blob/cac8174ea6833147fc89991629e6c34296f32eb8/src/scss/partials/_sidebar.scss",
+          "sha256": "5821e2bc833794db930069e1a701ae680506d03d831480d7b9b579e5f0316d33"
+        }
+      ],
+      "auditStatus": "structural-mismatch"
     }
-  ]
+  ],
+  "auditDocument": "CLIENT_DESIGN_AUDIT.md"
 }

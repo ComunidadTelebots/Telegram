@@ -2246,9 +2246,9 @@
     <string name="SkinGeneralDesigns">GENERAL DESIGNS</string>
     <string name="SkinGeneralDesignsInfo">Telegram themes that can be created, shared and imported through links</string>
     <string name="SkinCustomDesigns">CUSTOM DESIGNS</string>
-    <string name="SkinCustomDesignsInfo">Complete interface designs included with this client</string>
-    <string name="SkinAndroidVersions">ANDROID VERSIONS</string>
-    <string name="SkinAndroidVersionsInfo">Use a historical Android design with the latest Telegram features</string>
+    <string name="SkinCustomDesignsInfo">Experimental interface adaptations; visual parity is not complete</string>
+    <string name="SkinAndroidVersions">ANDROID STYLES</string>
+    <string name="SkinAndroidVersionsInfo">Visual styles inspired by Android; these are not verified historical releases</string>
     <string name="SkinApplyDesign">Apply</string>
     <string name="SkinPreviewModernFeatures">This preview combines the selected interface style with current features such as stories, reactions, bots and the modern message composer.</string>
     <string name="SkinPreviewStories">Stories</string>
@@ -11244,4 +11244,12 @@
     <string name="SkinMotionQuick">Quick</string>
     <string name="SkinMotionFade">Fade</string>
     <string name="SkinMotionNone">None</string>
+    <string name="SkinHistoryTitle">Design versions</string>
+    <string name="SkinHistoryInfo">Source-backed design milestones. Historical appearances are not implemented yet.</string>
+    <string name="SkinHistoryChoose">Choose a reference version</string>
+    <string name="SkinHistoryPending">Reference only. This historical design is not implemented. Saving this selection does not change the active appearance.</string>
+    <string name="SkinHistorySelect">Save reference</string>
+    <string name="SkinHistorySource">View source commit</string>
+    <string name="SkinHistoryDiff">View changes in the repository</string>
+    <string name="SkinHistoryRelease">View release or tag</string>
 </resources>
