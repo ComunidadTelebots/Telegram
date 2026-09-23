@@ -1329,4 +1329,11 @@
     <string name="RemindDayYearAt">\'Recordar el\' d \'de\' MMM \'de\' yyyy \'a las\' HH:mm</string>
     <string name="BotsMenuTitle">Menu</string>
     <string name="Understood">👍 Entendido</string>
+    <string name="SkinMotionTitle">ANIMACIONES</string>
+    <string name="SkinMotionInfo">Elige las transiciones de pantalla independientemente del diseño y del tema de colores. Se respetan los ajustes de animación del sistema y de Telegram.</string>
+    <string name="SkinMotionOriginal">Original</string>
+    <string name="SkinMotionSmooth">Suave</string>
+    <string name="SkinMotionQuick">Rápida</string>
+    <string name="SkinMotionFade">Fundido</string>
+    <string name="SkinMotionNone">Ninguna</string>
 </resources>

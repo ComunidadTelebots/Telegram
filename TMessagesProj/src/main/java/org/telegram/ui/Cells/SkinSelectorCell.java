@@ -17,6 +17,8 @@ import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.skins.SkinBase;
 import org.telegram.ui.skins.SkinManager;
 import org.telegram.ui.skins.SkinPreviewDialog;
+import org.telegram.ui.skins.MotionController;
+import org.telegram.ui.skins.MotionStyle;
 
 import java.util.List;
 
@@ -56,6 +58,42 @@ public class SkinSelectorCell extends LinearLayout {
                     getContext().getString(R.string.SkinAndroidVersionsInfo));
             addVariantSelector(variants);
         }
+        addSectionHeader(getContext().getString(R.string.SkinMotionTitle),
+                getContext().getString(R.string.SkinMotionInfo));
+        addMotionSelector();
+    }
+
+    private void addMotionSelector() {
+        LinearLayout row = createHorizontalRow();
+        int[] labels = {R.string.SkinMotionOriginal, R.string.SkinMotionSmooth,
+                R.string.SkinMotionQuick, R.string.SkinMotionFade, R.string.SkinMotionNone};
+        for (MotionStyle style : MotionStyle.values()) {
+            TextView button = new TextView(getContext());
+            boolean selected = MotionController.getStyle() == style;
+            button.setText((selected ? "✓ " : "") + getContext().getString(labels[style.ordinal()]));
+            button.setSelected(selected);
+            button.setTextSize(14);
+            button.setGravity(Gravity.CENTER);
+            button.setPadding(AndroidUtilities.dp(12), 0, AndroidUtilities.dp(12), 0);
+            button.setTextColor(Theme.getColor(selected ? Theme.key_windowBackgroundWhiteBlueText
+                    : Theme.key_windowBackgroundWhiteBlackText));
+            button.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_listSelector), 2, 0));
+            row.addView(button, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, 48));
+            button.setOnClickListener(v -> {
+                MotionController.setStyle(style);
+                rebuild();
+                MotionController.preview(this);
+            });
+        }
+        addHorizontalRow(row);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        animate().cancel();
+        setAlpha(1f);
+        setTranslationX(0f);
+        super.onDetachedFromWindow();
     }
 
     private void addSectionHeader(String title, String description) {

@@ -2472,6 +2472,9 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
                 case TYPE_SKIN_SELECTOR:
                     view = new SkinSelectorCell(mContext, skin -> {
                         listAdapter.notifyDataSetChanged();
+                        if (parentLayout != null) {
+                            parentLayout.rebuildAllFragmentViews(true, true);
+                        }
                     });
                     view.setLayoutParams(new RecyclerView.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));

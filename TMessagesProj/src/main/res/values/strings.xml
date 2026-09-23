@@ -11237,4 +11237,11 @@
     <string name="UnsupportedMessageTitle">Unsupported Message</string>
     <string name="UnsupportedMessageMessage">Update Telegram to view this message</string>
     <string name="UnsupportedUpdate">Update</string>
+    <string name="SkinMotionTitle">ANIMATIONS</string>
+    <string name="SkinMotionInfo">Choose screen transitions independently of the interface design and color theme. System and Telegram animation settings take precedence.</string>
+    <string name="SkinMotionOriginal">Original</string>
+    <string name="SkinMotionSmooth">Smooth</string>
+    <string name="SkinMotionQuick">Quick</string>
+    <string name="SkinMotionFade">Fade</string>
+    <string name="SkinMotionNone">None</string>
 </resources>

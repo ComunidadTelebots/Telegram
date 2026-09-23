@@ -8,6 +8,17 @@ se indique una versión propia del fork.
 
 ## [Sin publicar]
 
+### Diseños y animaciones independientes
+
+- Perfiles seleccionables de Unigram, Telegram X, Web A, Web K, macOS e iOS;
+  Web A conserva la selección Web anterior y Web K tiene identificador propio.
+- Los perfiles aplican avatares, separadores y colas de burbujas a la interfaz real,
+  además del radio de burbuja existente, con invalidación de cachés al cambiar.
+- Selector independiente de transiciones Original, Suave, Rápida, Fundido y
+  Ninguna, con persistencia y demostración; respeta los ajustes de animación.
+- Documentación del alcance y las ramas locales `dev`, `alfa`, `beta` y `rc` en
+  `Tools/CLIENT_DESIGNS.md`.
+
 ### Integración Android 16
 
 - Fusión de DrKLO/Telegram `master` (`9552e5541`, versión 12.10.3 / 7089).

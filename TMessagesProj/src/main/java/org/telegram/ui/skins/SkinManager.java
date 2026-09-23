@@ -21,6 +21,7 @@ import org.telegram.ui.skins.skins.TdesktopSkin;
 import org.telegram.ui.skins.skins.TelegramXSkin;
 import org.telegram.ui.skins.skins.UnigramSkin;
 import org.telegram.ui.skins.skins.WebSkin;
+import org.telegram.ui.skins.skins.WebKSkin;
 import org.telegram.ui.skins.skins.WebogramSkin;
 
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ public class SkinManager {
     private final List<SkinBase> skins = new ArrayList<>();
     private final List<SkinBase> skinFamilies = new ArrayList<>();
     private SkinBase activeSkin;
+    private boolean selectedSkin;
 
     private SkinManager() {
         skins.add(new AndroidSkin());
@@ -48,6 +50,7 @@ public class SkinManager {
         skins.add(new AndroidRedesignSkin());
         skins.add(new AndroidGlassSkin());
         skins.add(new WebSkin());
+        skins.add(new WebKSkin());
         skins.add(new WebogramSkin());
         skins.add(new IosSkin());
         skins.add(new MacosSkin());
@@ -67,7 +70,8 @@ public class SkinManager {
         String savedId = migrateLegacyId(getPrefs().getString(PREF_KEY, "android:current"));
         activeSkin = findById(savedId);
         if (activeSkin == null) activeSkin = skins.get(0);
-        if (getPrefs().contains(PREF_KEY)) {
+        selectedSkin = getPrefs().contains(PREF_KEY);
+        if (selectedSkin) {
             applyToSharedConfig(false);
         }
     }
@@ -105,6 +109,22 @@ public class SkinManager {
         return activeSkin;
     }
 
+    public boolean hasSelectedSkin() {
+        return selectedSkin;
+    }
+
+    public float getAvatarRadiusFactor() {
+        return hasSelectedSkin() ? Math.max(0f, Math.min(1f, activeSkin.getAvatarRadiusFactor())) : 1f;
+    }
+
+    public boolean showChatDividers() {
+        return !hasSelectedSkin() || activeSkin.showChatDividers();
+    }
+
+    public boolean hasBubbleTail() {
+        return !selectedSkin || activeSkin.hasBubbleTail();
+    }
+
     public SkinBase getSelectedSkinForFamily(String familyId) {
         if (activeSkin.getFamilyId().equals(familyId)) {
             return activeSkin;
@@ -134,6 +154,7 @@ public class SkinManager {
             return;
         }
         activeSkin = skin;
+        selectedSkin = true;
         getPrefs().edit()
                 .putString(PREF_KEY, skin.getId())
                 .putString(PREF_FAMILY_PREFIX + skin.getFamilyId(), skin.getId())

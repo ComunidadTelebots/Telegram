@@ -44,6 +44,7 @@ public class MessageDrawable extends Drawable {
     private RectF rect = new RectF();
     private Matrix matrix = new Matrix();
     private int currentType;
+    private final int originalType;
     public boolean isSelected;
     private Path path;
 
@@ -113,6 +114,7 @@ public class MessageDrawable extends Drawable {
         this.resourcesProvider = resourcesProvider;
         isOut = out;
         currentType = type;
+        originalType = type;
         isSelected = selected;
         path = new Path();
         selectedPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -318,6 +320,7 @@ public class MessageDrawable extends Drawable {
     }
 
     public Drawable getBackgroundDrawable() {
+        updateSkinShape();
         int newRad;
         if (overrideRoundRadius != 0) {
             newRad = overrideRoundRadius;
@@ -436,6 +439,7 @@ public class MessageDrawable extends Drawable {
     }
 
     public Drawable getShadowDrawable() {
+        updateSkinShape();
         if (isCrossfadeBackground) {
             return null;
         }
@@ -548,6 +552,7 @@ public class MessageDrawable extends Drawable {
     }
 
     public void draw(Canvas canvas, Paint paintToUse) {
+        updateSkinShape();
         Rect bounds = getBounds();
         if (paintToUse == null && gradientShader == null && overrideRoundRadius == 0 && overrideRounding <= 0) {
             Drawable background = getBackgroundDrawable();
@@ -620,6 +625,7 @@ public class MessageDrawable extends Drawable {
     }
 
     public Path makePath(PathDrawParams pathDrawCacheParams) {
+        updateSkinShape();
         Rect bounds = getBounds();
         int padding = dp(2);
         int rad;
@@ -848,14 +854,31 @@ public class MessageDrawable extends Drawable {
         this.resourcesProvider = resourcesProvider;
     }
 
+    private void updateSkinShape() {
+        int type = originalType == TYPE_TEXT && !org.telegram.ui.skins.SkinManager.get().hasBubbleTail()
+                ? TYPE_MEDIA : originalType;
+        if (type == currentType) return;
+        currentType = type;
+        Arrays.fill(currentShadowDrawableRadius, -1);
+        for (int[] radii : currentBackgroundDrawableRadius) {
+            Arrays.fill(radii, -1);
+        }
+    }
+
     public static class PathDrawParams {
         Path path = new Path();
         Rect lastRect = new Rect();
         boolean lastDrawFullTop;
         boolean lastDrawFullBottom;
+        boolean lastBubbleTail;
+        int lastBubbleRadius = -1;
 
         public boolean invalidatePath(Rect bounds, boolean drawFullBottom, boolean drawFullTop) {
             boolean invalidate = lastRect.isEmpty() || lastRect.top != bounds.top || lastRect.bottom != bounds.bottom || lastRect.right != bounds.right || lastRect.left != bounds.left || lastDrawFullTop != drawFullTop || lastDrawFullBottom != drawFullBottom || !drawFullTop || !drawFullBottom;
+            boolean bubbleTail = org.telegram.ui.skins.SkinManager.get().hasBubbleTail();
+            invalidate |= lastBubbleTail != bubbleTail || lastBubbleRadius != SharedConfig.bubbleRadius;
+            lastBubbleTail = bubbleTail;
+            lastBubbleRadius = SharedConfig.bubbleRadius;
             lastDrawFullTop = drawFullTop;
             lastDrawFullBottom = drawFullBottom;
             lastRect.set(bounds);
