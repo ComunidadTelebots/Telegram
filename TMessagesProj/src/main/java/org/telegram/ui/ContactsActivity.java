@@ -252,8 +252,8 @@ public class ContactsActivity extends BaseFragment implements FactorAnimator.Tar
         getContactsController().checkInviteText();
         getContactsController().reloadContactsStatusesMaybe(false);
 
-        additionNavigationBarHeight = hasMainTabs ? dp(DialogsActivity.MAIN_TABS_HEIGHT_WITH_MARGINS) : 0;
-        additionFloatingButtonOffset = hasMainTabs ? dp(DialogsActivity.MAIN_TABS_HEIGHT + DialogsActivity.MAIN_TABS_MARGIN) : 0;
+        additionNavigationBarHeight = hasMainTabs ? dp(org.telegram.ui.skins.SkinManager.get().getClientLayout().bottomInsetDp(DialogsActivity.MAIN_TABS_HEIGHT_WITH_MARGINS)) : 0;
+        additionFloatingButtonOffset = hasMainTabs ? dp(org.telegram.ui.skins.SkinManager.get().getClientLayout().bottomInsetDp(DialogsActivity.MAIN_TABS_HEIGHT + DialogsActivity.MAIN_TABS_MARGIN)) : 0;
 
         return true;
     }
@@ -278,6 +278,10 @@ public class ContactsActivity extends BaseFragment implements FactorAnimator.Tar
 
     @Override
     public View createView(Context context) {
+        // Recompute when a different client layout rebuilds the retained fragment view.
+        additionNavigationBarHeight = hasMainTabs ? dp(org.telegram.ui.skins.SkinManager.get().getClientLayout().bottomInsetDp(DialogsActivity.MAIN_TABS_HEIGHT_WITH_MARGINS)) : 0;
+        additionFloatingButtonOffset = hasMainTabs ? dp(org.telegram.ui.skins.SkinManager.get().getClientLayout().bottomInsetDp(DialogsActivity.MAIN_TABS_HEIGHT + DialogsActivity.MAIN_TABS_MARGIN)) : 0;
+
         searching = false;
         searchWas = false;
 
@@ -984,6 +988,7 @@ public class ContactsActivity extends BaseFragment implements FactorAnimator.Tar
             LaunchActivity.instance.getRootAnimatedInsetsListener().subscribeToWindowInsetsAnimation(this);
         }
         ViewCompat.setOnApplyWindowInsetsListener(fragmentView, this::onApplyWindowInsets);
+        org.telegram.ui.skins.ClientChrome.apply(actionBar, null, getResourceProvider());
         return fragmentView;
     }
 

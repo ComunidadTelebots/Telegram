@@ -706,8 +706,8 @@ public class CallLogActivity extends BaseFragment implements NotificationCenter.
 			hasMainTabs = arguments.getBoolean("hasMainTabs", false);
 		}
 
-		additionNavigationBarHeight = hasMainTabs ? dp(DialogsActivity.MAIN_TABS_HEIGHT_WITH_MARGINS) : 0;
-		additionFloatingButtonOffset = hasMainTabs ? dp(DialogsActivity.MAIN_TABS_HEIGHT + DialogsActivity.MAIN_TABS_MARGIN) : 0;
+		additionNavigationBarHeight = hasMainTabs ? dp(org.telegram.ui.skins.SkinManager.get().getClientLayout().bottomInsetDp(DialogsActivity.MAIN_TABS_HEIGHT_WITH_MARGINS)) : 0;
+		additionFloatingButtonOffset = hasMainTabs ? dp(org.telegram.ui.skins.SkinManager.get().getClientLayout().bottomInsetDp(DialogsActivity.MAIN_TABS_HEIGHT + DialogsActivity.MAIN_TABS_MARGIN)) : 0;
 
 		return true;
 	}
@@ -725,6 +725,10 @@ public class CallLogActivity extends BaseFragment implements NotificationCenter.
 	@SuppressLint("UseCompatLoadingForDrawables")
     @Override
 	public View createView(Context context) {
+		// Recompute when a different client layout rebuilds the retained fragment view.
+		additionNavigationBarHeight = hasMainTabs ? dp(org.telegram.ui.skins.SkinManager.get().getClientLayout().bottomInsetDp(DialogsActivity.MAIN_TABS_HEIGHT_WITH_MARGINS)) : 0;
+		additionFloatingButtonOffset = hasMainTabs ? dp(org.telegram.ui.skins.SkinManager.get().getClientLayout().bottomInsetDp(DialogsActivity.MAIN_TABS_HEIGHT + DialogsActivity.MAIN_TABS_MARGIN)) : 0;
+
 		if (!hasMainTabs) {
 			actionBar.setBackButtonDrawable(new BackDrawable(false));
 		}
@@ -943,6 +947,7 @@ public class CallLogActivity extends BaseFragment implements NotificationCenter.
 		if (hasMainTabs) {
 			ViewCompat.setOnApplyWindowInsetsListener(fragmentView, this::onInsetsInternal);
 		}
+		org.telegram.ui.skins.ClientChrome.apply(actionBar, null, getResourceProvider());
 		return fragmentView;
 	}
 

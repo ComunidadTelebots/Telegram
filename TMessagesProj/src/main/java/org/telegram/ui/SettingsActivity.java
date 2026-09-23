@@ -218,7 +218,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
             hasMainTabs = arguments.getBoolean("hasMainTabs", false);
         }
 
-        additionNavigationBarHeight = hasMainTabs ? dp(DialogsActivity.MAIN_TABS_HEIGHT_WITH_MARGINS) : 0;
+        additionNavigationBarHeight = hasMainTabs ? dp(org.telegram.ui.skins.SkinManager.get().getClientLayout().bottomInsetDp(DialogsActivity.MAIN_TABS_HEIGHT_WITH_MARGINS)) : 0;
         return super.onFragmentCreate();
     }
 
@@ -231,6 +231,9 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
 
     @Override
     public View createView(Context context) {
+        // Recompute when a different client layout rebuilds the retained fragment view.
+        additionNavigationBarHeight = hasMainTabs ? dp(org.telegram.ui.skins.SkinManager.get().getClientLayout().bottomInsetDp(DialogsActivity.MAIN_TABS_HEIGHT_WITH_MARGINS)) : 0;
+
         contentView = new SizeNotifierFrameLayout(context) {
             @Override
             protected void dispatchDraw(Canvas canvas) {
@@ -496,6 +499,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         checkUi_menuItems();
 
         ViewCompat.setOnApplyWindowInsetsListener(contentView, this::onApplyWindowInsets);
+        org.telegram.ui.skins.ClientChrome.apply(actionBar, null, getResourceProvider());
         return fragmentView = contentView;
     }
 

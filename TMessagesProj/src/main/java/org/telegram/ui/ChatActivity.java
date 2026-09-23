@@ -8975,6 +8975,7 @@ public class ChatActivity extends BaseFragment implements
         ViewCompat.setOnApplyWindowInsetsListener(fragmentView, this::onApplyWindowInsets);
         Timer.finish(t);
 
+        org.telegram.ui.skins.ClientChrome.apply(actionBar, avatarContainer, getResourceProvider());
         return fragmentView;
     }
 

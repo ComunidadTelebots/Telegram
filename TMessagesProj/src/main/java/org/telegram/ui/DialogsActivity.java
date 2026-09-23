@@ -2979,8 +2979,8 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         }
 
         BirthdayController.getInstance(currentAccount).check();
-        additionNavigationBarHeight = hasMainTabs ? dp(MAIN_TABS_HEIGHT_WITH_MARGINS) : 0;
-        additionFloatingButtonOffset = hasMainTabs ? dp(DialogsActivity.MAIN_TABS_HEIGHT + DialogsActivity.MAIN_TABS_MARGIN) : 0;
+        additionNavigationBarHeight = hasMainTabs ? dp(org.telegram.ui.skins.SkinManager.get().getClientLayout().bottomInsetDp(MAIN_TABS_HEIGHT_WITH_MARGINS)) : 0;
+        additionFloatingButtonOffset = hasMainTabs ? dp(org.telegram.ui.skins.SkinManager.get().getClientLayout().bottomInsetDp(DialogsActivity.MAIN_TABS_HEIGHT + DialogsActivity.MAIN_TABS_MARGIN)) : 0;
 
         return true;
     }
@@ -3204,6 +3204,10 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
     @Override
     public View createView(final Context context) {
+        // Recompute when a different client layout rebuilds the retained fragment view.
+        additionNavigationBarHeight = hasMainTabs ? dp(org.telegram.ui.skins.SkinManager.get().getClientLayout().bottomInsetDp(MAIN_TABS_HEIGHT_WITH_MARGINS)) : 0;
+        additionFloatingButtonOffset = hasMainTabs ? dp(org.telegram.ui.skins.SkinManager.get().getClientLayout().bottomInsetDp(DialogsActivity.MAIN_TABS_HEIGHT + DialogsActivity.MAIN_TABS_MARGIN)) : 0;
+
         searching = false;
         searchWas = false;
         wasDrawn = false;
@@ -5643,6 +5647,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         checkUi_forwardCommentFieldVisible();
         checkUi_searchFieldStyle();
 
+        org.telegram.ui.skins.ClientChrome.apply(actionBar, null, getResourceProvider());
         ViewCompat.setOnApplyWindowInsetsListener(fragmentView, this::onApplyWindowInsets);
         return fragmentView;
     }

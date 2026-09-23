@@ -80,6 +80,9 @@ import org.telegram.ui.Components.blur3.source.BlurredBackgroundSourceRenderNode
 import org.telegram.ui.Components.chat.ViewPositionWatcher;
 import org.telegram.ui.Components.glass.GlassTabView;
 import org.telegram.ui.Stories.recorder.HintView2;
+import org.telegram.ui.skins.ClientLayout;
+import org.telegram.ui.skins.ClientNavigationView;
+import org.telegram.ui.skins.SkinManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -118,6 +121,8 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
     private MainTabsLayout tabsView;
     private BlurredBackgroundDrawable tabsViewBackground;
     private View fadeView;
+    private ClientLayout clientLayout = ClientLayout.ANDROID;
+    private ClientNavigationView clientNavigation;
 
     public MainTabsActivity() {
         super();
@@ -302,6 +307,14 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
 
     @Override
     public View createView(Context context) {
+        ClientLayout nextLayout = SkinManager.get().getClientLayout();
+        if (clientLayout != nextLayout) {
+            // These positions represent different destinations in native and client layouts.
+            dropFragmentAtPosition(POSITION_CALLS_OR_SETTINGS);
+            dropFragmentAtPosition(POSITION_PROFILE);
+        }
+        clientLayout = nextLayout;
+        clientNavigation = null;
         super.createView(context);
         tabletLayout = false;
 
@@ -391,9 +404,51 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
             updateLayout.updateAppUpdateViews(currentAccount, false);
         }
 
+        if (clientLayout != ClientLayout.ANDROID) {
+            clientNavigation = new ClientNavigationView(context, clientLayout, resourceProvider, new ClientNavigationView.Listener() {
+                @Override
+                public void select(int destination) {
+                    selectClientDestination(destination);
+                }
+
+                @Override
+                public boolean longSelect(int destination, View anchor) {
+                    switch (destination) {
+                        case 0: return openFoldersSelector(anchor);
+                        case 1: return openContactsSelector(anchor);
+                        case 2: return openCallsSelector(anchor);
+                        default: return openAccountSelector(anchor);
+                    }
+                }
+            });
+            boolean side = clientLayout.placement == ClientLayout.Placement.SIDE;
+            contentView.addView(clientNavigation, new FrameLayout.LayoutParams(
+                    side ? dp(clientLayout.extentDp) : ViewGroup.LayoutParams.MATCH_PARENT,
+                    side ? ViewGroup.LayoutParams.MATCH_PARENT : dp(clientLayout.extentDp),
+                    side ? Gravity.START : clientLayout.placement == ClientLayout.Placement.TOP ? Gravity.TOP : Gravity.BOTTOM));
+            selectTab(viewPager.getCurrentPosition(), false);
+        }
         updateLayout();
         checkUnreadCount(false);
         return contentView;
+    }
+
+    private void selectClientDestination(int destination) {
+        if (viewPager.isManualScrolling() || viewPager.isTouch()) return;
+        int position = destination;
+        if (position == viewPager.getCurrentPosition()) {
+            BaseFragment fragment = getCurrentVisibleFragment();
+            if (fragment instanceof TabFragmentDelegate) ((TabFragmentDelegate) fragment).onParentScrollToTop();
+        } else {
+            selectTab(position, true);
+            viewPager.scrollToPosition(position);
+        }
+    }
+
+    private void updateClientNavigation() {
+        if (clientNavigation == null || viewPager == null) return;
+        int destination = viewPager.getCurrentPosition();
+        clientNavigation.update(destination, MessagesStorage.getInstance(currentAccount).getMainUnreadCount());
     }
 
     private void checkUnreadCount(boolean animated) {
@@ -402,6 +457,7 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
         }
 
         final int unreadCount = MessagesStorage.getInstance(currentAccount).getMainUnreadCount();
+        updateClientNavigation();
         if (unreadCount > 0) {
             final String unreadCountFmt = LocaleController.formatNumber(unreadCount, ',');
             tabs[INDEX_CHATS].setCounter(unreadCountFmt, false, animated);
@@ -813,7 +869,7 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
             args.putBoolean("hasMainTabs", true);
             return new ContactsActivity(args);
         } else if (position == POSITION_CALLS_OR_SETTINGS) {
-            if (getUserConfig().showCallsTab) {
+            if (clientLayout != ClientLayout.ANDROID || getUserConfig().showCallsTab) {
                 Bundle args = new Bundle();
                 args.putBoolean("needFinishFragment", false);
                 args.putBoolean("hasMainTabs", true);
@@ -829,6 +885,11 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
             dialogsActivity.setMainTabsActivityController(new MainTabsActivityControllerImpl());
             return dialogsActivity;
         } else if (position == POSITION_PROFILE) {
+            if (clientLayout != ClientLayout.ANDROID) {
+                Bundle args = new Bundle();
+                args.putBoolean("hasMainTabs", true);
+                return new SettingsActivity(args);
+            }
             Bundle args = new Bundle();
             args.putLong("user_id", UserConfig.getInstance(currentAccount).getClientUserId());
             args.putBoolean("my_profile", true);
@@ -851,6 +912,10 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
         for (int a = 0; a < tabs.length; a++) {
             GlassTabView tab = tabs[a];
             tab.setSelected(indexToPosition(a) == position, animated);
+        }
+        if (clientNavigation != null) {
+            int destination = position;
+            clientNavigation.update(destination, MessagesStorage.getInstance(currentAccount).getMainUnreadCount());
         }
     }
 
@@ -933,18 +998,50 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
         {
             int bottomMargin = isUpdateLayoutVisible ? (navigationBarHeight + updateLayoutHeight) : 0;
             if (tabletLayout) {
-                bottomMargin = Math.max(bottomMargin, navigationBarHeight + dp(DialogsActivity.MAIN_TABS_HEIGHT_WITH_MARGINS));
+                bottomMargin = Math.max(bottomMargin, navigationBarHeight + dp(clientLayout.bottomInsetDp(DialogsActivity.MAIN_TABS_HEIGHT_WITH_MARGINS)));
             }
             lp = (ViewGroup.MarginLayoutParams) viewPager.getLayoutParams();
-            if (lp.bottomMargin != bottomMargin || lp.leftMargin != systemInsets.left || lp.rightMargin != systemInsets.right) {
-                lp.leftMargin = systemInsets.left;
-                lp.rightMargin = systemInsets.right;
+            int sideWidth = clientLayout.placement == ClientLayout.Placement.SIDE ? dp(clientLayout.extentDp) : 0;
+            int leftMargin = systemInsets.left + (LocaleController.isRTL ? 0 : sideWidth);
+            int rightMargin = systemInsets.right + (LocaleController.isRTL ? sideWidth : 0);
+            int topMargin = clientLayout.placement == ClientLayout.Placement.TOP ? dp(clientLayout.extentDp) : 0;
+            if (lp.bottomMargin != bottomMargin || lp.leftMargin != leftMargin || lp.rightMargin != rightMargin || lp.topMargin != topMargin) {
+                lp.leftMargin = leftMargin;
+                lp.rightMargin = rightMargin;
+                lp.topMargin = topMargin;
                 lp.bottomMargin = bottomMargin;
                 viewPager.setLayoutParams(lp);
             }
         }
 
         tabsViewWrapper.setPadding(systemInsets.left, 0, systemInsets.right, navigationBarHeight);
+
+        if (clientNavigation != null) {
+            int size = dp(clientLayout.extentDp);
+            FrameLayout.LayoutParams navParams;
+            if (clientLayout.placement == ClientLayout.Placement.SIDE) {
+                navParams = new FrameLayout.LayoutParams(size, ViewGroup.LayoutParams.MATCH_PARENT,
+                        (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP);
+                navParams.leftMargin = systemInsets.left;
+                navParams.rightMargin = systemInsets.right;
+                clientNavigation.setPadding(0, systemInsets.top, 0, systemInsets.bottom + updateLayoutHeight);
+            } else if (clientLayout.placement == ClientLayout.Placement.TOP) {
+                navParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        size + systemInsets.top, Gravity.TOP);
+                clientNavigation.setPadding(systemInsets.left, systemInsets.top, systemInsets.right, 0);
+            } else {
+                navParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        size + systemInsets.bottom, Gravity.BOTTOM);
+                navParams.bottomMargin = updateLayoutHeight;
+                clientNavigation.setPadding(systemInsets.left, 0, systemInsets.right, systemInsets.bottom);
+            }
+            FrameLayout.LayoutParams old = (FrameLayout.LayoutParams) clientNavigation.getLayoutParams();
+            if (old.width != navParams.width || old.height != navParams.height || old.gravity != navParams.gravity
+                    || old.leftMargin != navParams.leftMargin || old.rightMargin != navParams.rightMargin
+                    || old.bottomMargin != navParams.bottomMargin) {
+                clientNavigation.setLayoutParams(navParams);
+            }
+        }
 
         final WindowInsetsCompat consumed = isUpdateLayoutVisible ?
             insets.inset(0, 0, 0, navigationBarHeight) : insets;
@@ -991,6 +1088,7 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
         } else if (id == NotificationCenter.needSetDayNightTheme) {
             clearAllHiddenFragments();
         } else if (id == NotificationCenter.callTabsVisibleToggled) {
+            if (clientLayout != ClientLayout.ANDROID) return;
             final boolean callTabsVisible = getUserConfig().showCallsTab;
             checkUi_callTabVisible(callTabsVisible, true);
             if (viewPager != null && viewPager.getCurrentPosition() == POSITION_CALLS_OR_SETTINGS) {
@@ -1058,6 +1156,10 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
     }
 
     private void checkUi_fadeView() {
+        if (clientNavigation != null) {
+            fadeView.setVisibility(View.GONE);
+            return;
+        }
         if (viewPager == null || fadeView == null) {
             return;
         }
@@ -1076,6 +1178,13 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
     }
 
     private void checkUi_tabsPosition() {
+        if (clientNavigation != null) {
+            tabsViewWrapper.setVisibility(View.GONE);
+            float visibility = animatorTabsVisible.getFloatValue();
+            clientNavigation.setAlpha(visibility);
+            clientNavigation.setVisibility(visibility > 0 ? View.VISIBLE : View.GONE);
+            return;
+        }
         final boolean isUpdateLayoutVisible = updateLayoutWrapper.isUpdateLayoutVisible();
         final int updateLayoutHeight = isUpdateLayoutVisible ? dp(UpdateLayoutWrapper.HEIGHT) : 0;
         final int normalY = -(updateLayoutHeight);

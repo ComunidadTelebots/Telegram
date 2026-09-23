@@ -160,6 +160,20 @@ android {
         }
     }
 
+    // Keep packaging aligned with an ABI-limited native build (including IDE builds).
+    def injectedAbis = providers.gradleProperty('android.injected.build.abi').orNull
+    if (injectedAbis) {
+        def selectedAbis = injectedAbis.split(',').collect { it.trim() }
+        def supportedAbis = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
+        if (!selectedAbis.every { supportedAbis.contains(it) }) {
+            throw new GradleException("Unsupported native build ABI: ${injectedAbis}")
+        }
+        productFlavors.all { flavor ->
+            flavor.ndk.abiFilters.clear()
+            flavor.ndk.abiFilters.addAll(selectedAbis)
+        }
+    }
+
     defaultConfig.versionCode = Integer.parseInt(APP_VERSION_CODE)
 
     applicationVariants.all { variant ->

@@ -1,0 +1,53 @@
+{
+  "reviewDate": "2026-09-23",
+  "references": [
+    {
+      "client": "iOS",
+      "repository": "https://github.com/TelegramMessenger/Telegram-iOS",
+      "commit": "6ad963e5b62d354da79040f388ae2b9132fb17b8",
+      "rootSource": "submodules/TelegramUI/Sources/TelegramRootController.swift",
+      "sourceUrl": "https://github.com/TelegramMessenger/Telegram-iOS/blob/6ad963e5b62d354da79040f388ae2b9132fb17b8/submodules/TelegramUI/Sources/TelegramRootController.swift",
+      "visualParityVerified": false
+    },
+    {
+      "client": "Unigram",
+      "repository": "https://github.com/UnigramDev/Unigram",
+      "commit": "55c94e0fb3e42fe06fee8f70f6ef94ec7b10fd1b",
+      "rootSource": "Telegram/Views/MainPage.xaml",
+      "sourceUrl": "https://github.com/UnigramDev/Unigram/blob/55c94e0fb3e42fe06fee8f70f6ef94ec7b10fd1b/Telegram/Views/MainPage.xaml",
+      "visualParityVerified": false
+    },
+    {
+      "client": "Telegram X",
+      "repository": "https://github.com/TGX-Android/Telegram-X",
+      "commit": "9312ace35291f68fdd66ddff348d7321bee2a4bd",
+      "rootSource": "app/src/main/java/org/thunderdog/challegram/ui/MainController.java",
+      "sourceUrl": "https://github.com/TGX-Android/Telegram-X/blob/9312ace35291f68fdd66ddff348d7321bee2a4bd/app/src/main/java/org/thunderdog/challegram/ui/MainController.java",
+      "visualParityVerified": false
+    },
+    {
+      "client": "macOS",
+      "repository": "https://github.com/overtake/TelegramSwift",
+      "commit": "579cebbf0c01fd41b712eff3647fa7f69db9665d",
+      "rootSource": "Telegram-Mac/MainViewController.swift",
+      "sourceUrl": "https://github.com/overtake/TelegramSwift/blob/579cebbf0c01fd41b712eff3647fa7f69db9665d/Telegram-Mac/MainViewController.swift",
+      "visualParityVerified": false
+    },
+    {
+      "client": "Web A",
+      "repository": "https://github.com/Ajaxy/telegram-tt",
+      "commit": "ea0d226147a80f05253bf1a6ffef08d694b8e6e4",
+      "rootSource": "src/components/left/main/LeftMain.tsx",
+      "sourceUrl": "https://github.com/Ajaxy/telegram-tt/blob/ea0d226147a80f05253bf1a6ffef08d694b8e6e4/src/components/left/main/LeftMain.tsx",
+      "visualParityVerified": false
+    },
+    {
+      "client": "Web K",
+      "repository": "https://github.com/morethanwords/tweb",
+      "commit": "cac8174ea6833147fc89991629e6c34296f32eb8",
+      "rootSource": "src/scss/partials/_leftSidebar.scss",
+      "sourceUrl": "https://github.com/morethanwords/tweb/blob/cac8174ea6833147fc89991629e6c34296f32eb8/src/scss/partials/_leftSidebar.scss",
+      "visualParityVerified": false
+    }
+  ]
+}

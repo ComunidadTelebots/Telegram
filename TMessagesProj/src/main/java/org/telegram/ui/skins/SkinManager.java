@@ -109,6 +109,10 @@ public class SkinManager {
         return activeSkin;
     }
 
+    public ClientLayout getClientLayout() {
+        return selectedSkin ? ClientLayout.forSkin(activeSkin.getId()) : ClientLayout.ANDROID;
+    }
+
     public boolean hasSelectedSkin() {
         return selectedSkin;
     }

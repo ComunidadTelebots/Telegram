@@ -25,8 +25,32 @@ public final class SkinPreviewDialog {
         content.setOrientation(LinearLayout.VERTICAL);
 
         SkinChatPreviewView previewView = new SkinChatPreviewView(context, skin);
-        content.addView(previewView, LayoutHelper.createLinear(
-                LayoutHelper.MATCH_PARENT, 330, 20, 4, 20, 10));
+        ClientLayout client = ClientLayout.forSkin(skin.getId());
+        LinearLayout preview = new LinearLayout(context);
+        boolean side = client.placement == ClientLayout.Placement.SIDE;
+        preview.setOrientation(side ? LinearLayout.HORIZONTAL : LinearLayout.VERTICAL);
+        if (client != ClientLayout.ANDROID) {
+            final ClientNavigationView[] navigation = new ClientNavigationView[1];
+            navigation[0] = new ClientNavigationView(context, client, null,
+                    destination -> navigation[0].update(destination, 0));
+            LinearLayout.LayoutParams navParams = side
+                    ? new LinearLayout.LayoutParams(AndroidUtilities.dp(client.extentDp), LinearLayout.LayoutParams.MATCH_PARENT)
+                    : new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, AndroidUtilities.dp(client.extentDp));
+            LinearLayout.LayoutParams chatParams = side
+                    ? new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+                    : new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f);
+            if (client.placement == ClientLayout.Placement.BOTTOM) {
+                preview.addView(previewView, chatParams);
+                preview.addView(navigation[0], navParams);
+            } else {
+                preview.addView(navigation[0], navParams);
+                preview.addView(previewView, chatParams);
+            }
+        } else {
+            preview.addView(previewView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+        }
+        content.addView(preview, LayoutHelper.createLinear(
+                LayoutHelper.MATCH_PARENT, 390, 12, 4, 12, 10));
 
         TextView description = new TextView(context);
         description.setText(R.string.SkinPreviewModernFeatures);
@@ -86,8 +110,14 @@ public final class SkinPreviewDialog {
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
-            int width = getWidth();
-            int height = getHeight();
+            // Use a fixed logical canvas so side navigation cannot clip the sample bubbles.
+            int width = AndroidUtilities.dp(320);
+            float scale = Math.min(getWidth() / (float) width, getHeight() / (float) AndroidUtilities.dp(330));
+            if (scale <= 0) return;
+            int height = (int) (getHeight() / scale);
+            canvas.save();
+            canvas.translate((getWidth() - width * scale) / 2f, 0);
+            canvas.scale(scale, scale);
 
             paint.setColor(Theme.getColor(Theme.key_windowBackgroundGray));
             canvas.drawRoundRect(0, 0, width, height, AndroidUtilities.dp(14), AndroidUtilities.dp(14), paint);
@@ -96,6 +126,7 @@ public final class SkinPreviewDialog {
             drawStories(canvas, width);
             drawMessages(canvas, width);
             drawComposer(canvas, width, height);
+            canvas.restore();
         }
 
         private void drawHeader(Canvas canvas, int width) {
@@ -153,7 +184,7 @@ public final class SkinPreviewDialog {
             rect.set(AndroidUtilities.dp(10), height - AndroidUtilities.dp(48),
                     width - AndroidUtilities.dp(10), height - AndroidUtilities.dp(8));
             canvas.drawRoundRect(rect, AndroidUtilities.dp(20), AndroidUtilities.dp(20), paint);
-            drawText(canvas, messageText, 48, height - 23, 13, Theme.key_chat_messagePanelHint, false);
+            drawText(canvas, messageText, 48, height / AndroidUtilities.density - 23, 13, Theme.key_chat_messagePanelHint, false);
 
             paint.setColor(Theme.getColor(Theme.key_chat_messagePanelIcons));
             canvas.drawCircle(AndroidUtilities.dp(29), height - AndroidUtilities.dp(28), AndroidUtilities.dp(7), paint);

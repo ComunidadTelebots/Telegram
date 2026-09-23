@@ -8,6 +8,18 @@ se indique una versión propia del fork.
 
 ## [Sin publicar]
 
+### Navegación de clientes en desarrollo
+
+- Contenedores inferiores para iOS/macOS, superiores para Telegram X y laterales
+  para Unigram/Web A/Web K, conectados a chats, contactos, llamadas y ajustes.
+- Cabeceras y espacios de navegación actualizados al cambiar de diseño, también
+  cuando se reconstruyen vistas conservadas. Referencias de código fijadas por commit.
+- Esta revisión todavía no reproduce íntegramente los seis clientes ni cuenta con
+  comparación visual en dispositivo; permanece experimental en `dev`.
+- Corregido el argumento `--exclude-libs` que impedía enlazar bibliotecas nativas.
+- Los APK de compilaciones limitadas a una ABI excluyen las demás arquitecturas,
+  evitando anunciar arquitecturas que carecen de la biblioteca principal.
+
 ### Diseños y animaciones independientes
 
 - Perfiles seleccionables de Unigram, Telegram X, Web A, Web K, macOS e iOS;
