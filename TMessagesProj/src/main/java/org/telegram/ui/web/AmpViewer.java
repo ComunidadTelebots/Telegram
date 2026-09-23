@@ -6,15 +6,16 @@ import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.RectF;
 import android.os.Build;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.JavascriptInterface;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -29,13 +30,8 @@ import androidx.core.graphics.ColorUtils;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
-import org.telegram.messenger.FileLog;
-import org.telegram.messenger.LocaleController;
-import org.telegram.messenger.R;
+import org.telegram.messenger.browser.Browser;
 import org.telegram.tgnet.TLRPC;
-import org.telegram.ui.ActionBar.ActionBar;
-import org.telegram.ui.ActionBar.ActionBarMenu;
-import org.telegram.ui.ActionBar.ActionBarMenuItem;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.LayoutHelper;
 
@@ -46,7 +42,7 @@ import java.net.URL;
  *
  * Modos:
  *  - Iframe (WebView): carga la URL via Google AMP Cache → Cloudflare AMP Cache → URL original.
- *  - Lectura: extrae el artículo del HTML y lo renderiza de forma nativa sin WebView.
+ *  - Lectura: muestra el título y la descripción recibidos de Telegram.
  *
  * La preferencia de modo se persiste en SharedPreferences ("amp-reader-mode").
  */
@@ -83,7 +79,9 @@ public class AmpViewer extends FrameLayout {
     private final Runnable onClose;
 
     private boolean readerMode;
-    private boolean useFallback = false;
+    private int fallbackStage;
+    private boolean destroyed;
+    private ValueAnimator progressAnimator;
 
     // Vistas
     private View headerView;
@@ -93,7 +91,6 @@ public class AmpViewer extends FrameLayout {
     private ProgressBar loadingView;
     private ScrollView readerScrollView;
     private LinearLayout readerContent;
-    private ActionBarMenuItem readerModeItem;
 
     // Animación de progreso
     private final Paint progressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -137,7 +134,6 @@ public class AmpViewer extends FrameLayout {
                 canvas.drawRect(0, 0, w * progressFraction, getHeight(), progressPaint);
             }
         };
-        progressBar.setId(R.id.search_field); // reutilizo un id existente como tag
         addView(progressBar, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 3, Gravity.TOP | Gravity.START, 0, 56, 0, 0));
         // Guardar referencia para actualizar progreso
         setTag(progressBar);
@@ -227,7 +223,7 @@ public class AmpViewer extends FrameLayout {
         openBtn.setGravity(Gravity.CENTER);
         openBtn.setClickable(true);
         openBtn.setBackground(Theme.createSelectorDrawable(Theme.ACTION_BAR_WHITE_SELECTOR_COLOR));
-        openBtn.setOnClickListener(v -> AndroidUtilities.openUrl(getContext(), url));
+        openBtn.setOnClickListener(v -> Browser.openUrl(getContext(), url));
         header.addView(openBtn, LayoutHelper.createLinear(48, 56));
 
         return header;
@@ -239,24 +235,52 @@ public class AmpViewer extends FrameLayout {
         settings.setDomStorageEnabled(true);
         settings.setLoadWithOverviewMode(true);
         settings.setUseWideViewPort(true);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            settings.setSafeBrowsingEnabled(false);
-        }
+        settings.setAllowFileAccess(false);
+        settings.setAllowContentAccess(false);
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                // Permitir navegación dentro de la página AMP; bloquear salidas externas
-                String reqUrl = request.getUrl().toString();
-                if (reqUrl.contains("ampproject.org") || reqUrl.contains("amp.cloudflare.com")) {
+                return !request.isForMainFrame() || handleNavigation(request.getUrl().toString());
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String target) {
+                return handleNavigation(target);
+            }
+
+            private boolean handleNavigation(String target) {
+                Uri uri = Uri.parse(target);
+                String scheme = uri.getScheme();
+                if (!"https".equalsIgnoreCase(scheme) && !"http".equalsIgnoreCase(scheme)) {
+                    return true;
+                }
+                if ("https".equalsIgnoreCase(scheme) && uri.getUserInfo() == null
+                        && AmpUrls.isCacheHost(uri.getHost())) {
                     return false;
                 }
-                AndroidUtilities.openUrl(getContext(), reqUrl);
+                Browser.openUrl(getContext(), target);
                 return true;
             }
 
             @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                if (request.isForMainFrame()) loadFallback();
+            }
+
+            @Override
+            public void onReceivedError(WebView view, int code, String description, String failingUrl) {
+                if (Build.VERSION.SDK_INT < 23) loadFallback();
+            }
+
+            @Override
+            public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse response) {
+                if (request.isForMainFrame() && response.getStatusCode() >= 400) loadFallback();
+            }
+
+            @Override
             public void onPageFinished(WebView view, String url) {
+                if (destroyed || readerMode) return;
                 loadingView.setVisibility(GONE);
                 webViewContainer.setVisibility(VISIBLE);
                 animateProgress(0.35f); // Simula algo de progreso leído
@@ -274,14 +298,27 @@ public class AmpViewer extends FrameLayout {
     // ── Carga AMP ───────────────────────────────────────────────────────────
 
     private void loadAmpUrl() {
+        if (destroyed || readerMode) return;
         loadingView.setVisibility(VISIBLE);
         webViewContainer.setVisibility(INVISIBLE);
         readerScrollView.setVisibility(GONE);
 
-        String ampUrl = useFallback ? buildCloudflareAmpUrl(url) : buildGoogleAmpUrl(url);
+        String ampUrl = fallbackStage == 0 ? buildGoogleAmpUrl(url)
+                : fallbackStage == 1 ? buildCloudflareAmpUrl(url) : url;
         if (ampUrl == null) ampUrl = url;
 
         webView.loadUrl(ampUrl);
+    }
+
+    private void loadFallback() {
+        if (destroyed || readerMode) return;
+        if (fallbackStage < 2) {
+            fallbackStage++;
+            loadAmpUrl();
+        } else {
+            loadingView.setVisibility(GONE);
+            webViewContainer.setVisibility(VISIBLE);
+        }
     }
 
     // ── Modo lectura ─────────────────────────────────────────────────────────
@@ -301,6 +338,7 @@ public class AmpViewer extends FrameLayout {
     }
 
     private void showReaderMode() {
+        webView.stopLoading();
         loadingView.setVisibility(VISIBLE);
         webViewContainer.setVisibility(GONE);
 
@@ -353,7 +391,7 @@ public class AmpViewer extends FrameLayout {
         readMoreView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
         readMoreView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueText));
         readMoreView.setPadding(0, AndroidUtilities.dp(16), 0, 0);
-        readMoreView.setOnClickListener(v -> AndroidUtilities.openUrl(ctx, url));
+        readMoreView.setOnClickListener(v -> Browser.openUrl(ctx, url));
         readerContent.addView(readMoreView);
 
         loadingView.setVisibility(GONE);
@@ -364,9 +402,12 @@ public class AmpViewer extends FrameLayout {
     // ── Progreso de lectura ─────────────────────────────────────────────────
 
     private void animateProgress(float target) {
+        if (destroyed) return;
+        if (progressAnimator != null) progressAnimator.cancel();
         View bar = (View) getTag();
         if (bar == null) return;
         ValueAnimator anim = ValueAnimator.ofFloat(progressFraction, target);
+        progressAnimator = anim;
         anim.setDuration(200);
         anim.addUpdateListener(a -> {
             progressFraction = (float) a.getAnimatedValue();
@@ -396,10 +437,23 @@ public class AmpViewer extends FrameLayout {
     }
 
     public void destroy() {
+        if (destroyed) return;
+        destroyed = true;
+        if (progressAnimator != null) progressAnimator.cancel();
         if (webView != null) {
             webView.stopLoading();
+            webView.setWebChromeClient(null);
+            webView.setWebViewClient(null);
+            webViewContainer.removeView(webView);
             webView.destroy();
+            webView = null;
         }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        destroy();
+        super.onDetachedFromWindow();
     }
 
     // ── Factory: abrir desde ChatMessageCell ─────────────────────────────────
@@ -409,9 +463,6 @@ public class AmpViewer extends FrameLayout {
      * Heurística simple: HTTPS y no es ya una URL de AMP cache.
      */
     public static boolean isAmpEligible(String url) {
-        if (url == null) return false;
-        return url.startsWith("https://")
-            && !url.contains("ampproject.org")
-            && !url.contains("amp.cloudflare.com");
+        return AmpUrls.isEligible(url);
     }
 }

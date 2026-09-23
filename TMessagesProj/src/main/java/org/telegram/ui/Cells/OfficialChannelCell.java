@@ -23,6 +23,8 @@ import org.telegram.ui.Components.BackupImageView;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.UniversalAdapter;
 import org.telegram.ui.Components.UItem;
+import org.telegram.ui.Components.RecyclerListView;
+import org.telegram.ui.Components.UniversalRecyclerView;
 
 /**
  * Fila estilo lista-de-chats para mostrar un canal oficial en los Ajustes.
@@ -53,7 +55,7 @@ public class OfficialChannelCell extends FrameLayout {
         // Avatar
         avatarDrawable = new AvatarDrawable();
         avatarDrawable.setColor(0xFF5B9BD5, 0xFF3A7EC4);
-        avatarDrawable.setInfo(0, "C", "T", false);
+        avatarDrawable.setInfo(0, "C", "T");
 
         avatarView = new BackupImageView(context);
         avatarView.setRoundRadius(AndroidUtilities.dp(23));
@@ -109,12 +111,12 @@ public class OfficialChannelCell extends FrameLayout {
         static { setup(new Factory()); }
 
         @Override
-        public OfficialChannelCell createView(Context context, int which, int height, Theme.ResourcesProvider resourcesProvider) {
+        public OfficialChannelCell createView(Context context, RecyclerListView listView, int currentAccount, int classGuid, Theme.ResourcesProvider resourcesProvider) {
             return new OfficialChannelCell(context);
         }
 
         @Override
-        public void bindView(OfficialChannelCell view, UItem item, boolean divider) {
+        public void bindView(View view, UItem item, boolean divider, UniversalAdapter adapter, UniversalRecyclerView listView) {
             // Datos estáticos — nada que bindear dinámicamente
         }
 

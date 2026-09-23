@@ -8,6 +8,21 @@ se indique una versión propia del fork.
 
 ## [Sin publicar]
 
+### Integración Android 16
+
+- Fusión de DrKLO/Telegram `master` (`9552e5541`, versión 12.10.3 / 7089).
+- SDK de compilación y destino 36, Gradle 8.13 y AGP 8.13.2 de upstream.
+  Se conserva el mínimo real de Android 5.0; Android 1.0–4.4 no está soportado.
+- Corregidas las firmas de la celda del canal oficial, el acceso a la URL AMP,
+  las llamadas al navegador y un recurso inexistente que impedían compilar.
+- Corregidas la validación de dominios AMP, la recuperación ante errores de carga,
+  el cambio a modo lectura y la liberación del WebView y sus animaciones.
+- Se respeta el radio de burbujas existente cuando no se ha elegido un diseño.
+- Corregida la retirada del callback de navegación Atrás en Android 13 y la
+  configuración de namespaces de Media3 en Windows.
+- Añadidas pruebas de regresión de URLs y documentación de compatibilidad en
+  `Tools/ANDROID_COMPATIBILITY.md`.
+
 ### Añadido
 
 - Selector inicial de diseños de interfaz en los ajustes de apariencia.

@@ -10,9 +10,11 @@ import android.webkit.MimeTypeMap;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.OptIn;
 import androidx.collection.LongSparseArray;
 
-import com.google.android.exoplayer2.util.Consumer;
+import androidx.media3.common.util.Consumer;
+import androidx.media3.common.util.UnstableApi;
 
 import org.telegram.SQLite.SQLiteCursor;
 import org.telegram.SQLite.SQLiteDatabase;
@@ -53,6 +55,7 @@ import org.telegram.tgnet.TLRPC;
 import org.telegram.tgnet.Vector;
 import org.telegram.tgnet.tl.TL_bots;
 import org.telegram.tgnet.tl.TL_stories;
+import org.telegram.tgnet.tl.TL_update;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
@@ -62,7 +65,6 @@ import org.telegram.ui.Components.Premium.LimitReachedBottomSheet;
 import org.telegram.ui.Components.Premium.PremiumFeatureBottomSheet;
 import org.telegram.ui.Components.Reactions.ReactionImageHolder;
 import org.telegram.ui.Components.Reactions.ReactionsLayoutInBubble;
-import org.telegram.ui.FilterCreateActivity;
 import org.telegram.ui.LaunchActivity;
 import org.telegram.ui.PremiumPreviewFragment;
 import org.telegram.ui.StatisticActivity;
@@ -90,6 +92,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
+@OptIn(markerClass = UnstableApi.class)
 public class StoriesController {
 
     public final static int STATE_READ = 0;
@@ -2410,8 +2413,8 @@ public class StoriesController {
                                 storyItem.media = updateStory.story.media;
                             }
                         }
-                        if (updates.updates.get(i) instanceof TLRPC.TL_updateStoryID) {
-                            TLRPC.TL_updateStoryID updateStory = (TLRPC.TL_updateStoryID) updates.updates.get(i);
+                        if (updates.updates.get(i) instanceof TL_update.TL_updateStoryID) {
+                            TL_update.TL_updateStoryID updateStory = (TL_update.TL_updateStoryID) updates.updates.get(i);
                             if (storyItem == null) {
                                 storyItem = new TL_stories.TL_storyItem();
                                 storyItem.date = ConnectionsManager.getInstance(currentAccount).getCurrentTime();
@@ -2522,9 +2525,9 @@ public class StoriesController {
             for (int i = 0; i < count; ++i) {
                 long userId = entry.shareUserIds.get(i);
                 if (entry.wouldBeVideo()) {
-                    SendMessagesHelper.prepareSendingVideo(AccountInstance.getInstance(currentAccount), path, null, null, null, userId, null, null, null, null, captionEntities, 0, null, !entry.silent, entry.scheduleDate, 0, false, false, caption, null, 0, 0, 0);
+                    SendMessagesHelper.prepareSendingVideo(AccountInstance.getInstance(currentAccount), path, null, null, null, userId, null, null, null, null, captionEntities, 0, null, !entry.silent, entry.scheduleDate, 0, false, false, caption, null, 0, 0);
                 } else {
-                    SendMessagesHelper.prepareSendingPhoto(AccountInstance.getInstance(currentAccount), path, null, null, userId, null, null, null, null, captionEntities, null, null, 0, null, null, !entry.silent, entry.scheduleDate, 0, false, caption, null, 0, 0, 0);
+                    SendMessagesHelper.prepareSendingPhoto(AccountInstance.getInstance(currentAccount), path, null, null, userId, null, null, null, null, captionEntities, null, null, 0, null, null, !entry.silent, entry.scheduleDate, 0, false, caption, null, 0, 0);
                 }
             }
             putMessages = true;

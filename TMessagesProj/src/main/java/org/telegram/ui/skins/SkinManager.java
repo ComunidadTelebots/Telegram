@@ -67,7 +67,9 @@ public class SkinManager {
         String savedId = migrateLegacyId(getPrefs().getString(PREF_KEY, "android:current"));
         activeSkin = findById(savedId);
         if (activeSkin == null) activeSkin = skins.get(0);
-        applyToSharedConfig(false);
+        if (getPrefs().contains(PREF_KEY)) {
+            applyToSharedConfig(false);
+        }
     }
 
     public static SkinManager get() {
