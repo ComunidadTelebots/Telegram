@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:197932818067:android:e11ef72d7bc9c25c397766",
+        "android_client_info": {
+          "package_name": "org.comunidadtelebots.alfa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDY_fSQsg-eMT-PE_TM7p2DkRgzu6Id7Rg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:197932818067:android:094994bc6877a010397766",
         "android_client_info": {
           "package_name": "org.comunidadtelebots.dev"
