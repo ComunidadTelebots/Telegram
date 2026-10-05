@@ -15,9 +15,10 @@ se indique una versión propia del fork.
 - Eliminados los sufijos de paquete ligados a debug/standalone. Las cuentas,
   acciones de contactos y proveedores quedan separados entre canales.
 - Incorporada la configuración Firebase aportada para `org.comunidadtelebots.dev`
-  `org.comunidadtelebots.alfa`, `org.comunidadtelebots.rc` y `org.comunidadtelebots.stable`.
+  `org.comunidadtelebots.alfa`, `org.comunidadtelebots.beta`, `org.comunidadtelebots.rc`
+  y `org.comunidadtelebots.stable`.
   `ENABLE_FIREBASE=auto` activa Google Services solo si el archivo del módulo
-  registra el paquete seleccionado; los otros canales necesitan su configuración.
+  registra el paquete seleccionado; verificada la selección en los cinco canales.
 
 ### Actualización oficial 12.10.6
 
