@@ -66,8 +66,8 @@ another channel.
 
 `ENABLE_FIREBASE=auto` enables Google Services only when the module's root
 `google-services.json` registers the selected application ID. The user-supplied
-dev configuration is installed in `TMessagesProj_App/google-services.json`;
-alfa/beta/rc/stable still need their own registrations. Register each required
+configuration for dev and stable is installed in `TMessagesProj_App/google-services.json`;
+alfa/beta/rc still need their own registrations. Register each required
 package and signing certificate in your own Firebase project and replace the
 module's configuration. `-PENABLE_FIREBASE=false` explicitly disables integration;
 `true` forces the Google plugin to validate its configuration (including files
@@ -82,7 +82,8 @@ an invalid channel was rejected. Only dev has been packaged and run for this
 change; release signing, FCM delivery and authenticated contact sync remain untested.
 The final rebuild includes the user-supplied Firebase dev configuration. Generated
 Google Services resources match its app registration and the emulator reports
-`FirebaseApp initialization successful`. Other channels keep Firebase disabled.
+`FirebaseApp initialization successful`. Google Services resource generation was also verified for stable using the
+subsequently supplied registration; alfa/beta/rc keep Firebase disabled.
 The retained dev APK is `.gradle/channel-apks/telebots-dev-12.10.6-debug.apk`.
 
 ## Fork fixes
