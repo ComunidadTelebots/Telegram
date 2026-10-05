@@ -1,0 +1,18 @@
+import groovy.json.JsonSlurper
+
+// A Firebase Android registration belongs to an exact application ID.
+// Never relabel upstream credentials to make a fork package pass validation.
+def mode = rootProject.ext.forkFirebaseMode
+def configFile = file('google-services.json')
+def matchesPackage = false
+if (mode == 'auto' && configFile.exists()) {
+    def config = new JsonSlurper().parse(configFile)
+    matchesPackage = config.client?.any {
+        it.client_info?.android_client_info?.package_name == rootProject.ext.forkApplicationId
+    } ?: false
+}
+if (mode == 'true' || (mode == 'auto' && matchesPackage)) {
+    apply plugin: 'com.google.gms.google-services'
+} else if (mode == 'auto') {
+    logger.lifecycle("${project.path}: Firebase disabled; no configuration for ${rootProject.ext.forkApplicationId}")
+}

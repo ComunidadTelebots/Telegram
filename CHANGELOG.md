@@ -8,6 +8,16 @@ se indique una versión propia del fork.
 
 ## [Sin publicar]
 
+### Paquetes por canal
+
+- Identificadores `org.comunidadtelebots.dev`, `.alfa`, `.beta`, `.rc` y `.stable`,
+  seleccionados con `APP_CHANNEL` (predeterminado: `dev`) en los módulos APK.
+- Eliminados los sufijos de paquete ligados a debug/standalone. Las cuentas,
+  acciones de contactos y proveedores quedan separados entre canales.
+- Incorporada la configuración Firebase aportada para `org.comunidadtelebots.dev`.
+  `ENABLE_FIREBASE=auto` activa Google Services solo si el archivo del módulo
+  registra el paquete seleccionado; los otros canales necesitan su configuración.
+
 ### Actualización oficial 12.10.6
 
 - Integradas las versiones 12.10.4–12.10.6 de DrKLO/Telegram, hasta el commit

@@ -1,7 +1,5 @@
 plugins {
     id 'com.android.application'
-    id 'com.google.gms.google-services'
-    id 'com.google.firebase.crashlytics'
 }
 apply plugin: 'org.telegram.build-app-plugin'
 
@@ -34,7 +32,7 @@ android {
     compileSdkVersion 36
     buildToolsVersion '36.0.0'
 
-    defaultConfig.applicationId = APP_PACKAGE
+    defaultConfig.applicationId = rootProject.ext.forkApplicationId
 
     sourceSets.main.jniLibs.srcDirs = ['../TMessagesProj/jni/']
 
@@ -78,7 +76,7 @@ android {
             debuggable false
             jniDebuggable false
             signingConfig signingConfigs.debug
-            applicationIdSuffix ".beta"
+
             minifyEnabled true
             multiDexEnabled true
             shrinkResources true
@@ -90,7 +88,7 @@ android {
             debuggable false
             jniDebuggable false
             signingConfig signingConfigs.debug
-            applicationIdSuffix ".beta"
+
             minifyEnabled true
             multiDexEnabled true
             shrinkResources true
@@ -102,7 +100,7 @@ android {
             debuggable false
             jniDebuggable false
             signingConfig signingConfigs.debug
-            applicationIdSuffix ".beta"
+
             minifyEnabled true
             multiDexEnabled true
             shrinkResources true
@@ -194,4 +192,9 @@ android {
     lintOptions {
         checkReleaseBuilds false
     }
+}
+
+apply from: rootProject.file('gradle/firebase.gradle')
+if (pluginManager.hasPlugin('com.google.gms.google-services')) {
+    apply plugin: 'com.google.firebase.crashlytics'
 }

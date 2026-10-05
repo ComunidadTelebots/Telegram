@@ -17,6 +17,18 @@ repositories {
     google()
 }
 
+// Channels are independent of debug/release and ABI variants.
+def forkChannels = ['dev', 'alfa', 'beta', 'rc', 'stable']
+def forkChannel = providers.gradleProperty('APP_CHANNEL').get()
+if (!forkChannels.contains(forkChannel)) {
+    throw new GradleException("APP_CHANNEL must be one of ${forkChannels}; got '${forkChannel}'")
+}
+ext.forkApplicationId = "${APP_PACKAGE}.${forkChannel}"
+ext.forkFirebaseMode = providers.gradleProperty('ENABLE_FIREBASE').get()
+if (!['auto', 'true', 'false'].contains(forkFirebaseMode)) {
+    throw new GradleException('ENABLE_FIREBASE must be auto, true or false')
+}
+
 // Strip JLatexMath fonts we don't ship (transitive AAR assets from
 // io.noties.markwon:ext-latex -> ru.noties:jlatexmath-android, ~764 KB total under
 // assets/org/scilab/forge/jlatexmath/fonts/). Has to live in the APK modules — a

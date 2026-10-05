@@ -140,6 +140,10 @@ android {
 
 
     defaultConfig {
+        resValue "string", "fork_account_type", rootProject.ext.forkApplicationId
+        resValue "string", "fork_contact_profile_mime", "vnd.android.cursor.item/vnd.${rootProject.ext.forkApplicationId}.android.profile"
+        resValue "string", "fork_contact_call_mime", "vnd.android.cursor.item/vnd.${rootProject.ext.forkApplicationId}.android.call"
+        resValue "string", "fork_contact_video_mime", "vnd.android.cursor.item/vnd.${rootProject.ext.forkApplicationId}.android.call.video"
         minSdkVersion 21
         targetSdkVersion 36
 

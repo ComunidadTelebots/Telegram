@@ -33,7 +33,7 @@ android {
     compileSdkVersion 36
     buildToolsVersion '36.0.0'
 
-    defaultConfig.applicationId = APP_PACKAGE
+    defaultConfig.applicationId = rootProject.ext.forkApplicationId
 
     sourceSets.main.jniLibs.srcDirs = ['../TMessagesProj/jni/']
 
@@ -166,4 +166,4 @@ android {
     }
 }
 
-apply plugin: 'com.google.gms.google-services'
+apply from: rootProject.file('gradle/firebase.gradle')

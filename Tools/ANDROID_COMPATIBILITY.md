@@ -39,6 +39,52 @@ The command above packages ARM64 only. Omit the injected ABI property to build
 the flavor's full ABI set. The debug APK is generated at
 `TMessagesProj_App/build/intermediates/apk/afat/debug/app.apk`.
 
+## Application packages and channels
+
+Set `APP_CHANNEL` in `gradle.properties` or pass `-PAPP_CHANNEL=beta` to Gradle.
+The default is `dev`. Only the following channel names are accepted:
+
+| Channel | Application ID |
+| --- | --- |
+| dev | org.comunidadtelebots.dev |
+| alfa | org.comunidadtelebots.alfa |
+| beta | org.comunidadtelebots.beta |
+| rc | org.comunidadtelebots.rc |
+| stable | org.comunidadtelebots.stable |
+
+Channels are independent of Git branches, ABI flavors and debug/release build
+types. All APK modules use the same channel mapping; the old `.beta`/`.web`
+build-type suffixes are removed. Java namespaces remain unchanged for JNI and
+upstream compatibility. Selecting `stable` alone does not produce a release build.
+
+For example, append `-PAPP_CHANNEL=stable` to an `assembleAfatRelease` invocation.
+Different channels can coexist, each with separate app data, provider authorities,
+Android account types and contact actions. An APK with a new package does not
+update or inherit login/data from the old `org.telegram.messenger.beta` app.
+Build outputs use the same variant directory, so copy each APK before building
+another channel.
+
+`ENABLE_FIREBASE=auto` enables Google Services only when the module's root
+`google-services.json` registers the selected application ID. The user-supplied
+dev configuration is installed in `TMessagesProj_App/google-services.json`;
+alfa/beta/rc/stable still need their own registrations. Register each required
+package and signing certificate in your own Firebase project and replace the
+module's configuration. `-PENABLE_FIREBASE=false` explicitly disables integration;
+`true` forces the Google plugin to validate its configuration (including files
+in variant source sets). Do not just edit package names in Telegram's Firebase
+files. Huawei builds also need matching AppGallery/AG Connect configuration.
+
+Channel verification on 2026-10-05: the dev ARM64 debug APK compiled (301 tasks),
+passed signature/16 KB ZIP alignment checks, installed alongside the old beta
+package and launched on the API 37 emulator without a recorded crash. All five
+channels passed merged-manifest, provider-authority and contact-resource checks;
+an invalid channel was rejected. Only dev has been packaged and run for this
+change; release signing, FCM delivery and authenticated contact sync remain untested.
+The final rebuild includes the user-supplied Firebase dev configuration. Generated
+Google Services resources match its app registration and the emulator reports
+`FirebaseApp initialization successful`. Other channels keep Firebase disabled.
+The retained dev APK is `.gradle/channel-apks/telebots-dev-12.10.6-debug.apk`.
+
 ## Fork fixes
 
 - Correct the official-channel avatar and UItem factory API signatures.

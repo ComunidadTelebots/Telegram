@@ -27,7 +27,7 @@ android {
     compileSdkVersion 36
     buildToolsVersion '36.0.0'
 
-    defaultConfig.applicationId = APP_PACKAGE
+    defaultConfig.applicationId = rootProject.ext.forkApplicationId
 
     sourceSets.main.jniLibs.srcDirs = ['../TMessagesProj/jni/']
 
@@ -70,7 +70,7 @@ android {
             debuggable true
             jniDebuggable true
             signingConfig signingConfigs.debug
-            applicationIdSuffix ".web"
+
             minifyEnabled false
             multiDexEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), '../TMessagesProj/proguard-rules.pro'
@@ -81,7 +81,7 @@ android {
             debuggable false
             jniDebuggable false
             signingConfig signingConfigs.release
-            applicationIdSuffix ".web"
+
             minifyEnabled true
             shrinkResources true
             multiDexEnabled true
@@ -158,4 +158,4 @@ android {
     }
 }
 
-apply plugin: 'com.google.gms.google-services'
+apply from: rootProject.file('gradle/firebase.gradle')
