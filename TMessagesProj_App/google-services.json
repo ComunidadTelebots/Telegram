@@ -26,6 +26,25 @@
     },
     {
       "client_info": {
+        "mobilesdk_app_id": "1:197932818067:android:9e3f667ab1ee8a93397766",
+        "android_client_info": {
+          "package_name": "org.comunidadtelebots.rc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDY_fSQsg-eMT-PE_TM7p2DkRgzu6Id7Rg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:197932818067:android:dae60f803a362077397766",
         "android_client_info": {
           "package_name": "org.comunidadtelebots.stable"
