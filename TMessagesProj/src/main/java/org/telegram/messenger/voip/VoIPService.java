@@ -756,6 +756,11 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 	@SuppressLint({"MissingPermission", "InlinedApi"})
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+        if (org.telegram.utils.proxy.TorProxyController.isEnabled()) {
+            android.widget.Toast.makeText(this, LocaleController.getString(org.telegram.messenger.R.string.TorCallsUnavailable), android.widget.Toast.LENGTH_LONG).show();
+            stopSelf();
+            return START_NOT_STICKY;
+        }
 		if (sharedInstance != null) {
 			if (BuildVars.LOGS_ENABLED) {
 				FileLog.e("Tried to start the VoIP service when it's already started");

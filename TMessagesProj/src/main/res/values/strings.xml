@@ -11264,4 +11264,17 @@
     <string name="RoundVideoComposition">Composition</string>
     <string name="RoundVideoCompositionEnabled">Round video styling</string>
     <string name="RoundVideoCompositionInfo">Disable styling to record a plain square without outside-circle blur, dimming or Telegram overlays.</string>
+    <string name="TorTitle">Integrated Tor</string>
+    <string name="TorStopped">Tor disabled</string>
+    <string name="TorStarting">Connecting to Tor</string>
+    <string name="TorConnected">Tor circuit ready</string>
+    <string name="TorFailed">Tor unavailable. Telegram remains blocked. Turn Tor off and on to retry.</string>
+    <string name="TorUnsupported">Integrated Tor requires Android 7 or later.</string>
+    <string name="TorScope">The local VPN captures this package traffic (IPv4, IPv6 and DNS). TCP uses Tor; UDP and calls are unavailable. If Tor fails, traffic stays blocked while the VPN remains active. Revoking or stopping the VPN in Android removes this protection. Other packages, including Google push services, are outside this VPN. Your account still identifies you. Disabling Tor restores your previous proxy.</string>
+    <string name="TorCallsUnavailable">Calls are unavailable while integrated Tor is enabled.</string>
+    <string name="TorEndCallFirst">End the current call before enabling Tor.</string>
+    <string name="TorVpnActive">Package VPN active · Tor transport</string>
+    <string name="TorVpnRevoked">VPN permission revoked: package protection stopped</string>
+    <string name="TorServerLatency">Telegram server latency (RTT):</string>
+    <string name="TorLatencyUnavailable">No measurement</string>
 </resources>

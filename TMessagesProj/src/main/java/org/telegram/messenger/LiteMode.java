@@ -114,6 +114,10 @@ public class LiteMode {
                 onPowerSaverApplied(lastPowerSaverApplied = false);
             }
         }
+        if (!ignorePowerSaving && SharedConfig.isLowRamDevice()) {
+            return value & ~(FLAG_LIQUID_GLASS | FLAG_CHAT_BLUR | FLAG_CHAT_BACKGROUND
+                    | FLAG_CHAT_THANOS | FLAG_PARTICLES | FLAG_AUTOPLAY_VIDEOS | FLAG_AUTOPLAY_GIFS);
+        }
         return value;
     }
 

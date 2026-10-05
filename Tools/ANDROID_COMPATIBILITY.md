@@ -88,6 +88,10 @@ The retained dev APK is `.gradle/channel-apks/telebots-dev-12.10.6-debug.apk`.
 
 ## Fork fixes
 
+Tor integrado, VPN del paquete, política HTTPS, indicador de RTT y ajustes para
+dispositivos de poca RAM: consultar [TOR_AND_ANDROID_GO.md](TOR_AND_ANDROID_GO.md),
+incluidos sus límites de cobertura y verificación. Tor requiere API 24+.
+
 - Correct the official-channel avatar and UItem factory API signatures.
 - Use `Browser.openUrl` and expose the AMP URL accessor across packages.
 - Validate AMP hosts by hostname boundaries, support navigation on API 21–23,

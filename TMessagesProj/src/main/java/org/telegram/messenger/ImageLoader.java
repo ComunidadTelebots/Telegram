@@ -2032,6 +2032,11 @@ public class ImageLoader {
 
     private static volatile ImageLoader Instance = null;
 
+    public static void trimExistingMemory() {
+        ImageLoader loader = Instance;
+        if (loader != null) loader.clearMemory();
+    }
+
     public static ImageLoader getInstance() {
         ImageLoader localInstance = Instance;
         if (localInstance == null) {
@@ -2050,12 +2055,13 @@ public class ImageLoader {
 
         int memoryClass = ((ActivityManager) ApplicationLoader.applicationContext.getSystemService(Context.ACTIVITY_SERVICE)).getMemoryClass();
         int maxSize;
-        if (canForce8888 = memoryClass >= 192) {
+        if (canForce8888 = memoryClass >= 192 && !SharedConfig.isLowRamDevice()) {
             maxSize = 30;
         } else {
             maxSize = 15;
         }
-        int cacheSize = DEBUG_MODE ? 1 : Math.min(maxSize, memoryClass / 7) * 1024 * 1024;
+        if (SharedConfig.isLowRamDevice()) maxSize = 8;
+        int cacheSize = DEBUG_MODE ? 1 : Math.max(1, Math.min(maxSize, memoryClass / 7)) * 1024 * 1024;
 
         int commonCacheSize =  DEBUG_MODE ? 1 : (int) (cacheSize * 0.8f);
         int smallImagesCacheSize =   DEBUG_MODE ? 1 : (int) (cacheSize * 0.2f);

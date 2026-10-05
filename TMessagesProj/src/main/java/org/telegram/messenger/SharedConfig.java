@@ -1619,6 +1619,7 @@ public class SharedConfig {
 
     @PerformanceClass
     public static int getDevicePerformanceClass() {
+        if (isLowRamDevice()) return PERFORMANCE_CLASS_LOW;
         if (overrideDevicePerformanceClass != -1) {
             return overrideDevicePerformanceClass;
         }
@@ -1629,6 +1630,7 @@ public class SharedConfig {
     }
 
     public static int measureDevicePerformanceClass() {
+        if (isLowRamDevice()) return PERFORMANCE_CLASS_LOW;
         int androidVersion = Build.VERSION.SDK_INT;
         int cpuCount = ConnectionsManager.CPU_COUNT;
         int memoryClass = ((ActivityManager) ApplicationLoader.applicationContext.getSystemService(Context.ACTIVITY_SERVICE)).getMemoryClass();
@@ -1690,6 +1692,17 @@ public class SharedConfig {
         }
 
         return performanceClass;
+    }
+
+    private static Boolean lowRamDevice;
+    public static boolean isLowRamDevice() {
+        if (lowRamDevice == null) {
+            Context context = ApplicationLoader.applicationContext;
+            if (context == null) return false;
+            ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+            lowRamDevice = manager != null && manager.isLowRamDevice();
+        }
+        return lowRamDevice;
     }
 
     public static String performanceClassName(int perfClass) {

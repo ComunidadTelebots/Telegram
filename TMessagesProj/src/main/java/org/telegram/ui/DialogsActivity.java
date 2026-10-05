@@ -508,6 +508,12 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     public static boolean switchingTheme;
     private ActionBarMenuItem doneItem;
     private ProxyDrawable proxyDrawable;
+    private final Runnable latencyRefresh = new Runnable() {
+        @Override public void run() {
+            updateProxyButton(false, false);
+            AndroidUtilities.runOnUIThread(this, 5000);
+        }
+    };
     private ActionBarMenuSubItem proxyMenuSubItem;
     private HintView2 storyHint;
     private HintView2 storyPremiumHint;
@@ -3069,6 +3075,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     @Override
     public void onFragmentDestroy() {
         super.onFragmentDestroy();
+        AndroidUtilities.cancelRunOnUIThread(latencyRefresh);
         if (observersGroup != null) {
             observersGroup.removeAllObservers();
             observersGroup = null;
@@ -7022,6 +7029,8 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     @Override
     public void onResume() {
         super.onResume();
+        AndroidUtilities.cancelRunOnUIThread(latencyRefresh);
+        AndroidUtilities.runOnUIThread(latencyRefresh, 1000);
         if (dialogStoriesCell != null) {
             dialogStoriesCell.onResume();
         }
@@ -7240,6 +7249,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     @Override
     public void onPause() {
         super.onPause();
+        AndroidUtilities.cancelRunOnUIThread(latencyRefresh);
         if (storiesBulletin != null) {
             storiesBulletin.hide();
             storiesBulletin = null;
@@ -10240,9 +10250,12 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         checkUi_itemDownloadsVisibility();
 
         final SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences("mainconfig", Activity.MODE_PRIVATE);
-        boolean proxyEnabled = preferences.getBoolean("proxy_enabled", false);
+        boolean proxyEnabled = preferences.getBoolean("proxy_enabled", false) || org.telegram.utils.proxy.TorProxyController.isEnabled();
         final boolean connected = currentConnectionState == ConnectionsManager.ConnectionStateConnected || currentConnectionState == ConnectionsManager.ConnectionStateUpdating;
-        proxyMenuSubItem.setSubtext(getString(proxyEnabled ? (connected ? R.string.MenuProxyConnected : R.string.MenuProxyConnecting) : R.string.MenuProxyDisabled));
+        proxyMenuSubItem.setSubtext(android.text.TextUtils.concat(
+                getString(org.telegram.utils.proxy.TorProxyController.isEnabled() ? R.string.TorTitle :
+                        proxyEnabled ? (connected ? R.string.MenuProxyConnected : R.string.MenuProxyConnecting) : R.string.MenuProxyDisabled),
+                " · ", org.telegram.ui.Components.ConnectionLatency.badge(currentAccount)));
         proxyDrawable.setConnected(proxyEnabled, connected, animated);
     }
 

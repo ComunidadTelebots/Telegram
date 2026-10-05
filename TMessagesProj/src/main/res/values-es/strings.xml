@@ -1344,4 +1344,17 @@
     <string name="SkinHistorySource">Ver commit original</string>
     <string name="SkinHistoryDiff">Ver cambios en el repositorio</string>
     <string name="SkinHistoryRelease">Ver publicación o etiqueta</string>
+    <string name="TorTitle">Tor integrado</string>
+    <string name="TorStopped">Tor desactivado</string>
+    <string name="TorStarting">Conectando a Tor</string>
+    <string name="TorConnected">Circuito Tor preparado</string>
+    <string name="TorFailed">Tor no disponible. Telegram permanece bloqueado. Desactiva y activa Tor para reintentar.</string>
+    <string name="TorUnsupported">Tor integrado requiere Android 7 o posterior.</string>
+    <string name="TorScope">La VPN local captura el tráfico de este paquete (IPv4, IPv6 y DNS). TCP pasa por Tor; UDP y llamadas no están disponibles. Si Tor falla, la VPN mantiene el tráfico bloqueado mientras sigue activa. Revocar o detener la VPN desde Android elimina esa protección. Otros paquetes, incluidos los servicios de notificaciones de Google, quedan fuera. Tu cuenta sigue identificándote. Al desactivar Tor se restaura tu proxy anterior.</string>
+    <string name="TorCallsUnavailable">Las llamadas no están disponibles mientras Tor integrado está activo.</string>
+    <string name="TorEndCallFirst">Finaliza la llamada actual antes de activar Tor.</string>
+    <string name="TorVpnActive">VPN del paquete activa · salida mediante Tor</string>
+    <string name="TorVpnRevoked">Permiso VPN revocado: protección del paquete detenida</string>
+    <string name="TorServerLatency">Latencia del servidor Telegram (RTT):</string>
+    <string name="TorLatencyUnavailable">Sin medición</string>
 </resources>

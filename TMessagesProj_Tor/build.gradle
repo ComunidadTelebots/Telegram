@@ -1,0 +1,80 @@
+apply plugin: 'com.android.library'
+
+repositories {
+    ivy {
+        url 'https://github.com/heiher/hev-socks5-tunnel/releases/download'
+        patternLayout { artifact '[revision]/[artifact].[ext]' }
+        metadataSources { artifact() }
+        content { includeGroup 'org.hev' }
+    }
+    google()
+    mavenCentral()
+    maven {
+        url 'https://raw.githubusercontent.com/guardianproject/gpmaven/master'
+        content { includeGroup 'info.guardianproject' }
+    }
+}
+
+// Recompile the matching published Java sources, retaining the upstream native binary.
+// The upstream AAR's Java 24 bytecode/SDK 37.1 metadata cannot be consumed by this app.
+configurations { torNative; tunnelNative }
+dependencies {
+    torNative('info.guardianproject:tor-android:0.4.9.13@aar') { transitive = false }
+    tunnelNative('org.hev:hev-socks5-tunnel:2.18.0@aar') { transitive = false }
+    api 'info.guardianproject:jtorctl:0.4.5.7'
+    api 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
+    implementation 'androidx.annotation:annotation:1.9.1'
+}
+
+def unpackTor = tasks.register('unpackTorNative', Sync) {
+    inputs.files(configurations.torNative)
+    from({ zipTree(configurations.torNative.singleFile) }) { include 'jni/**' }
+    into layout.buildDirectory.dir('tor-native')
+    doFirst {
+        def digest = java.security.MessageDigest.getInstance('SHA-256')
+        configurations.torNative.singleFile.withInputStream { stream ->
+            byte[] buffer = new byte[65536]
+            int count
+            while ((count = stream.read(buffer)) != -1) digest.update(buffer, 0, count)
+        }
+        if (digest.digest().encodeHex().toString() != '6a1fd13e9961e5398fe73e4dc507a859431ed7998f229b121d43dcc56b311b0a') {
+            throw new GradleException('Tor AAR checksum mismatch')
+        }
+    }
+}
+
+android {
+    namespace 'org.torproject.jni'
+    compileSdkVersion 36
+    defaultConfig {
+        minSdkVersion 24
+        buildConfigField 'String', 'VERSION_NAME', '"0.4.9.13"'
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    buildFeatures { buildConfig = true }
+    sourceSets.main.jniLibs.srcDir layout.buildDirectory.dir('tor-native/jni')
+}
+tasks.named('preBuild').configure { dependsOn unpackTor }
+
+def unpackTunnel = tasks.register('unpackTunnelNative', Sync) {
+    inputs.files(configurations.tunnelNative)
+    from({ zipTree(configurations.tunnelNative.singleFile) }) { include 'jni/**' }
+    into layout.buildDirectory.dir('tunnel-native')
+    doFirst {
+        def digest = java.security.MessageDigest.getInstance('SHA-256')
+        configurations.tunnelNative.singleFile.withInputStream { stream ->
+            byte[] buffer = new byte[65536]
+            int count
+            while ((count = stream.read(buffer)) != -1) digest.update(buffer, 0, count)
+        }
+        if (digest.digest().encodeHex().toString() != '15ec8ed121663b562c99caa5bb602d1009f24e5b09e733438b81988f12feaaab') {
+            throw new GradleException('Hev tunnel AAR checksum mismatch')
+        }
+    }
+}
+android.sourceSets.main.jniLibs.srcDir layout.buildDirectory.dir('tunnel-native/jni')
+tasks.named('preBuild').configure { dependsOn unpackTunnel }

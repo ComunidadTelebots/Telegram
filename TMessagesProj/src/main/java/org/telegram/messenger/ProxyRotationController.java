@@ -20,6 +20,7 @@ public class ProxyRotationController implements NotificationCenter.NotificationC
 
     private boolean isCurrentlyChecking;
     private Runnable checkProxyAndSwitchRunnable = () -> {
+        if (org.telegram.utils.proxy.TorProxyController.isEnabled()) return;
         isCurrentlyChecking = true;
 
         int currentAccount = UserConfig.selectedAccount;
@@ -59,7 +60,7 @@ public class ProxyRotationController implements NotificationCenter.NotificationC
     private void switchToAvailable() {
         isCurrentlyChecking = false;
 
-        if (!SharedConfig.proxyRotationEnabled) {
+        if (org.telegram.utils.proxy.TorProxyController.isEnabled() || !SharedConfig.proxyRotationEnabled) {
             return;
         }
 

@@ -83,6 +83,18 @@ public class ApplicationLoader extends Application {
         super.attachBaseContext(base);
     }
 
+    @Override public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        if (level >= android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW && SharedConfig.isLowRamDevice()) {
+            ImageLoader.trimExistingMemory();
+        }
+    }
+
+    @Override public void onLowMemory() {
+        super.onLowMemory();
+        ImageLoader.trimExistingMemory();
+    }
+
     public static ILocationServiceProvider getLocationServiceProvider() {
         if (locationServiceProvider == null) {
             locationServiceProvider = applicationLoaderInstance.onCreateLocationServiceProvider();

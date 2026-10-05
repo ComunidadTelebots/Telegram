@@ -48,6 +48,7 @@ import org.telegram.messenger.Utilities;
 import org.telegram.utils.proxy.WebProxyConnectionTester;
 import org.telegram.utils.proxy.WebProxyTransport;
 import org.telegram.utils.proxy.ProxySettings;
+import org.telegram.utils.proxy.TorProxyController;
 import org.telegram.ui.Components.VideoPlayer;
 import org.telegram.ui.LoginActivity;
 
@@ -633,7 +634,10 @@ public class ConnectionsManager extends BaseController {
     public void init(int version, int layer, int apiId, String deviceModel, String systemVersion, String appVersion, String langCode, String systemLangCode, String configPath, String logPath, String regId, String cFingerprint, int timezoneOffset, long userId, boolean userPremium, boolean enablePushConnection) {
         final SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences("mainconfig", Activity.MODE_PRIVATE);
         final ProxySettings proxySettings = ProxySettings.fromSharedPreferences(preferences);
-        if (preferences.getBoolean("proxy_enabled", false) && proxySettings.isValid()) {
+        if (TorProxyController.isEnabled()) {
+            ProxySettings tor = TorProxyController.getProxy();
+            native_setProxySettings(currentAccount, tor.getAddress(), tor.getPort(), "", "", "");
+        } else if (preferences.getBoolean("proxy_enabled", false) && proxySettings.isValid()) {
             if (proxySettings.getType() == ProxySettings.Type.WEB) {
                 int localPort = WebProxyTransport.start(proxySettings.getAddress(), proxySettings.getSecret());
                 native_setProxySettings(currentAccount, "127.0.0.1", localPort != 0 ? localPort : 9, "", "",
@@ -735,6 +739,10 @@ public class ConnectionsManager extends BaseController {
     }
 
     public long checkProxy(ProxySettings settings, RequestTimeDelegate requestTimeDelegate) {
+        if (TorProxyController.isEnabled()) {
+            AndroidUtilities.runOnUIThread(() -> requestTimeDelegate.run(-1));
+            return 0;
+        }
         if (settings == null || !settings.isValid()) {
             return 0;
         }
@@ -858,6 +866,7 @@ public class ConnectionsManager extends BaseController {
     }
 
     public static void onRequestNewServerIpAndPort(final int second, final int currentAccount) {
+        if (TorProxyController.isEnabled()) return;
         Utilities.globalQueue.postRunnable(() -> {
             boolean networkOnline = ApplicationLoader.isNetworkOnline();
             Utilities.stageQueue.postRunnable(() -> {
@@ -895,6 +904,10 @@ public class ConnectionsManager extends BaseController {
     }
 
     public static void getHostByName(String hostName, long address) {
+        if (TorProxyController.isEnabled()) {
+            native_onHostNameResolved(hostName, address, "");
+            return;
+        }
         AndroidUtilities.runOnUIThread(() -> {
             ResolvedDomain resolvedDomain = dnsCache.get(hostName);
             if (resolvedDomain != null && SystemClock.elapsedRealtime() - resolvedDomain.ttl < 5 * 60 * 1000) {
@@ -943,6 +956,10 @@ public class ConnectionsManager extends BaseController {
     }
 
     public static void setProxySettings(boolean enabled, ProxySettings settings) {
+        if (TorProxyController.isEnabled()) {
+            enabled = true;
+            settings = TorProxyController.getProxy();
+        }
         String address = "";
         int port = 0;
         String username = "";

@@ -292,9 +292,15 @@ public class Browser {
         if (context == null || uri == null) {
             return;
         }
+        if ("http".equalsIgnoreCase(uri.getScheme())) uri = uri.buildUpon().scheme("https").build();
         final int currentAccount = UserConfig.selectedAccount;
         boolean[] forceBrowser = new boolean[]{false};
         boolean internalUri = isInternalUri(uri, forceBrowser);
+        if (org.telegram.utils.proxy.TorProxyController.isEnabled() && !internalUri && "https".equalsIgnoreCase(uri.getScheme())) {
+            // Custom tabs and external browsers belong to another UID outside our VPN.
+            openInTelegramBrowser(context, uri.toString(), inCaseLoading);
+            return;
+        }
         String browserPackage = getBrowserPackageName(browser);
         if (browserPackage != null) {
             tryTelegraph = false;

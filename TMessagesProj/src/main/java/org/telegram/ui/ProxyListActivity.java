@@ -48,6 +48,7 @@ import org.telegram.messenger.ProxyRotationController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.utils.proxy.ProxySettings;
+import org.telegram.utils.proxy.TorProxyController;
 import org.telegram.tgnet.ConnectionsManager;
 import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.ActionBarMenu;
@@ -87,6 +88,26 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
 
     private boolean useProxySettings;
 
+    private int torRow;
+    private final Runnable latencyRefresh = new Runnable() {
+        @Override public void run() {
+            if (listAdapter != null && torInfoRow >= 0) listAdapter.notifyItemChanged(torInfoRow);
+            AndroidUtilities.runOnUIThread(this, 5000);
+        }
+    };
+    @Override public void onPause() {
+        super.onPause();
+        AndroidUtilities.cancelRunOnUIThread(latencyRefresh);
+    }
+    @Override public void onActivityResultFragment(int requestCode, int resultCode, Intent data) {
+        super.onActivityResultFragment(requestCode, resultCode, data);
+        if (requestCode == 8392 && resultCode == android.app.Activity.RESULT_OK
+                && org.telegram.messenger.voip.VoIPService.getSharedInstance() == null) {
+            TorProxyController.setEnabled(true);
+            updateRows(true);
+        }
+    }
+    private int torInfoRow;
     private int rowCount;
     @Keep
     private int useProxyRow;
@@ -351,6 +372,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
     @Override
     public void onFragmentDestroy() {
         super.onFragmentDestroy();
+        AndroidUtilities.cancelRunOnUIThread(latencyRefresh);
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.proxyChangedByRotation);
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.proxySettingsChanged);
         NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.proxyCheckDone);
@@ -391,6 +413,20 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
         frameLayout.addView(listView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.TOP | Gravity.LEFT));
         listView.setAdapter(listAdapter);
         listView.setOnItemClickListener((view, position) -> {
+            if (position == torRow) {
+                if (!TorProxyController.isEnabled() && org.telegram.messenger.voip.VoIPService.getSharedInstance() != null) {
+                    android.widget.Toast.makeText(context, getString(R.string.TorEndCallFirst), android.widget.Toast.LENGTH_LONG).show();
+                    return;
+                }
+                if (!TorProxyController.isEnabled()) {
+                    android.content.Intent consent = android.net.VpnService.prepare(context);
+                    if (consent != null) { startActivityForResult(consent, 8392); return; }
+                }
+                TorProxyController.setEnabled(!TorProxyController.isEnabled());
+                updateRows(true);
+                return;
+            }
+            if (TorProxyController.isEnabled()) return;
             if (position == useProxyRow) {
                 if (SharedConfig.currentProxy == null) {
                     if (!proxyList.isEmpty()) {
@@ -593,8 +629,10 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
 
     private void updateRows(boolean notify) {
         rowCount = 0;
+        torRow = rowCount++;
+        torInfoRow = rowCount++;
         useProxyRow = rowCount++;
-        if (useProxySettings && SharedConfig.currentProxy != null && SharedConfig.proxyList.size() > 1 && IS_PROXY_ROTATION_AVAILABLE) {
+        if (!TorProxyController.isEnabled() && useProxySettings && SharedConfig.currentProxy != null && SharedConfig.proxyList.size() > 1 && IS_PROXY_ROTATION_AVAILABLE) {
             rotationRow = rowCount++;
             if (SharedConfig.proxyRotationEnabled) {
                 rotationTimeoutRow = rowCount++;
@@ -669,6 +707,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
     }
 
     private void checkProxyList() {
+        if (TorProxyController.isEnabled()) return;
         for (int a = 0, count = proxyList.size(); a < count; a++) {
             final SharedConfig.ProxyInfo proxyInfo = proxyList.get(a);
             if (proxyInfo.checking || SystemClock.elapsedRealtime() - proxyInfo.availableCheckTime < 2 * 60 * 1000) {
@@ -698,6 +737,9 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
     @Override
     public void onResume() {
         super.onResume();
+        TorProxyController.ensureRunning();
+        AndroidUtilities.cancelRunOnUIThread(latencyRefresh);
+        AndroidUtilities.runOnUIThread(latencyRefresh, 1000);
         if (listAdapter != null) {
             listAdapter.notifyDataSetChanged();
         }
@@ -855,7 +897,9 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
                 }
                 case VIEW_TYPE_TEXT_CHECK: {
                     TextCheckCell checkCell = (TextCheckCell) holder.itemView;
-                    if (position == useProxyRow) {
+                    if (position == torRow) {
+                        checkCell.setTextAndCheck(getString(R.string.TorTitle), TorProxyController.isEnabled(), false);
+                    } else if (position == useProxyRow) {
                         checkCell.setTextAndCheck(getString(R.string.UseProxySettings), useProxySettings, rotationRow != -1);
                     } else if (position == rotationRow) {
                         checkCell.setTextAndCheck(getString(R.string.UseProxyRotation), SharedConfig.proxyRotationEnabled, true);
@@ -864,7 +908,12 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
                 }
                 case VIEW_TYPE_INFO: {
                     TextInfoPrivacyCell cell = (TextInfoPrivacyCell) holder.itemView;
-                    if (position == rotationTimeoutInfoRow) {
+                    if (position == torInfoRow) {
+                        String state = getString(TorProxyController.isSupported() ? TorProxyController.getStatus() : R.string.TorUnsupported);
+                        if (TorProxyController.isEnabled() && TorProxyController.getStatus() == R.string.TorStarting) state += " " + TorProxyController.getProgress() + "%";
+                        cell.setText(android.text.TextUtils.concat(state, "\n", getString(R.string.TorServerLatency), " ",
+                                org.telegram.ui.Components.ConnectionLatency.badge(currentAccount), "\n\n", getString(R.string.TorScope)));
+                    } else if (position == rotationTimeoutInfoRow) {
                         cell.setText(getString(R.string.ProxyRotationTimeoutInfo));
                     }
                     break;
@@ -937,6 +986,8 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
         @Override
         public boolean isEnabled(RecyclerView.ViewHolder holder) {
             int position = holder.getAdapterPosition();
+            if (position == torRow) return TorProxyController.isSupported();
+            if (TorProxyController.isEnabled()) return false;
             return position == useProxyRow || position == rotationRow || position == proxyAddRow || position == deleteAllRow || position >= proxyStartRow && position < proxyEndRow;
         }
 
@@ -979,6 +1030,8 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
         @Override
         public long getItemId(int position) {
             // Random stable ids, could be anything non-repeating
+            if (position == torRow) return -20;
+            if (position == torInfoRow) return -21;
             if (position == useProxyShadowRow) {
                 return -1;
             } else if (position == proxyShadowRow) {
@@ -1010,7 +1063,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
                 return VIEW_TYPE_SHADOW;
             } else if (position == proxyAddRow || position == deleteAllRow) {
                 return VIEW_TYPE_TEXT_SETTING;
-            } else if (position == useProxyRow || position == rotationRow) {
+            } else if (position == torRow || position == useProxyRow || position == rotationRow) {
                 return VIEW_TYPE_TEXT_CHECK;
             } else if (position == connectionsHeaderRow) {
                 return VIEW_TYPE_HEADER;
