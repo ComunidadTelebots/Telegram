@@ -8,6 +8,17 @@ se indique una versión propia del fork.
 
 ## [Sin publicar]
 
+### Actualización oficial 12.10.6
+
+- Integradas las versiones 12.10.4–12.10.6 de DrKLO/Telegram, hasta el commit
+  `f2908b14133bbffbf7ab04f641ecb5bfaf533242` (código 7112), comprobado el 05/10/2026.
+- Incorporados el grabador circular Camera2 y sus ajustes experimentales,
+  cambios del motor Glass/desenfoque, emojis, reproducción multimedia y llamadas.
+- Incluidas las correcciones oficiales del análisis de enteros y temas con CRLF.
+- Actualizados los submódulos oficiales, incluida la nueva integración de
+  Abseil/WAMR y C++17. Conservadas las correcciones de compilación en Windows,
+  los perfiles de cliente, las animaciones, el catálogo histórico y el visor AMP.
+
 ### Auditoría y versiones de referencia
 
 - Auditoría de estructura, listas, carpetas y compositores de seis clientes,
