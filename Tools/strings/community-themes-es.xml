@@ -1,0 +1,8 @@
+<resources>
+    <string name="CommunityThemesTitle">Temas de la comunidad</string>
+    <string name="CommunityThemesInfo">Temas aprobados de la comunidad. Previsualiza antes de aplicar. El tema cambia el aspecto de esta instalación para todas las cuentas. Esta versión admite paletas de colores; no importa fondos incrustados ni remotos.</string>
+    <string name="CommunityThemesMore">Cargar más</string>
+    <string name="CommunityThemesPreview">Previsualizar tema</string>
+    <string name="CommunityThemesEmpty">Todavía no hay temas aprobados.</string>
+    <string name="CommunityThemesFailed">No se ha podido cargar o previsualizar el tema. Comprueba la conexión y el proxy seleccionado e inténtalo de nuevo.</string>
+</resources>

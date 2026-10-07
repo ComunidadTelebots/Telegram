@@ -1,0 +1,8 @@
+<resources>
+    <string name="CommunityThemesTitle">Community themes</string>
+    <string name="CommunityThemesInfo">Approved community themes. Preview before applying. Themes change the appearance of this installation for all accounts. This version supports color palettes; embedded or remote wallpapers are not imported.</string>
+    <string name="CommunityThemesMore">Load more</string>
+    <string name="CommunityThemesPreview">Preview theme</string>
+    <string name="CommunityThemesEmpty">There are no approved themes yet.</string>
+    <string name="CommunityThemesFailed">Could not load or preview this theme. Check the connection and selected proxy, then retry.</string>
+</resources>
