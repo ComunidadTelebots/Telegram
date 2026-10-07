@@ -48,24 +48,24 @@ public class SkinSelectorCell extends LinearLayout {
         setPadding(0, AndroidUtilities.dp(8), 0, AndroidUtilities.dp(8));
 
         addSectionHeader(
-                getContext().getString(R.string.SkinCustomDesigns),
-                getContext().getString(R.string.SkinCustomDesignsInfo));
+                org.telegram.messenger.LocaleController.getString(R.string.SkinCustomDesigns),
+                org.telegram.messenger.LocaleController.getString(R.string.SkinCustomDesignsInfo));
         addFamilySelector();
 
         SkinBase activeSkin = SkinManager.get().getActiveSkin();
         List<SkinBase> variants = SkinManager.get().getVariants(activeSkin.getFamilyId());
         if (variants.size() > 1) {
             addSectionHeader(
-                    getContext().getString(R.string.SkinAndroidVersions),
-                    getContext().getString(R.string.SkinAndroidVersionsInfo));
+                    org.telegram.messenger.LocaleController.getString(R.string.SkinAndroidVersions),
+                    org.telegram.messenger.LocaleController.getString(R.string.SkinAndroidVersionsInfo));
             addVariantSelector(variants);
         }
         if (!ClientDesignHistory.forFamily(activeSkin.getFamilyId()).isEmpty()) {
-            addSectionHeader(getContext().getString(R.string.SkinHistoryTitle),
-                    getContext().getString(R.string.SkinHistoryInfo));
+            addSectionHeader(org.telegram.messenger.LocaleController.getString(R.string.SkinHistoryTitle),
+                    org.telegram.messenger.LocaleController.getString(R.string.SkinHistoryInfo));
             TextView history = new TextView(getContext());
             ClientDesignHistory.Milestone selected = ClientDesignHistory.selected(activeSkin.getFamilyId());
-            history.setText(selected == null ? getContext().getString(R.string.SkinHistoryChoose)
+            history.setText(selected == null ? org.telegram.messenger.LocaleController.getString(R.string.SkinHistoryChoose)
                     : selected.title() + " · " + selected.version());
             history.setTextSize(14);
             history.setMinHeight(AndroidUtilities.dp(48));
@@ -75,10 +75,11 @@ public class SkinSelectorCell extends LinearLayout {
             history.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_listSelector), 2, 0));
             history.setOnClickListener(v -> ClientDesignHistoryDialog.show(getContext(),
                     activeSkin.getFamilyId(), activeSkin.getFamilyDisplayName(), this::rebuild));
+            org.telegram.ui.Components.CommunitySettingsUi.button(history);
             addView(history, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
         }
-        addSectionHeader(getContext().getString(R.string.SkinMotionTitle),
-                getContext().getString(R.string.SkinMotionInfo));
+        addSectionHeader(org.telegram.messenger.LocaleController.getString(R.string.SkinMotionTitle),
+                org.telegram.messenger.LocaleController.getString(R.string.SkinMotionInfo));
         addMotionSelector();
     }
 
@@ -89,15 +90,16 @@ public class SkinSelectorCell extends LinearLayout {
         for (MotionStyle style : MotionStyle.values()) {
             TextView button = new TextView(getContext());
             boolean selected = MotionController.getStyle() == style;
-            button.setText((selected ? "✓ " : "") + getContext().getString(labels[style.ordinal()]));
+            button.setText((selected ? "✓ " : "") + org.telegram.messenger.LocaleController.getString(labels[style.ordinal()]));
             button.setSelected(selected);
             button.setTextSize(14);
             button.setGravity(Gravity.CENTER);
-            button.setPadding(AndroidUtilities.dp(12), 0, AndroidUtilities.dp(12), 0);
+            button.setPadding(AndroidUtilities.dp(12), AndroidUtilities.dp(12), AndroidUtilities.dp(12), AndroidUtilities.dp(12));
+            org.telegram.ui.Components.CommunitySettingsUi.button(button);
             button.setTextColor(Theme.getColor(selected ? Theme.key_windowBackgroundWhiteBlueText
                     : Theme.key_windowBackgroundWhiteBlackText));
             button.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_listSelector), 2, 0));
-            row.addView(button, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, 48));
+            row.addView(button, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT));
             button.setOnClickListener(v -> {
                 MotionController.setStyle(style);
                 rebuild();
@@ -200,13 +202,18 @@ public class SkinSelectorCell extends LinearLayout {
         name.setTextSize(11);
         name.setGravity(Gravity.CENTER);
         name.setPadding(0, AndroidUtilities.dp(4), 0, 0);
-        name.setMaxLines(2);
+        name.setSingleLine(false);
+        name.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
         name.setTextColor(Theme.getColor(active
                 ? Theme.key_windowBackgroundWhiteBlueText
                 : Theme.key_windowBackgroundWhiteGrayText));
         card.addView(name, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
 
         card.setOnClickListener(v -> onClick.run());
+        card.setSelected(active);
+        card.setContentDescription(label);
+        org.telegram.ui.Components.CommunitySettingsUi.button(card);
+        preview.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
         card.setLayoutParams(new LinearLayout.LayoutParams(
                 AndroidUtilities.dp(88), LinearLayout.LayoutParams.WRAP_CONTENT));
         return card;

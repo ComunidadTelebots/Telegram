@@ -1,0 +1,37 @@
+{
+  "generator": "image_gen built-in edit, one call per variant",
+  "source": "Tools/branding/comunidad-telebots-icon-v1.png",
+  "source_sha256": "8e418dfccf3296a8befaef9cd49213929e8ebe24726d707b55fac89fd9432d73",
+  "prompt_template": "Edit target: the attached Comunidad Telebots app icon. Preserve the exact original two-person chat/bot emblem, its shape, proportions, cream and turquoise colors and deep navy full square background. Do not redraw or redesign the emblem. Add only the exact uppercase label '{LABEL}' centered in the clear navy space BELOW the emblem, large bold cream sans-serif, highly legible at launcher icon size. Label baseline within bottom 16 percent safe margin; do not overlap emblem. Output a single square app icon with no border, mockup or external caption. Maintain every other feature of the source. This is the {LABEL} build channel icon.",
+  "labels": [
+    "DEV",
+    "ALFA",
+    "BETA",
+    "RC",
+    "STABLE"
+  ],
+  "adaptive_inset": "20%; bounds checked against 66/108 safe-zone circle",
+  "selection": "APP_CHANNEL via gradle/community-branding.gradle; application resources override library asset; invalid/missing channel fails",
+  "images": {
+    "alfa": {
+      "path": "Tools/branding/channels/alfa/res/drawable-nodpi/comunidad_telebots_icon.png",
+      "sha256": "db51938f5209945e4a10547ff732220dd2dc69e119ff3509d84baffb813f1670"
+    },
+    "beta": {
+      "path": "Tools/branding/channels/beta/res/drawable-nodpi/comunidad_telebots_icon.png",
+      "sha256": "30021aedc351ea8f4d05fe4a998bbcb4fb41b67f07f72c17e9bb75a3e9bfcb39"
+    },
+    "dev": {
+      "path": "Tools/branding/channels/dev/res/drawable-nodpi/comunidad_telebots_icon.png",
+      "sha256": "e91ff942ff66d148f3930cea640150e8cea8933e8fcc94044dffdd517b384b70"
+    },
+    "rc": {
+      "path": "Tools/branding/channels/rc/res/drawable-nodpi/comunidad_telebots_icon.png",
+      "sha256": "726f8a69200f9f22c4fe0d8fc02d8b3e7d086707b153b914d60f03043659242e"
+    },
+    "stable": {
+      "path": "Tools/branding/channels/stable/res/drawable-nodpi/comunidad_telebots_icon.png",
+      "sha256": "74a7d1e45c341ecf022dacd6e534dd1e92ca60cf5ae8b30e3e5350cc78e1b38f"
+    }
+  }
+}

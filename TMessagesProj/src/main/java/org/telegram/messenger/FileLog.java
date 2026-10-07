@@ -90,6 +90,20 @@ public class FileLog {
     private static ExclusionStrategy exclusionStrategy;
     private static HashSet<String> excludeRequests;
 
+    private static String protocolObjectSummary(TLObject object) {
+        if (object == null) {
+            return "null";
+        }
+        // Protocol objects can contain login codes, passwords, API hashes, tokens
+        // and phone numbers, including inside responses and nested updates.
+        // Keep diagnostics structural; neither JSON nor toString() is safe here.
+        String type = object.getClass().getSimpleName();
+        if (object instanceof TLRPC.TL_error) {
+            return type + " code=" + ((TLRPC.TL_error) object).code;
+        }
+        return type + " [payload omitted]";
+    }
+
     public static void dumpResponseAndRequest(int account, TLObject request, TLObject response, TLRPC.TL_error error, long requestMsgId, long startRequestTimeInMillis, int requestToken) {
         if (!BuildVars.DEBUG_PRIVATE_VERSION || !BuildVars.LOGS_ENABLED || request == null) {
             return;
@@ -101,12 +115,12 @@ public class FileLog {
             return;
         }
         try {
-            String req = "req -> " + requestSimpleName + " : " + gson.toJson(request);
+            String req = "req -> " + protocolObjectSummary(request);
             String res = "null";
             if (response != null) {
-                res = "res -> " + response.getClass().getSimpleName() + " : " + gson.toJson(response);
+                res = "res -> " + protocolObjectSummary(response);
             } else if (error != null) {
-                res = "err -> " + error.getClass().getSimpleName() + " : " + gson.toJson(error);
+                res = "err -> " + protocolObjectSummary(error);
             }
             String finalRes = res;
             long time = System.currentTimeMillis();
@@ -148,7 +162,7 @@ public class FileLog {
         try {
             checkGson();
             getInstance().dateFormat.format(System.currentTimeMillis());
-            String messageStr = "receive message -> " + message.getClass().getSimpleName() + " : " + (gsonDisabled ? message : gson.toJson(message));
+            String messageStr = "receive message -> " + protocolObjectSummary(message);
             String res = "null";
             long time = System.currentTimeMillis();
             FileLog.getInstance().logQueue.postRunnable(() -> {

@@ -2448,6 +2448,10 @@ public class FileLoadOperation {
             }
             flags |= ConnectionsManager.RequestFlagListenAfterCancel;
             int datacenterId = isCdn ? cdnDatacenterId : this.datacenterId;
+            final boolean diagnosticCdn = request instanceof TLRPC.TL_upload_getCdnFile;
+            final long diagnosticStart = android.os.SystemClock.elapsedRealtime();
+            final long diagnosticOwner = UserConfig.getInstance(currentAccount).getClientUserId();
+            final String diagnosticRoute = org.telegram.utils.proxy.TelegramCdnDiagnostics.route();
             final int requestToken = requestInfo.requestToken = ConnectionsManager.getInstance(currentAccount).sendRequestSync(request, (response, error) -> {
                 if (requestInfo.cancelled) {
                     FileLog.e("received chunk but definitely cancelled offset=" + requestInfo.offset + " size=" + requestInfo.chunkSize + " token=" + requestInfo.requestToken);
@@ -2455,6 +2459,11 @@ public class FileLoadOperation {
                 }
                 if (requestInfo.cancelling) {
                     FileLog.e("received cancelled chunk after cancelRequests! offset=" + requestInfo.offset + " size=" + requestInfo.chunkSize + " token=" + requestInfo.requestToken);
+                }
+                if (diagnosticCdn && !requestInfo.cancelling && diagnosticOwner == UserConfig.getInstance(currentAccount).getClientUserId()) {
+                    org.telegram.utils.proxy.TelegramCdnDiagnostics.record(currentAccount, datacenterId,
+                            android.os.SystemClock.elapsedRealtime() - diagnosticStart,
+                            error == null && response instanceof TLRPC.TL_upload_cdnFile, diagnosticRoute);
                 }
                 if (!requestInfos.contains(requestInfo)) {
                     if (!cancelledRequestInfos.contains(requestInfo)) {

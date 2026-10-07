@@ -34,8 +34,8 @@ public final class SkinPreviewDialog {
             navigation[0] = new ClientNavigationView(context, client, null,
                     destination -> navigation[0].update(destination, 0));
             LinearLayout.LayoutParams navParams = side
-                    ? new LinearLayout.LayoutParams(AndroidUtilities.dp(client.extentDp), LinearLayout.LayoutParams.MATCH_PARENT)
-                    : new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, AndroidUtilities.dp(client.extentDp));
+                    ? new LinearLayout.LayoutParams(AndroidUtilities.dp(client.extentDp(context.getResources().getConfiguration().fontScale)), LinearLayout.LayoutParams.MATCH_PARENT)
+                    : new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, AndroidUtilities.dp(client.extentDp(context.getResources().getConfiguration().fontScale)));
             LinearLayout.LayoutParams chatParams = side
                     ? new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f)
                     : new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f);
@@ -62,7 +62,9 @@ public final class SkinPreviewDialog {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(buildTitle(skin));
-        builder.setView(content);
+        android.widget.ScrollView scroll = new android.widget.ScrollView(context);
+        scroll.addView(content);
+        builder.setView(scroll);
         builder.setNegativeButton(context.getString(R.string.Cancel), null);
         if (!ClientDesignHistory.forFamily(skin.getFamilyId()).isEmpty()) {
             builder.setNeutralButton(context.getString(R.string.SkinHistoryTitle), (dialog, which) ->
@@ -109,6 +111,9 @@ public final class SkinPreviewDialog {
             incomingLine2 = context.getString(R.string.SkinPreviewIncomingLine2);
             outgoingLine1 = context.getString(R.string.SkinPreviewOutgoingLine1);
             outgoingLine2 = context.getString(R.string.SkinPreviewOutgoingLine2);
+            setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
+            setContentDescription(buildTitle(skin) + ". " + incomingLine1 + " " + incomingLine2 + ". " + outgoingLine1 + " " + outgoingLine2);
+            setFocusable(true);
         }
 
         @Override

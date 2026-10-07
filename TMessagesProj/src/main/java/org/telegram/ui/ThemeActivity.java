@@ -656,7 +656,7 @@ public class ThemeActivity extends BaseFragment implements NotificationCenter.No
             createNewThemeRow = rowCount++;
             lastShadowRow = rowCount++;
         } else if (currentType == THEME_TYPE_BASIC) {
-            skinSelectorRow = rowCount++;
+            // Client designs are configured in CommunitySettingsActivity.
             textSizeHeaderRow = rowCount++;
             textSizeRow = rowCount++;
             backgroundRow = rowCount++;

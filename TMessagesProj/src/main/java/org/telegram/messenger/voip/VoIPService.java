@@ -756,6 +756,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 	@SuppressLint({"MissingPermission", "InlinedApi"})
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+        if (!org.telegram.messenger.ReleaseAccess.allowed()) { stopSelf(); return START_NOT_STICKY; }
         if (org.telegram.utils.proxy.TorProxyController.isEnabled()) {
             android.widget.Toast.makeText(this, LocaleController.getString(org.telegram.messenger.R.string.TorCallsUnavailable), android.widget.Toast.LENGTH_LONG).show();
             stopSelf();

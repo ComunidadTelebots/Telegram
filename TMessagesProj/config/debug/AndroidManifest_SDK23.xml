@@ -27,9 +27,9 @@
 
 
     <application
-        android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:label="@string/AppNameBeta"
+        android:icon="@mipmap/comunidad_telebots_launcher"
+        android:roundIcon="@mipmap/comunidad_telebots_launcher"
+        android:label="@string/ForkAppName"
         android:theme="@style/Theme.TMessages.Start"
         android:hardwareAccelerated="true"
         android:largeHeap="true"

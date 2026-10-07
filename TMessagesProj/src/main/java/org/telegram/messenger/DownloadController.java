@@ -330,6 +330,7 @@ public class DownloadController extends BaseController implements NotificationCe
             loadAutoDownloadConfig(false);
         });
 
+        CommunityDownloadPolicy.observeNetwork();
         BroadcastReceiver networkStateReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -470,6 +471,7 @@ public class DownloadController extends BaseController implements NotificationCe
     }
 
     public int getAutodownloadMask() {
+        if (!CommunityDownloadPolicy.allowAutomatic(currentAccount)) return 0;
         int result = 0;
         int[] masksArray;
         int networkType = ApplicationLoader.getAutodownloadNetworkType();
@@ -607,6 +609,7 @@ public class DownloadController extends BaseController implements NotificationCe
     }
 
     public boolean canDownloadMedia(MessageObject messageObject) {
+        if (!CommunityDownloadPolicy.allowAutomatic(currentAccount)) return false;
         if (messageObject.type == MessageObject.TYPE_STORY) {
             if (!SharedConfig.isAutoplayVideo()) return false;
             TLRPC.TL_messageMediaStory mediaStory = (TLRPC.TL_messageMediaStory) MessageObject.getMedia(messageObject);
@@ -625,6 +628,7 @@ public class DownloadController extends BaseController implements NotificationCe
     }
 
     public boolean canDownloadMedia(int type, long size) {
+        if (!CommunityDownloadPolicy.allowAutomatic(currentAccount)) return false;
         Preset preset;
         int networkType = ApplicationLoader.getAutodownloadNetworkType();
         if (networkType == StatsController.TYPE_WIFI) {
@@ -686,6 +690,7 @@ public class DownloadController extends BaseController implements NotificationCe
     }
 
     private int canDownloadMediaInternal(MessageObject message) {
+        if (!CommunityDownloadPolicy.allowAutomatic(currentAccount)) return 0;
         if (message == null || message.messageOwner == null) return 0;
         if (message.messageOwner.media instanceof TLRPC.TL_messageMediaStory) {
             return canPreloadStories() ? 2 : 0;
@@ -768,7 +773,7 @@ public class DownloadController extends BaseController implements NotificationCe
         } else {
             size = MessageObject.getMessageSize(msg);
         }
-        if (isVideo && preset.preloadVideo && size > maxSize && maxSize > 2 * 1024 * 1024) {
+        if (isVideo && CommunityPerformanceSettings.allowPreload() && preset.preloadVideo && size > maxSize && maxSize > 2 * 1024 * 1024) {
             return (mask & type) != 0 ? 2 : 0;
         } else {
             return (type == AUTODOWNLOAD_TYPE_PHOTO || size != 0 && size <= maxSize) && (type == AUTODOWNLOAD_TYPE_AUDIO || (mask & type) != 0) ? 1 : 0;
@@ -776,6 +781,7 @@ public class DownloadController extends BaseController implements NotificationCe
     }
 
     private int canDownloadMediaInternal(MessageObject message, long overrideSize) {
+        if (!CommunityDownloadPolicy.allowAutomatic(currentAccount)) return 0;
         if (message == null || message.messageOwner == null) return 0;
         if (message.messageOwner.media instanceof TLRPC.TL_messageMediaStory) {
             return canPreloadStories() ? 2 : 0;
@@ -851,7 +857,7 @@ public class DownloadController extends BaseController implements NotificationCe
             maxSize = preset.sizes[typeToIndex(type)];
         }
         final long size = overrideSize;
-        if (isVideo && preset.preloadVideo && size > maxSize && maxSize > 2 * 1024 * 1024) {
+        if (isVideo && CommunityPerformanceSettings.allowPreload() && preset.preloadVideo && size > maxSize && maxSize > 2 * 1024 * 1024) {
             return (mask & type) != 0 ? 2 : 0;
         } else {
             return (type == AUTODOWNLOAD_TYPE_PHOTO || size != 0 && size <= maxSize) && (type == AUTODOWNLOAD_TYPE_AUDIO || (mask & type) != 0) ? 1 : 0;
@@ -859,6 +865,7 @@ public class DownloadController extends BaseController implements NotificationCe
     }
 
     public int canDownloadMedia(TLRPC.Message message) {
+        if (!CommunityDownloadPolicy.allowAutomatic(currentAccount)) return 0;
         if (message == null || message.media instanceof TLRPC.TL_messageMediaStory) {
             return canPreloadStories() ? 2 : 0;
         }
@@ -932,7 +939,7 @@ public class DownloadController extends BaseController implements NotificationCe
             maxSize = preset.sizes[typeToIndex(type)];
         }
         long size = MessageObject.getMessageSize(message);
-        if (isVideo && preset.preloadVideo && size > maxSize && maxSize > 2 * 1024 * 1024) {
+        if (isVideo && CommunityPerformanceSettings.allowPreload() && preset.preloadVideo && size > maxSize && maxSize > 2 * 1024 * 1024) {
             return (mask & type) != 0 ? 2 : 0;
         } else {
             return (type == AUTODOWNLOAD_TYPE_PHOTO || size != 0 && size <= maxSize) && (type == AUTODOWNLOAD_TYPE_AUDIO || (mask & type) != 0) ? 1 : 0;
@@ -940,6 +947,7 @@ public class DownloadController extends BaseController implements NotificationCe
     }
 
     public int canDownloadMedia(TLRPC.Message message, TLRPC.MessageMedia media) {
+        if (!CommunityDownloadPolicy.allowAutomatic(currentAccount)) return 0;
         if (message == null || media instanceof TLRPC.TL_messageMediaStory) {
             return canPreloadStories() ? 2 : 0;
         }
@@ -1014,7 +1022,7 @@ public class DownloadController extends BaseController implements NotificationCe
             maxSize = preset.sizes[typeToIndex(type)];
         }
         long size = MessageObject.getMediaSize(media);
-        if (isVideo && preset.preloadVideo && size > maxSize && maxSize > 2 * 1024 * 1024) {
+        if (isVideo && CommunityPerformanceSettings.allowPreload() && preset.preloadVideo && size > maxSize && maxSize > 2 * 1024 * 1024) {
             return (mask & type) != 0 ? 2 : 0;
         } else {
             return (type == AUTODOWNLOAD_TYPE_PHOTO || size != 0 && size <= maxSize) && (type == AUTODOWNLOAD_TYPE_AUDIO || (mask & type) != 0) ? 1 : 0;
@@ -1022,6 +1030,7 @@ public class DownloadController extends BaseController implements NotificationCe
     }
 
     protected boolean canDownloadNextTrack() {
+        if (!CommunityDownloadPolicy.allowAutomatic(currentAccount) || !CommunityPerformanceSettings.allowPreload()) return false;
         int networkType = ApplicationLoader.getAutodownloadNetworkType();
         if (networkType == StatsController.TYPE_WIFI) {
             return wifiPreset.enabled && getCurrentWiFiPreset().preloadMusic;
@@ -1033,6 +1042,7 @@ public class DownloadController extends BaseController implements NotificationCe
     }
 
     public int getCurrentDownloadMask() {
+        if (!CommunityDownloadPolicy.allowAutomatic(currentAccount)) return 0;
         int networkType = ApplicationLoader.getAutodownloadNetworkType();
         if (networkType == StatsController.TYPE_WIFI) {
             if (!wifiPreset.enabled) {
@@ -1749,6 +1759,7 @@ public class DownloadController extends BaseController implements NotificationCe
     }
 
     public boolean canPreloadStories() {
+        if (!CommunityDownloadPolicy.allowAutomatic(currentAccount) || !CommunityPerformanceSettings.allowPreload()) return false;
         Preset preset;
         int networkType = ApplicationLoader.getAutodownloadNetworkType();
         if (networkType == StatsController.TYPE_WIFI) {

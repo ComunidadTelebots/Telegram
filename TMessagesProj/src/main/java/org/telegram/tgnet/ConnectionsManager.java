@@ -393,6 +393,15 @@ public class ConnectionsManager extends BaseController {
     }
 
     private void sendRequestInternal(TLObject object, RequestDelegate onComplete, RequestDelegateTimestamp onCompleteTimestamp, QuickAckDelegate onQuickAck, WriteToSocketDelegate onWriteToSocket, int flags, int datacenterId, int connectionType, boolean immediate, int requestToken) {
+        if (!org.telegram.messenger.ReleaseAccess.allowed()) {
+            TLRPC.TL_error error = new TLRPC.TL_error();
+            error.code = 403;
+            error.text = "RELEASE_ACCESS_REQUIRED";
+            if (onComplete != null) onComplete.run(null, error);
+            if (onCompleteTimestamp != null) onCompleteTimestamp.run(null, error, 0);
+            object.freeResources();
+            return;
+        }
         if (BuildVars.LOGS_ENABLED) {
             FileLog.d("send request " + object + " with token = " + requestToken);
         }
@@ -746,12 +755,19 @@ public class ConnectionsManager extends BaseController {
         if (settings == null || !settings.isValid()) {
             return 0;
         }
+        final boolean online = ApplicationLoader.isNetworkOnline();
+        RequestTimeDelegate measured = time -> {
+            if (online && ApplicationLoader.isNetworkOnline() && !TorProxyController.isEnabled()) {
+                org.telegram.utils.proxy.ProxyReliability.record(settings, time >= 0);
+            }
+            requestTimeDelegate.run(time);
+        };
         if (settings.getType() == ProxySettings.Type.WEB) {
-            WebProxyConnectionTester.getInstance().checkProxy(settings, requestTimeDelegate, this::checkWebProxyInternal);
+            WebProxyConnectionTester.getInstance().checkProxy(settings, measured, this::checkWebProxyInternal);
             return 0;
         }
 
-        return native_checkProxy(currentAccount, settings.getAddress(), settings.getPort(), settings.getUser(), settings.getPassword(), settings.getSecret(), requestTimeDelegate);
+        return native_checkProxy(currentAccount, settings.getAddress(), settings.getPort(), settings.getUser(), settings.getPassword(), settings.getSecret(), measured);
     }
 
     private void checkWebProxyInternal(ProxySettings settings, int port, RequestTimeDelegate requestTimeDelegate) {
@@ -909,11 +925,14 @@ public class ConnectionsManager extends BaseController {
             return;
         }
         AndroidUtilities.runOnUIThread(() -> {
-            ResolvedDomain resolvedDomain = dnsCache.get(hostName);
+            String lookupKey = org.telegram.utils.proxy.DnsConfig.policy() + "|" + hostName;
+            // Custom DNS has its own TTL-aware cache; the legacy fixed five-minute
+            // cache must not extend a provider's shorter TTL (or a zero TTL).
+            ResolvedDomain resolvedDomain = org.telegram.utils.proxy.DnsConfig.selected().isEmpty() ? dnsCache.get(lookupKey) : null;
             if (resolvedDomain != null && SystemClock.elapsedRealtime() - resolvedDomain.ttl < 5 * 60 * 1000) {
                 native_onHostNameResolved(hostName, address, resolvedDomain.getAddress());
             } else {
-                ResolveHostByNameTask task = resolvingHostnameTasks.get(hostName);
+                ResolveHostByNameTask task = resolvingHostnameTasks.get(lookupKey);
                 if (task == null) {
                     task = new ResolveHostByNameTask(hostName);
                     try {
@@ -923,7 +942,7 @@ public class ConnectionsManager extends BaseController {
                         native_onHostNameResolved(hostName, address, "");
                         return;
                     }
-                    resolvingHostnameTasks.put(hostName, task);
+                    resolvingHostnameTasks.put(lookupKey, task);
                 }
                 task.addAddress(address);
             }
@@ -1152,10 +1171,13 @@ public class ConnectionsManager extends BaseController {
 
         private ArrayList<Long> addresses = new ArrayList<>();
         private String currentHostName;
+        private final String dnsPolicy = org.telegram.utils.proxy.DnsConfig.policy();
+        private String lookupKey;
 
         public ResolveHostByNameTask(String hostName) {
             super();
             currentHostName = hostName;
+            lookupKey = dnsPolicy + "|" + hostName;
         }
 
         public void addAddress(long address) {
@@ -1166,6 +1188,13 @@ public class ConnectionsManager extends BaseController {
         }
 
         protected ResolvedDomain doInBackground(Void... voids) {
+            if (!org.telegram.utils.proxy.DnsConfig.selected().isEmpty()) {
+                try {
+                    ArrayList<String> resolved = new ArrayList<>();
+                    for (InetAddress address : org.telegram.utils.proxy.DnsConfig.resolve(currentHostName)) resolved.add(address.getHostAddress());
+                    return new ResolvedDomain(resolved, SystemClock.elapsedRealtime());
+                } catch (Exception ignored) { return null; } // No silent fallback to another resolver.
+            }
             ByteArrayOutputStream outbuf = null;
             InputStream httpConnectionStream = null;
             boolean done = false;
@@ -1238,9 +1267,10 @@ public class ConnectionsManager extends BaseController {
         }
 
         @Override
-        protected void onPostExecute(final ResolvedDomain result) {
+        protected void onPostExecute(final ResolvedDomain response) {
+            ResolvedDomain result = dnsPolicy.equals(org.telegram.utils.proxy.DnsConfig.policy()) ? response : null;
             if (result != null) {
-                dnsCache.put(currentHostName, result);
+                if (org.telegram.utils.proxy.DnsConfig.selected().isEmpty()) dnsCache.put(lookupKey, result);
                 for (int a = 0, N = addresses.size(); a < N; a++) {
                     native_onHostNameResolved(currentHostName, addresses.get(a), result.getAddress());
                 }
@@ -1249,14 +1279,26 @@ public class ConnectionsManager extends BaseController {
                     native_onHostNameResolved(currentHostName, addresses.get(a), "");
                 }
             }
-            resolvingHostnameTasks.remove(currentHostName);
+            resolvingHostnameTasks.remove(lookupKey);
         }
+    }
+
+    private static NativeByteBuffer selectedDnsConfig(int account) throws Exception {
+        List<byte[]> records = org.telegram.utils.proxy.DnsConfig.lookup(native_isTestBackend(account) != 0 ? "tapv3.stel.com" : AccountInstance.getInstance(account).getMessagesController().dcDomainName, 16);
+        ArrayList<String> values = new ArrayList<>();
+        for (byte[] record : records) values.add(new String(record, java.nio.charset.StandardCharsets.US_ASCII));
+        Collections.sort(values, (a,b) -> Integer.compare(b.length(),a.length()));
+        StringBuilder joined = new StringBuilder(); for (String value : values) joined.append(value);
+        if (joined.length() == 0) return null;
+        byte[] decoded = Base64.decode(joined.toString(), Base64.DEFAULT);
+        NativeByteBuffer buffer = new NativeByteBuffer(decoded.length); buffer.writeBytes(decoded); return buffer;
     }
 
     private static class GoogleDnsLoadTask extends AsyncTask<Void, Void, NativeByteBuffer> {
 
         private int currentAccount;
         private int responseDate;
+        private final String dnsPolicy = org.telegram.utils.proxy.DnsConfig.policy();
 
         public GoogleDnsLoadTask(int instance) {
             super();
@@ -1264,6 +1306,13 @@ public class ConnectionsManager extends BaseController {
         }
 
         protected NativeByteBuffer doInBackground(Void... voids) {
+            if (TorProxyController.isEnabled()) return null;
+            if (!org.telegram.utils.proxy.DnsConfig.selected().isEmpty()) {
+                try {
+                    responseDate = ConnectionsManager.getInstance(currentAccount).getCurrentTime();
+                    return selectedDnsConfig(currentAccount);
+                } catch (Exception ignored) { return null; }
+            }
             ByteArrayOutputStream outbuf = null;
             InputStream httpConnectionStream = null;
             try {
@@ -1355,6 +1404,10 @@ public class ConnectionsManager extends BaseController {
         @Override
         protected void onPostExecute(final NativeByteBuffer result) {
             Utilities.stageQueue.postRunnable(() -> {
+                if (!dnsPolicy.equals(org.telegram.utils.proxy.DnsConfig.policy())) {
+                    if (result != null) result.reuse();
+                    currentTask = null; return;
+                }
                 FileLog.d("3. currentTask = null, result = " + result);
                 currentTask = null;
                 if (result != null) {
@@ -1377,6 +1430,7 @@ public class ConnectionsManager extends BaseController {
 
         private int currentAccount;
         private int responseDate;
+        private final String dnsPolicy = org.telegram.utils.proxy.DnsConfig.policy();
 
         public MozillaDnsLoadTask(int instance) {
             super();
@@ -1384,6 +1438,13 @@ public class ConnectionsManager extends BaseController {
         }
 
         protected NativeByteBuffer doInBackground(Void... voids) {
+            if (TorProxyController.isEnabled()) return null;
+            if (!org.telegram.utils.proxy.DnsConfig.selected().isEmpty()) {
+                try {
+                    responseDate = ConnectionsManager.getInstance(currentAccount).getCurrentTime();
+                    return selectedDnsConfig(currentAccount);
+                } catch (Exception ignored) { return null; }
+            }
             ByteArrayOutputStream outbuf = null;
             InputStream httpConnectionStream = null;
             try {
@@ -1476,6 +1537,10 @@ public class ConnectionsManager extends BaseController {
         @Override
         protected void onPostExecute(final NativeByteBuffer result) {
             Utilities.stageQueue.postRunnable(() -> {
+                if (!dnsPolicy.equals(org.telegram.utils.proxy.DnsConfig.policy())) {
+                    if (result != null) result.reuse();
+                    currentTask = null; return;
+                }
                 FileLog.d("5. currentTask = null");
                 currentTask = null;
                 if (result != null) {

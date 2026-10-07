@@ -19,17 +19,23 @@ public final class ClientDesignHistoryDialog {
     public static void show(Context context, String family, String familyName, Runnable onSelected) {
         List<ClientDesignHistory.Milestone> entries = ClientDesignHistory.forFamily(family);
         ClientDesignHistory.Milestone selected = ClientDesignHistory.selected(family);
-        CharSequence[] labels = new CharSequence[entries.size()];
-        for (int i = 0; i < entries.size(); i++) {
-            ClientDesignHistory.Milestone item = entries.get(i);
-            labels[i] = (selected != null && selected.id.equals(item.id) ? "✓ " : "")
-                    + item.title() + " · " + item.version();
-        }
-        new AlertDialog.Builder(context)
+        LinearLayout list = new LinearLayout(context); list.setOrientation(LinearLayout.VERTICAL);
+        AlertDialog dialog = new AlertDialog.Builder(context)
                 .setTitle(familyName + " · " + context.getString(R.string.SkinHistoryTitle))
-                .setItems(labels, (dialog, which) -> details(context, entries.get(which), onSelected))
-                .setNegativeButton(context.getString(R.string.Cancel), null)
-                .show();
+                .setView(scroll(context, list))
+                .setNegativeButton(context.getString(R.string.Cancel), null).create();
+        for (ClientDesignHistory.Milestone item : entries) {
+            TextView label = new TextView(context);
+            boolean active = selected != null && selected.id.equals(item.id);
+            label.setText(item.title() + " · " + item.version()); label.setTextSize(16);
+            label.setTextColor(Theme.getColor(Theme.key_dialogTextBlack)); label.setSelected(active);
+            label.setPadding(AndroidUtilities.dp(24), AndroidUtilities.dp(14), AndroidUtilities.dp(24), AndroidUtilities.dp(14));
+            label.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_listSelector), 2, 0));
+            org.telegram.ui.Components.CommunitySettingsUi.button(label);
+            label.setOnClickListener(v -> { dialog.dismiss(); details(context, item, onSelected); });
+            list.addView(label, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+        }
+        dialog.show();
     }
 
     private static void details(Context context, ClientDesignHistory.Milestone item, Runnable onSelected) {
@@ -47,13 +53,17 @@ public final class ClientDesignHistoryDialog {
         if (!item.releaseUrl.isEmpty()) link(content, R.string.SkinHistoryRelease, item.releaseUrl);
         new AlertDialog.Builder(context)
                 .setTitle(item.title())
-                .setView(content)
+                .setView(scroll(context, content))
                 .setPositiveButton(context.getString(R.string.SkinHistorySelect), (dialog, which) -> {
                     ClientDesignHistory.select(item);
                     if (onSelected != null) onSelected.run();
                 })
                 .setNegativeButton(context.getString(R.string.Cancel), null)
                 .show();
+    }
+
+    private static android.widget.ScrollView scroll(Context context, LinearLayout content) {
+        android.widget.ScrollView scroll = new android.widget.ScrollView(context); scroll.addView(content); return scroll;
     }
 
     private static void link(LinearLayout content, int label, String url) {
@@ -64,6 +74,8 @@ public final class ClientDesignHistoryDialog {
         link.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueText));
         link.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_listSelector), 2, 0));
         link.setOnClickListener(v -> Browser.openUrl(content.getContext(), url));
-        content.addView(link, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 48));
+        org.telegram.ui.Components.CommunitySettingsUi.button(link);
+        link.setPadding(0, AndroidUtilities.dp(12), 0, AndroidUtilities.dp(12));
+        content.addView(link, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
     }
 }

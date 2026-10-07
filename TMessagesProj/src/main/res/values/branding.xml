@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ForkAppName" translatable="false">Comunidad Telebots</string>
+    <string name="ForkIndependentClient">An independent client using the Telegram API. Not affiliated with or endorsed by Telegram.</string>
+</resources>

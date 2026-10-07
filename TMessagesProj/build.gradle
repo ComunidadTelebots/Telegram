@@ -145,6 +145,8 @@ android {
 
 
     defaultConfig {
+        // Local emulator previews must never change the distributed release gate.
+        buildConfigField "boolean", "EMULATOR_ACCESS_PREVIEW", "false"
         resValue "string", "fork_account_type", rootProject.ext.forkApplicationId
         resValue "string", "fork_contact_profile_mime", "vnd.android.cursor.item/vnd.${rootProject.ext.forkApplicationId}.android.profile"
         resValue "string", "fork_contact_call_mime", "vnd.android.cursor.item/vnd.${rootProject.ext.forkApplicationId}.android.call"
@@ -167,6 +169,7 @@ android {
 
     buildTypes {
         debug {
+            buildConfigField "boolean", "EMULATOR_ACCESS_PREVIEW", (project.findProperty('EMULATOR_ACCESS_PREVIEW') == 'true').toString()
             jniDebuggable true
             shrinkResources false
             multiDexEnabled true

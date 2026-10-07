@@ -1,0 +1,7 @@
+.env
+backups/
+*.log
+.git/
+*.sqlite*
+__pycache__
+test_*.py

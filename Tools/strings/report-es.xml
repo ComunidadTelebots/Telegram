@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="TelebotsReportReview">Revisar informe de conexión</string>
+    <string name="TelebotsReportSave">Guardar archivo</string>
+    <string name="TelebotsReportSaved">Informe guardado</string>
+    <string name="TelebotsReportFailed">No se pudo guardar el informe. Si hay otro guardado pendiente, espera a que termine.</string>
+    <string name="TelebotsReportScope">Revisa esta instantánea antes de guardarla. Contiene versiones de la app y Android, ajustes de conexión seleccionados y estados agrupados del inventario parcial de diagnóstico. Los resultados pueden proceder de comprobaciones anteriores y no prueban que la ruta actual funcione. No incluye identidad de cuenta, direcciones IP, dominios, nombres de proxy, credenciales ni registros generales. No realiza nuevas pruebas de conexión ni envía nada automáticamente. Si eliges un proveedor de documentos en la nube, este puede subir el archivo a su servicio.</string>
+</resources>

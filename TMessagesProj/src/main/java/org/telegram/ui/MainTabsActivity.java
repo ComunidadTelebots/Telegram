@@ -423,8 +423,8 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
             });
             boolean side = clientLayout.placement == ClientLayout.Placement.SIDE;
             contentView.addView(clientNavigation, new FrameLayout.LayoutParams(
-                    side ? dp(clientLayout.extentDp) : ViewGroup.LayoutParams.MATCH_PARENT,
-                    side ? ViewGroup.LayoutParams.MATCH_PARENT : dp(clientLayout.extentDp),
+                    side ? dp(clientLayout.extentDp(ApplicationLoader.applicationContext.getResources().getConfiguration().fontScale)) : ViewGroup.LayoutParams.MATCH_PARENT,
+                    side ? ViewGroup.LayoutParams.MATCH_PARENT : dp(clientLayout.extentDp(ApplicationLoader.applicationContext.getResources().getConfiguration().fontScale)),
                     side ? Gravity.START : clientLayout.placement == ClientLayout.Placement.TOP ? Gravity.TOP : Gravity.BOTTOM));
             selectTab(viewPager.getCurrentPosition(), false);
         }
@@ -998,13 +998,13 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
         {
             int bottomMargin = isUpdateLayoutVisible ? (navigationBarHeight + updateLayoutHeight) : 0;
             if (tabletLayout) {
-                bottomMargin = Math.max(bottomMargin, navigationBarHeight + dp(clientLayout.bottomInsetDp(DialogsActivity.MAIN_TABS_HEIGHT_WITH_MARGINS)));
+                bottomMargin = Math.max(bottomMargin, navigationBarHeight + dp(clientLayout.bottomInsetDp(DialogsActivity.MAIN_TABS_HEIGHT_WITH_MARGINS, ApplicationLoader.applicationContext.getResources().getConfiguration().fontScale)));
             }
             lp = (ViewGroup.MarginLayoutParams) viewPager.getLayoutParams();
-            int sideWidth = clientLayout.placement == ClientLayout.Placement.SIDE ? dp(clientLayout.extentDp) : 0;
+            int sideWidth = clientLayout.placement == ClientLayout.Placement.SIDE ? dp(clientLayout.extentDp(ApplicationLoader.applicationContext.getResources().getConfiguration().fontScale)) : 0;
             int leftMargin = systemInsets.left + (LocaleController.isRTL ? 0 : sideWidth);
             int rightMargin = systemInsets.right + (LocaleController.isRTL ? sideWidth : 0);
-            int topMargin = clientLayout.placement == ClientLayout.Placement.TOP ? dp(clientLayout.extentDp) : 0;
+            int topMargin = clientLayout.placement == ClientLayout.Placement.TOP ? dp(clientLayout.extentDp(ApplicationLoader.applicationContext.getResources().getConfiguration().fontScale)) : 0;
             if (lp.bottomMargin != bottomMargin || lp.leftMargin != leftMargin || lp.rightMargin != rightMargin || lp.topMargin != topMargin) {
                 lp.leftMargin = leftMargin;
                 lp.rightMargin = rightMargin;
@@ -1017,7 +1017,7 @@ public class MainTabsActivity extends ViewPagerActivity implements NotificationC
         tabsViewWrapper.setPadding(systemInsets.left, 0, systemInsets.right, navigationBarHeight);
 
         if (clientNavigation != null) {
-            int size = dp(clientLayout.extentDp);
+            int size = dp(clientLayout.extentDp(ApplicationLoader.applicationContext.getResources().getConfiguration().fontScale));
             FrameLayout.LayoutParams navParams;
             if (clientLayout.placement == ClientLayout.Placement.SIDE) {
                 navParams = new FrameLayout.LayoutParams(size, ViewGroup.LayoutParams.MATCH_PARENT,

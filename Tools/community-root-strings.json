@@ -1,0 +1,62 @@
+{
+  "TelebotsPerformance": {
+    "en": "Consumption and performance",
+    "es": "Consumo y rendimiento"
+  },
+  "TelebotsSaving": {
+    "en": "Save resources",
+    "es": "Ahorro"
+  },
+  "TelebotsBalanced": {
+    "en": "Balanced",
+    "es": "Equilibrado"
+  },
+  "TelebotsFluid": {
+    "en": "Maximum fluidity",
+    "es": "Máxima fluidez"
+  },
+  "TelebotsProfileInfo": {
+    "en": "Preview each profile before applying. Applies to this device. Android battery and low-memory safeguards and existing download limits still apply.",
+    "es": "Revisa cada perfil antes de aplicarlo. Se aplica a este dispositivo. Se respetan el ahorro de batería de Android, las protecciones de poca memoria y los límites de descarga existentes."
+  },
+  "TelebotsSavingInfo": {
+    "en": "Disable interface animations, animated stickers and emoji, effects and GIF/video autoplay. Disable media preloading. Automatic AMP only on unmetered networks.",
+    "es": "Desactiva animaciones de interfaz, stickers y emojis animados, efectos y reproducción automática de GIF y vídeos. Desactiva la precarga multimedia. AMP automático solo en redes sin límite."
+  },
+  "TelebotsBalancedInfo": {
+    "en": "Enable short interface animations, animated stickers and GIF autoplay. Disable video autoplay, animated emoji and heavy effects. Allow media preloading and automatic AMP only on unmetered networks.",
+    "es": "Activa animaciones cortas de interfaz, stickers animados y reproducción automática de GIF. Desactiva la reproducción automática de vídeos, emojis animados y efectos pesados. Precarga multimedia y AMP automático solo en redes sin límite."
+  },
+  "TelebotsFluidInfo": {
+    "en": "Enable smooth interface animations, animated stickers and emoji, effects and GIF/video autoplay. Allow media preloading within your Telegram download settings; automatic AMP also on metered networks when Android permits. May use more battery and data.",
+    "es": "Activa animaciones suaves de interfaz, stickers y emojis animados, efectos y reproducción automática de GIF y vídeos. Permite precarga según tus ajustes de descarga de Telegram y AMP automático también en redes medidas cuando Android lo permita. Puede consumir más batería y datos."
+  },
+  "TelebotsUndoProfile": {
+    "en": "Undo last profile change",
+    "es": "Deshacer el último cambio de perfil"
+  },
+  "TelebotsProfileApplied": {
+    "en": "Profile applied. You can undo it on this screen.",
+    "es": "Perfil aplicado. Puedes deshacerlo desde esta pantalla."
+  },
+  "TelebotsProfileRestored": {
+    "en": "Previous settings restored.",
+    "es": "Ajustes anteriores restaurados."
+  },
+  "TelebotsAccessibility": {
+    "en": "Accessibility",
+    "es": "Accesibilidad"
+  },
+  "TelebotsAccessibilityInfo": {
+    "en": "Custom controls support scalable text and screen readers. Text size and contrast also depend on the Android and Telegram theme settings. Reduced motion follows the system animation setting.",
+    "es": "Los controles propios admiten texto ampliado y lectores de pantalla. El tamaño y contraste también dependen de los ajustes de Android y del tema de Telegram. La reducción de movimiento respeta la configuración de animaciones del sistema."
+  },
+  "TelebotsSystemAccessibility": {
+    "en": "Android accessibility settings",
+    "es": "Accesibilidad de Android"
+  },
+  "TelebotsTextAppearance": {
+    "en": "Telegram text size and appearance",
+    "es": "Tamaño de texto y apariencia de Telegram"
+  }
+}

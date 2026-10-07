@@ -58,6 +58,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.Nullable;
 
@@ -65,6 +66,14 @@ public class WebInstantView {
 
     public String url;
     public MHTML mhtml;
+    public interface PhotoLoader { void load(String url, Utilities.Callback<Bitmap> callback); }
+    public PhotoLoader photoLoader;
+    private volatile boolean recycled;
+    public boolean isRecycled() { return recycled; }
+
+    private static final AtomicLong photoLoaderIds = new AtomicLong();
+    private final long photoLoaderId = photoLoaderIds.incrementAndGet();
+    private String photoKey(String url) { return photoLoader == null ? url : "amp:" + photoLoaderId + ":" + url; }
     public TLRPC.WebPage webpage;
 
     public final HashMap<String, Bitmap> loadedPhotos = new HashMap<>();
@@ -78,6 +87,7 @@ public class WebInstantView {
         }
 
         final boolean[] cancelled = new boolean[] { false };
+        final Runnable[] cancelReader = new Runnable[1];
 
         final WebInstantView instant = new WebInstantView();
         instant.url = webView.getUrl();
@@ -87,10 +97,11 @@ public class WebInstantView {
         instant.getHTML(webView, unsafe, dirty_html -> {
             Timer.done(task_getHTML);
             if (cancelled[0]) {
+                closeReaderStream(dirty_html);
                 return;
             }
             final Timer.Task task_readHTML = Timer.start(t, "readHTML");
-            instant.readHTML(instant.url, dirty_html, json -> {
+            cancelReader[0] = instant.readHTML(instant.url, dirty_html, json -> {
                 Timer.done(task_readHTML);
                 if (cancelled[0]) {
                     return;
@@ -103,20 +114,22 @@ public class WebInstantView {
                     FileLog.e(e);
                 }
                 Timer.done(task_parseJSON);
-                whenDone.run(instant);
-                if (instant.webpage != null) {
+                if (instant.webpage != null && !instant.isRecycled()) {
                     instants.put(instant.webpage, instant);
                 }
+                whenDone.run(instant);
                 Timer.finish(t);
             });
         });
 
         return () -> {
             cancelled[0] = true;
+            if (cancelReader[0] != null) cancelReader[0].run();
         };
     }
 
     public void recycle() {
+        recycled = true;
         instants.remove(webpage);
         for (Map.Entry<String, Bitmap> e : loadedPhotos.entrySet()) {
             AndroidUtilities.recycleBitmap(e.getValue());
@@ -127,7 +140,7 @@ public class WebInstantView {
                 if (photo instanceof WebPhoto) {
                     WebPhoto webPhoto = (WebPhoto) photo;
                     if (loadingPhotos != null) {
-                        loadingPhotos.remove(webPhoto.url);
+                        loadingPhotos.remove(photoKey(webPhoto.url));
                     }
                 }
             }
@@ -198,7 +211,7 @@ public class WebInstantView {
                 return;
             }
             if (loadingPhotos == null) loadingPhotos = new HashMap<>();
-            ArrayList<Pair<ImageReceiver, Runnable>> currentImageReceivers = loadingPhotos.get(photo.url);
+            ArrayList<Pair<ImageReceiver, Runnable>> currentImageReceivers = loadingPhotos.get(photoKey(photo.url));
             if (currentImageReceivers != null) {
                 boolean contains = false;
                 for (int i = 0; i < currentImageReceivers.size(); ++i) {
@@ -212,9 +225,16 @@ public class WebInstantView {
                 return;
             }
             currentImageReceivers = new ArrayList<>();
-            loadingPhotos.put(photo.url, currentImageReceivers);
-            new HttpGetBitmapTask(bitmap -> AndroidUtilities.runOnUIThread(() -> {
-                if (loadingPhotos == null) return;
+            currentImageReceivers.add(new Pair<>(imageReceiver, receivedSize));
+            final String requestKey = photoKey(photo.url);
+            final ArrayList<Pair<ImageReceiver, Runnable>> pendingReceivers = currentImageReceivers;
+            loadingPhotos.put(requestKey, pendingReceivers);
+            Utilities.Callback<Bitmap> onBitmap = bitmap -> AndroidUtilities.runOnUIThread(() -> {
+                if (recycled || loadingPhotos == null || loadingPhotos.get(requestKey) != pendingReceivers) {
+                    if (loadingPhotos != null && loadingPhotos.get(requestKey) == pendingReceivers) loadingPhotos.remove(requestKey);
+                    AndroidUtilities.recycleBitmap(bitmap);
+                    return;
+                }
                 final boolean updatedSize = (photo.w <= 0 || photo.h <= 0) && bitmap != null;
                 if (bitmap != null) {
                     loadedPhotos.put(photo.url, bitmap);
@@ -233,7 +253,7 @@ public class WebInstantView {
                         }
                     }
                 }
-                final ArrayList<Pair<ImageReceiver, Runnable>> receivingImageReceivers = loadingPhotos.remove(photo.url);
+                final ArrayList<Pair<ImageReceiver, Runnable>> receivingImageReceivers = loadingPhotos.remove(requestKey);
                 if (receivingImageReceivers == null) return;
                 for (Pair<ImageReceiver, Runnable> pair : receivingImageReceivers) {
                     pair.first.setImageBitmap(bitmap);
@@ -242,7 +262,9 @@ public class WebInstantView {
                     }
                 }
 
-            })).execute(photo.url);
+            });
+            if (photoLoader != null) photoLoader.load(photo.url, onBitmap);
+            else new HttpGetBitmapTask(onBitmap).execute(photo.url);
         } catch (Exception e) {
             FileLog.e(e);
         }
@@ -320,11 +342,12 @@ public class WebInstantView {
         });
     }
 
-    public void readHTML(String url, InputStream stream, Utilities.Callback<JSONObject> whenDone) {
-        if (whenDone == null) return;
+    public Runnable readHTML(String url, InputStream stream, Utilities.Callback<JSONObject> whenDone) {
+        if (whenDone == null) { closeReaderStream(stream); return () -> {}; }
         if (stream == null) {
+            closeReaderStream(stream);
             whenDone.run(null);
-            return;
+            return () -> {};
         }
 
         Context context = LaunchActivity.instance;
@@ -332,13 +355,16 @@ public class WebInstantView {
 
         final Activity activity = AndroidUtilities.findActivity(context);
         if (activity == null) {
+            closeReaderStream(stream);
             whenDone.run(null);
-            return;
+            return () -> {};
         }
-        final View rootView = activity.findViewById(android.R.id.content).getRootView();
+        final View contentView = activity.findViewById(android.R.id.content);
+        final View rootView = contentView == null ? null : contentView.getRootView();
         if (!(rootView instanceof ViewGroup)) {
+            closeReaderStream(stream);
             whenDone.run(null);
-            return;
+            return () -> {};
         }
         final ViewGroup container = (ViewGroup) rootView;
         final FrameLayout webViewContainer = new FrameLayout(context) {
@@ -359,38 +385,91 @@ public class WebInstantView {
                 super.onMeasure(MeasureSpec.makeMeasureSpec(dp(500), MeasureSpec.EXACTLY), MeasureSpec.makeMeasureSpec(dp(500), MeasureSpec.EXACTLY));
             }
         };
+        final WebView webView = new WebView(context);
         container.addView(webViewContainer);
 
-        final WebView webView = new WebView(context);
-        final WebSettings settings = webView.getSettings();
-        settings.setAllowContentAccess(false);
-        settings.setDatabaseEnabled(false);
-        settings.setAllowFileAccess(false);
-        settings.setJavaScriptEnabled(true);
-        settings.setSaveFormData(false);
-        settings.setGeolocationEnabled(false);
-        settings.setDomStorageEnabled(false);
-        settings.setAllowFileAccessFromFileURLs(false);
-        settings.setAllowUniversalAccessFromFileURLs(false);
+        final boolean[] done = { false };
+        final Runnable[] timeout = new Runnable[1];
+        final Runnable cleanup = () -> {
+            if (timeout[0] != null) AndroidUtilities.cancelRunOnUIThread(timeout[0]);
+            try {
+                webView.removeJavascriptInterface("Instant");
+                webView.stopLoading();
+                webView.onPause();
+            } catch (Exception e) {
+                FileLog.e(e);
+            } finally {
+                AndroidUtilities.removeFromParent(webView);
+                AndroidUtilities.removeFromParent(webViewContainer);
+                try { webView.destroy(); } catch (Exception e) { FileLog.e(e); }
+                closeReaderStream(stream);
+            }
+        };
+        final Utilities.Callback<JSONObject> finish = result -> {
+            if (done[0]) return;
+            done[0] = true;
+            cleanup.run();
+            whenDone.run(result);
+        };
+        timeout[0] = () -> finish.run(null);
+        AndroidUtilities.runOnUIThread(timeout[0], 15000);
 
-        webView.setWebViewClient(new WebViewClient() {
-            private boolean firstLoad = true;
-            private boolean streamLoaded;
-            @androidx.annotation.Nullable
-            @Override
-            public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-                InputStream requestStream = null;
-                String mime = "text/html";
-                if (firstLoad) {
-                    firstLoad = false;
-                    final String script = readRes(R.raw.instant).replace("$DEBUG$", "" + BuildVars.DEBUG_VERSION);
-                    final String html = "<script>\n" + script + "\n</script>";
-                    return new WebResourceResponse("text/html", "UTF-8", new ByteArrayInputStream(html.getBytes(StandardCharsets.UTF_8)));
-                } else if (url != null && url.endsWith("/index.html")) {
-                    mime = "application/octet-stream";
-                    if (streamLoaded) {
-                        MHTML.Entry entry = mhtml != null ? mhtml.entries.get(0) : null;
+        try {
+            final WebSettings settings = webView.getSettings();
+            settings.setAllowContentAccess(false);
+            settings.setDatabaseEnabled(false);
+            settings.setAllowFileAccess(false);
+            settings.setJavaScriptEnabled(true);
+            settings.setSaveFormData(false);
+            settings.setGeolocationEnabled(false);
+            settings.setDomStorageEnabled(false);
+            settings.setAllowFileAccessFromFileURLs(false);
+            settings.setAllowUniversalAccessFromFileURLs(false);
+
+            webView.setWebViewClient(new WebViewClient() {
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, String nextUrl) {
+                    return true; // Only the app-provided parser document may navigate.
+                }
+                private boolean firstLoad = true;
+                private boolean streamLoaded;
+                @androidx.annotation.Nullable
+                @Override
+                public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+                    InputStream requestStream = null;
+                    String mime = "text/html";
+                    if (firstLoad) {
+                        firstLoad = false;
+                        final String script = readRes(R.raw.instant).replace("$DEBUG$", "false");
+                        final String html = "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'unsafe-inline'; connect-src 'self'; style-src 'self' 'unsafe-inline'\"><script>\n" + script + "\n</script>";
+                        return new WebResourceResponse("text/html", "UTF-8", new ByteArrayInputStream(html.getBytes(StandardCharsets.UTF_8)));
+                    } else if (url != null && url.endsWith("/index.html")) {
+                        mime = "application/octet-stream";
+                        if (streamLoaded) {
+                            MHTML.Entry entry = mhtml != null ? mhtml.entries.get(0) : null;
+                            if (entry == null) {
+                                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return new WebResourceResponse(mime, "UTF-8", null);
+                                return new WebResourceResponse("text/plain", "utf-8", 404, "Not Found", null, null);
+                            }
+                            try {
+                                requestStream = entry.getInputStream();
+                            } catch (IOException e) {
+                                FileLog.e(e);
+                                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return new WebResourceResponse(mime, "UTF-8", null);
+                                return new WebResourceResponse("text/plain", "utf-8", 503, "Server error", null, null);
+                            }
+                        } else {
+                            requestStream = stream;
+                            streamLoaded = true;
+                        }
+                    } else {
+                        MHTML.Entry entry = mhtml != null ? mhtml.entriesByLocation.get(url) : null;
                         if (entry == null) {
+                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return new WebResourceResponse(mime, "UTF-8", null);
+                            return new WebResourceResponse("text/plain", "utf-8", 404, "Not Found", null, null);
+                        }
+                        mime = entry.getType();
+                        if (!"text/html".equalsIgnoreCase(mime) && !"text/css".equalsIgnoreCase(mime)) {
                             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return new WebResourceResponse(mime, "UTF-8", null);
                             return new WebResourceResponse("text/plain", "utf-8", 404, "Not Found", null, null);
                         }
@@ -401,63 +480,44 @@ public class WebInstantView {
                             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return new WebResourceResponse(mime, "UTF-8", null);
                             return new WebResourceResponse("text/plain", "utf-8", 503, "Server error", null, null);
                         }
-                    } else {
-                        requestStream = stream;
-                        streamLoaded = true;
                     }
-                } else {
-                    MHTML.Entry entry = mhtml != null ? mhtml.entriesByLocation.get(url) : null;
-                    if (entry == null) {
-                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return new WebResourceResponse(mime, "UTF-8", null);
-                        return new WebResourceResponse("text/plain", "utf-8", 404, "Not Found", null, null);
-                    }
-                    mime = entry.getType();
-                    if (!"text/html".equalsIgnoreCase(mime) && !"text/css".equalsIgnoreCase(mime)) {
-                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return new WebResourceResponse(mime, "UTF-8", null);
-                        return new WebResourceResponse("text/plain", "utf-8", 404, "Not Found", null, null);
-                    }
-                    try {
-                        requestStream = entry.getInputStream();
-                    } catch (IOException e) {
-                        FileLog.e(e);
-                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return new WebResourceResponse(mime, "UTF-8", null);
-                        return new WebResourceResponse("text/plain", "utf-8", 503, "Server error", null, null);
-                    }
+                    return new WebResourceResponse(mime, null, requestStream);
                 }
-                return new WebResourceResponse(mime, null, requestStream);
-            }
+            });
+            webView.setWebChromeClient(new WebChromeClient() {
+
+            });
+            webViewContainer.addView(webView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
+            webView.addJavascriptInterface(new Object() {
+                @Keep
+                @JavascriptInterface
+                public void done(String json) {
+                    AndroidUtilities.runOnUIThread(() -> {
+                        if (done[0]) return;
+                        JSONObject rez = null;
+                        try {
+                            rez = new JSONObject(json);
+                        } catch (Exception e) {
+                            FileLog.e(e);
+                        }
+                        finish.run(rez);
+                    });
+                }
+            }, "Instant");
+            webView.loadUrl(url);
+        } catch (Exception e) {
+            finish.run(null);
+        }
+        return () -> AndroidUtilities.runOnUIThread(() -> {
+            if (done[0]) return;
+            done[0] = true;
+            cleanup.run();
         });
-        webView.setWebChromeClient(new WebChromeClient() {
+    }
 
-        });
-        webViewContainer.addView(webView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT));
-        final boolean[] done = new boolean[] { false };
-        webView.addJavascriptInterface(new Object() {
-            @Keep
-            @JavascriptInterface
-            public void done(String json) {
-                AndroidUtilities.runOnUIThread(() -> {
-                    if (done[0]) return;
-                    done[0] = true;
-
-                    if (!BuildVars.DEBUG_PRIVATE_VERSION) {
-                        webView.onPause();
-                        webView.destroy();
-                        AndroidUtilities.removeFromParent(webView);
-                        AndroidUtilities.removeFromParent(webViewContainer);
-                    }
-
-                    JSONObject rez = null;
-                    try {
-                        rez = new JSONObject(json);
-                    } catch (Exception e) {
-                        FileLog.e(e);
-                    }
-                    whenDone.run(rez);
-                });
-            }
-        }, "Instant");
-        webView.loadUrl(url);
+    private static void closeReaderStream(InputStream stream) {
+        if (stream == null) return;
+        try { stream.close(); } catch (IOException ignored) { }
     }
 
     public TLRPC.TL_webPage parseJSON(String url, JSONObject root) throws JSONException {
@@ -1239,6 +1299,17 @@ public class WebInstantView {
             return null;
         }
 
+        /** Transfer the chosen article to the viewer stack before its browser page is cleaned up. */
+        public TLRPC.WebPage takeWebPage() {
+            final TLRPC.WebPage page = getWebPage();
+            if (page == null) return null;
+            if (page == localPage) localPage = null;
+            if (page == remotePage) remotePage = null;
+            // Stop pending retries so they cannot replace or recycle the transferred page.
+            cancel();
+            return page;
+        }
+
         public void cancel() {
             if (cancelled) return;
             cancelled = true;
@@ -1266,8 +1337,8 @@ public class WebInstantView {
         }
 
         private void notifyUpdate() {
-            for (Runnable listener : listeners) {
-                listener.run();
+            for (Runnable listener : new ArrayList<>(listeners)) {
+                if (listeners.contains(listener)) listener.run();
             }
         }
 

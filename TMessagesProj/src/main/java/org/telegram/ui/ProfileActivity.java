@@ -14541,6 +14541,20 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             final int currentAccount = f.getCurrentAccount();
             final Theme.ResourcesProvider resourcesProvider = f.getResourceProvider();
             return new SearchResult[]{
+                    new SearchResult(9800, getString(R.string.TelebotsSettings), getString(R.string.TelebotsSettings), R.drawable.settings_features, () -> f.presentFragment(new CommunitySettingsActivity())),
+                    new SearchResult(9801, getString(R.string.DnsCatalogTitle), getString(R.string.TelebotsSettings), R.drawable.settings_features, () -> f.presentFragment(new DnsSettingsActivity())),
+                    new SearchResult(9802, getString(R.string.TelebotsDomainTools), getString(R.string.TelebotsSettings), R.drawable.settings_features, () -> f.presentFragment(new NetworkDiagnosticsActivity(false))),
+                    new SearchResult(9803, getString(R.string.TelebotsProxyTools), getString(R.string.TelebotsSettings), R.drawable.settings_features, () -> f.presentFragment(new NetworkDiagnosticsActivity(true))),
+                    new SearchResult(9804, getString(R.string.TorTitle), getString(R.string.TelebotsSettings), R.drawable.settings_features, () -> f.presentFragment(new CommunitySettingsActivity(CommunitySettingsActivity.TOR))),
+                    new SearchResult(9805, getString(R.string.TelebotsDesign), getString(R.string.TelebotsSettings), R.drawable.settings_features, () -> f.presentFragment(new CommunitySettingsActivity(CommunitySettingsActivity.DESIGN))),
+                    new SearchResult(9806, getString(R.string.TelebotsReading), getString(R.string.TelebotsSettings), R.drawable.settings_features, () -> f.presentFragment(new CommunitySettingsActivity(CommunitySettingsActivity.READING))),
+                    new SearchResult(9807, getString(R.string.TelebotsPhrases), getString(R.string.TelebotsSettings), R.drawable.settings_features, () -> f.presentFragment(new CommunityQuickPhrasesActivity())),
+                    new SearchResult(9808, getString(R.string.TelebotsDownloads), getString(R.string.TelebotsSettings), R.drawable.settings_features, () -> f.presentFragment(new CommunityDownloadsActivity())),
+                    new SearchResult(9809, getString(R.string.TelebotsPerformance), getString(R.string.TelebotsSettings), R.drawable.settings_features, () -> f.presentFragment(new CommunityPerformanceActivity())),
+                    new SearchResult(9810, getString(R.string.TelebotsAccessibility), getString(R.string.TelebotsSettings), R.drawable.settings_features, () -> f.presentFragment(new CommunitySettingsActivity(CommunitySettingsActivity.ACCESSIBILITY))),
+                    new SearchResult(9811, getString(R.string.TelebotsUpdates), getString(R.string.TelebotsSettings), R.drawable.settings_features, () -> f.presentFragment(new AppUpdatesActivity())),
+                    new SearchResult(9812, getString(R.string.TelebotsPrivacy), getString(R.string.TelebotsSettings), R.drawable.settings_features, () -> f.presentFragment(new CommunitySettingsActivity(CommunitySettingsActivity.PRIVACY))),
+                    new SearchResult(9813, getString(R.string.TelebotsBackupTitle), getString(R.string.TelebotsSettings), R.drawable.settings_features, () -> f.presentFragment(new CommunitySettingsBackupActivity())),
                     new SearchResult(500, getString(R.string.EditName), 0, () -> f.presentFragment(new ChangeNameActivity(resourcesProvider))),
                     new SearchResult(501, getString(R.string.ChangePhoneNumber), 0, () -> f.presentFragment(new ActionIntroActivity(ActionIntroActivity.ACTION_TYPE_CHANGE_PHONE_NUMBER))).withLink("tg://settings/edit/change-number"),
                     new SearchResult(502, getString(R.string.AddAnotherAccount), 0, () -> {
@@ -15085,7 +15099,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 ArrayList<SearchResult> results = new ArrayList<>();
                 ArrayList<MessagesController.FaqSearchResult> faqResults = new ArrayList<>();
                 ArrayList<CharSequence> names = new ArrayList<>();
-                String[] searchArgs = text.split(" ");
+                String[] searchArgs = text.trim().toLowerCase(java.util.Locale.ROOT).split("\\s+");
                 String[] translitArgs = new String[searchArgs.length];
                 for (int a = 0; a < searchArgs.length; a++) {
                     translitArgs[a] = LocaleController.getInstance().getTranslitString(searchArgs[a]);
@@ -15099,7 +15113,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     if (result == null) {
                         continue;
                     }
-                    String title = " " + result.searchTitle.toLowerCase();
+                    String title = " " + result.searchTitle.toLowerCase(java.util.Locale.ROOT);
                     SpannableStringBuilder stringBuilder = null;
                     for (int i = 0; i < searchArgs.length; i++) {
                         if (searchArgs[i].length() != 0) {
@@ -15139,7 +15153,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 if (faqWebPage != null) {
                     for (int a = 0, N = faqSearchArray.size(); a < N; a++) {
                         MessagesController.FaqSearchResult result = faqSearchArray.get(a);
-                        String title = " " + result.title.toLowerCase();
+                        String title = " " + result.title.toLowerCase(java.util.Locale.ROOT);
                         SpannableStringBuilder stringBuilder = null;
                         for (int i = 0; i < searchArgs.length; i++) {
                             if (searchArgs[i].length() != 0) {

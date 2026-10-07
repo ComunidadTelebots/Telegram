@@ -1,0 +1,14 @@
+FROM gradle:8.13-jdk21
+USER root
+ENV ANDROID_HOME=/opt/android ANDROID_SDK_ROOT=/opt/android
+ENV PATH=/opt/android/cmdline-tools/latest/bin:/opt/android/build-tools/36.0.0:$PATH
+RUN apt-get update && apt-get install -y --no-install-recommends curl unzip git python3 && rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /opt/android/cmdline-tools && curl -fsSL https://dl.google.com/android/repository/commandlinetools-linux-15859902_latest.zip -o /tmp/sdk.zip && unzip -q /tmp/sdk.zip -d /tmp/sdk && mv /tmp/sdk/cmdline-tools /opt/android/cmdline-tools/latest && rm -rf /tmp/sdk*
+RUN yes | sdkmanager --licenses >/dev/null
+RUN sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;27.2.12479018' 'cmake;3.22.1' 'platform-tools'
+COPY android.sh /opt/build.sh
+COPY verify-bundle.py /opt/verify-bundle.py
+ENTRYPOINT ["bash", "/opt/build.sh"]
+
+COPY build_resources.py /opt/build_resources.py
+COPY select_apk.py /opt/select_apk.py

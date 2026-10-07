@@ -4340,6 +4340,7 @@ public abstract class BotWebViewContainer extends FrameLayout implements Notific
 
                 @Override
                 public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                    org.telegram.utils.proxy.NetworkDomainDiagnostics.observe(url, "browser_navigation");
                     if (bot && botWebViewContainer != null) {
                         botWebViewContainer.documentGeneration++;
                     }

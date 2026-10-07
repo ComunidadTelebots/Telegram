@@ -151,6 +151,7 @@ import org.telegram.tgnet.tl.TL_keyboard;
 import org.telegram.tgnet.tl.TL_iv;
 import org.telegram.tgnet.tl.TL_stars;
 import org.telegram.tgnet.tl.TL_stories;
+import org.telegram.ui.web.MessageLinkPreview;
 import org.telegram.ui.ActionBar.MessageDrawable;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.AvatarSpan;
@@ -728,6 +729,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
 
         }
 
+        default void didPressAmpButton(ChatMessageCell cell, String url) {
+        }
+
         default void didPressInstantButton(ChatMessageCell cell, int type) {
         }
 
@@ -1249,6 +1253,212 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     private final Drawable[] selectorDrawable = new Drawable[2];
     private final MaskDrawable[] selectorMaskDrawable = new MaskDrawable[2];
     private int[] selectorDrawableMaskType = new int[2];
+    private MessageLinkPreview.Result readerPreview;
+    private Runnable readerPreviewCancel;
+    private int readerPreviewGeneration;
+    private final RectF ampButtonRect = new RectF();
+    private final RectF photoReaderRect = new RectF();
+    private final RectF photoInstantRect = new RectF();
+    private final Paint readerCardPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final android.text.TextPaint readerTextPaint = new android.text.TextPaint(Paint.ANTI_ALIAS_FLAG);
+    private int readerPressed;
+    private Drawable readerInstantIcon;
+    private int photoReaderHeight;
+    private boolean readerPreviewVisible;
+    private final Rect readerVisibleRect = new Rect();
+    private final Runnable readerVisibilityCheck = () -> updateReaderPreviewVisibility(isShown() && getLocalVisibleRect(readerVisibleRect));
+
+    public MessageObject getReaderPreviewMessageObject() {
+        return currentMessagesGroup != null && !currentMessagesGroup.isDocuments
+                ? currentMessagesGroup.findCaptionMessageObject() : currentMessageObject;
+    }
+
+    private boolean readerGroupBottom() {
+        return currentPosition == null || (currentPosition.flags & MessageObject.POSITION_FLAG_BOTTOM) != 0;
+    }
+
+    private boolean readerGroupOwner() {
+        return currentPosition != null && readerGroupBottom() && (currentPosition.flags & MessageObject.POSITION_FLAG_LEFT) != 0;
+    }
+
+    public void updateReaderPreviewVisibility(boolean visible) {
+        visible &= attachedToWindow && isShown() && getLocalVisibleRect(readerVisibleRect);
+        readerPreviewVisible = visible;
+        if (!visible) {
+            removeCallbacks(readerVisibilityCheck);
+            cancelReaderPreview();
+            return;
+        }
+        if (readerPreviewCancel == null) requestReaderPreview();
+    }
+
+
+    private void cancelReaderPreview() {
+        readerPreviewGeneration++;
+        if (readerPreviewCancel != null) readerPreviewCancel.run();
+        readerPreviewCancel = null;
+        readerPressed = 0;
+        ampButtonRect.setEmpty();
+        photoInstantRect.setEmpty();
+        photoReaderRect.setEmpty();
+    }
+
+    private void bindReaderPreview() {
+        cancelReaderPreview();
+        photoReaderHeight = 0;
+        readerPreview = MessageLinkPreview.peek(getReaderPreviewMessageObject());
+        removeCallbacks(readerVisibilityCheck);
+        if (attachedToWindow) post(readerVisibilityCheck);
+    }
+
+    private void requestReaderPreview() {
+        final MessageObject message = getReaderPreviewMessageObject();
+        final MessageObject boundMessage = currentMessageObject;
+        if (!readerPreviewVisible || message == null || message.preview || !readerGroupBottom()
+                || !(hasLinkPreview || message.type == MessageObject.TYPE_PHOTO)) return;
+        final int generation = readerPreviewGeneration;
+        final String url = MessageLinkPreview.findUrl(message);
+        if (url == null) return;
+        readerPreviewCancel = MessageLinkPreview.request(message, true, true, result -> {
+            if (!attachedToWindow || !readerPreviewVisible || generation != readerPreviewGeneration
+                    || currentMessageObject != boundMessage || getReaderPreviewMessageObject() != message
+                    || !TextUtils.equals(url, MessageLinkPreview.findUrl(message))) return;
+            readerPreview = result;
+            // All bottom-row siblings receive the same deduplicated metadata and reserve equal height.
+            requestLayout();
+            invalidateWithParent();
+        });
+    }
+
+    private boolean hasReaderAmp() {
+        return readerPreview != null && readerPreview.amp != null;
+    }
+
+    private boolean hasPhotoReader() {
+        MessageObject source = getReaderPreviewMessageObject();
+        return source != null && source.type == MessageObject.TYPE_PHOTO && readerGroupBottom()
+                && readerPreview != null && readerPreview.webpage instanceof TLRPC.TL_webPage;
+    }
+
+    private void drawReaderButton(Canvas canvas, RectF bounds, String title, int color, boolean pressed) {
+        // Same text treatment as native Instant View, inside the message's preview area.
+        readerCardPaint.setColor(Theme.multAlpha(color, pressed ? .18f : .0f));
+        if (pressed) canvas.drawRect(bounds, readerCardPaint);
+        readerTextPaint.set(Theme.chat_instantViewPaint);
+        readerTextPaint.setColor(color);
+        boolean instant = title.equals(getString(R.string.InstantView));
+        int iconSpace = instant ? dp(15) : 0;
+        CharSequence label = TextUtils.ellipsize(title, readerTextPaint, Math.max(1, bounds.width() - dp(12) - iconSpace), TextUtils.TruncateAt.END);
+        float textLeft = bounds.centerX() - (readerTextPaint.measureText(label.toString()) + iconSpace) / 2;
+        if (instant) {
+            if (readerInstantIcon == null) readerInstantIcon = getContext().getResources().getDrawable(R.drawable.msg_instant).mutate();
+            readerInstantIcon.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN));
+            setDrawableBounds(readerInstantIcon, textLeft, bounds.centerY() - dp(6.5f), dp(9), dp(13));
+            readerInstantIcon.draw(canvas);
+        }
+        canvas.drawText(label.toString(), textLeft + iconSpace,
+                bounds.centerY() - (readerTextPaint.ascent() + readerTextPaint.descent()) / 2, readerTextPaint);
+    }
+
+    private void drawReaderRow(Canvas canvas, RectF iv, float left, float top, float width, boolean instant, int color) {
+        readerCardPaint.setColor(Theme.multAlpha(color, .18f));
+        canvas.drawRect(left, top, left + width, top + Math.max(1, dp(.66f)), readerCardPaint);
+        final float ampWidth = instant ? Math.min(dp(76), width * .34f) : width;
+        if (hasReaderAmp()) {
+            ampButtonRect.set(left + width - ampWidth, top, left + width, top + dp(48));
+            drawReaderButton(canvas, ampButtonRect, "AMP", color, readerPressed == 1);
+        } else ampButtonRect.setEmpty();
+        if (instant) {
+            iv.set(left, top, left + width - (hasReaderAmp() ? ampWidth + dp(6) : 0), top + dp(48));
+            drawReaderButton(canvas, iv, getString(R.string.InstantView), color, readerPressed == 2 || instantButtonPressed);
+        } else iv.setEmpty();
+    }
+
+    public void drawGroupedReaderPreview(Canvas canvas) {
+        if (readerGroupOwner()) drawPhotoReader(canvas);
+    }
+
+    private int readerFooterHeight() {
+        int footer = drawCommentButton && drawSideButton != 3 ? dp(43) : 0;
+        if (!reactionsLayoutInBubble.isEmpty && !reactionsLayoutInBubble.isSmall) footer += reactionsLayoutInBubble.totalHeight;
+        if (hasNewLineForTime) footer += dp(16);
+        return footer;
+    }
+
+    private void drawPhotoReader(Canvas canvas) {
+        if (photoReaderHeight == 0) return;
+        if (!hasPhotoReader()) {
+            if (hasLinkPreview && !drawInstantView && hasReaderAmp()) {
+                int color = getThemedColor(currentMessageObject.isOutOwner() ? Theme.key_chat_outPreviewInstantText : Theme.key_chat_inPreviewInstantText);
+                drawReaderRow(canvas, photoInstantRect, getBackgroundDrawableLeft() + dp(10), totalHeight - readerFooterHeight() - dp(12), getBackgroundDrawableRight() - getBackgroundDrawableLeft() - dp(20), false, color);
+            }
+            return;
+        }
+        final boolean grouped = currentMessagesGroup != null;
+        final float left = grouped ? currentMessagesGroup.transitionParams.left - getLeft() + dp(12) : getBackgroundDrawableLeft() + dp(12);
+        final float width = Math.max(dp(100), grouped ? currentMessagesGroup.transitionParams.right - currentMessagesGroup.transitionParams.left - dp(24) : getBackgroundDrawableRight() - left - dp(12));
+        // Caption/media retains its original geometry; the native bubble and footer grow below it.
+        final float top = !captionAbove && captionLayout != null ? captionY + captionLayout.textHeight() + dp(6) : getPhotoBottom() + dp(8);
+        final boolean hasActions = readerPreview.webpage.cached_page != null || hasReaderAmp();
+        final int metadataHeight = TextUtils.isEmpty(readerPreview.webpage.description) ? 52 : 71;
+        photoReaderRect.set(left, top, left + width, top + dp(metadataHeight + (hasActions ? 48 : 0)));
+        final int color = getThemedColor(currentMessageObject.isOutOwner() ? Theme.key_chat_outPreviewInstantText : Theme.key_chat_inPreviewInstantText);
+        readerCardPaint.setColor(color);
+        canvas.drawRoundRect(left, top + dp(4), left + dp(3), top + dp(metadataHeight - 4), dp(1.5f), dp(1.5f), readerCardPaint);
+        readerTextPaint.setTypeface(AndroidUtilities.bold());
+        readerTextPaint.setTextSize(dp(14));
+        readerTextPaint.setColor(color);
+        TLRPC.WebPage page = readerPreview.webpage;
+        String title = !TextUtils.isEmpty(page.title) ? page.title : !TextUtils.isEmpty(page.site_name) ? page.site_name : readerPreview.url;
+        canvas.drawText(TextUtils.ellipsize(title, readerTextPaint, width - dp(20), TextUtils.TruncateAt.END).toString(), left + dp(10), top + dp(22), readerTextPaint);
+        readerTextPaint.setTypeface(null);
+        readerTextPaint.setTextSize(dp(12));
+        boolean description = !TextUtils.isEmpty(page.description);
+        if (description) canvas.drawText(TextUtils.ellipsize(page.description.replace('\n', ' '), readerTextPaint, width - dp(20), TextUtils.TruncateAt.END).toString(), left + dp(10), top + dp(43), readerTextPaint);
+        canvas.drawText(TextUtils.ellipsize(readerPreview.url, readerTextPaint, width - dp(20), TextUtils.TruncateAt.END).toString(), left + dp(10), top + dp(description ? 62 : 43), readerTextPaint);
+        if (hasActions) drawReaderRow(canvas, photoInstantRect, left, top + dp(description ? 71 : 52), width, page.cached_page != null, color);
+    }
+
+    private boolean checkReaderTouch(MotionEvent event) {
+        if (currentMessagesGroup != null && !readerGroupOwner() && getParent() instanceof ViewGroup) {
+            ViewGroup parent = (ViewGroup) getParent();
+            for (int i = 0; i < parent.getChildCount(); i++) {
+                View child = parent.getChildAt(i);
+                if (!(child instanceof ChatMessageCell) || child == this) continue;
+                ChatMessageCell cell = (ChatMessageCell) child;
+                if (cell.currentMessagesGroup != currentMessagesGroup || !cell.readerGroupOwner()) continue;
+                MotionEvent forwarded = MotionEvent.obtain(event);
+                forwarded.offsetLocation(getX() - cell.getX(), getY() - cell.getY());
+                boolean handled = cell.checkReaderTouch(forwarded);
+                forwarded.recycle();
+                return handled;
+            }
+            return false;
+        }
+        float x = event.getX(), y = event.getY();
+        int action = event.getActionMasked();
+        if (action == MotionEvent.ACTION_DOWN) {
+            readerPressed = hasReaderAmp() && ampButtonRect.contains(x, y) ? 1 : photoInstantRect.contains(x, y) ? 2 : photoReaderRect.contains(x, y) ? 3 : 0;
+            if (readerPressed == 0) return false;
+            invalidate();
+            return true;
+        }
+        if (readerPressed == 0) return false;
+        RectF bounds = readerPressed == 1 ? ampButtonRect : readerPressed == 2 ? photoInstantRect : photoReaderRect;
+        if (action == MotionEvent.ACTION_UP) {
+            int pressed = readerPressed;
+            readerPressed = 0;
+            if (bounds.contains(x, y) && delegate != null && readerPreview != null) {
+                playSoundEffect(SoundEffectConstants.CLICK);
+                if (pressed == 1 && hasReaderAmp()) delegate.didPressAmpButton(this, readerPreview.url);
+                else if (pressed == 2) delegate.didPressInstantButton(this, 0);
+                else delegate.didPressWebPage(this, readerPreview.webpage, readerPreview.url, false);
+            }
+        } else if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_MOVE && !bounds.contains(x, y)) readerPressed = 0;
+        invalidate();
+        return true;
+    }
+
     private RectF instantButtonRect = new RectF();
     private LoadingDrawable instantButtonLoading;
     private final int[] pressedState = new int[]{android.R.attr.state_enabled, android.R.attr.state_pressed};
@@ -4923,6 +5133,8 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             }
         }
 
+        if (checkReaderTouch(event)) return true;
+
         if (checkTextSelection(event)) {
             return true;
         }
@@ -6361,6 +6573,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        removeCallbacks(readerVisibilityCheck);
+        readerPreviewVisible = false;
+        cancelReaderPreview();
 
         if (observersGroup != null) {
             observersGroup.removeAllObservers();
@@ -6532,6 +6747,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         }
 
         attachedToWindow = true;
+        bindReaderPreview();
 
         animationOffsetX = 0;
         slidingOffsetX = 0;
@@ -11317,6 +11533,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         highlightCaptionToSetStart = highlightCaptionToSetEnd = -1;
 
         updateFlagSecure();
+        bindReaderPreview();
     }
 
     public void checkPollFileState() {
@@ -13684,6 +13901,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         updateSelectionTextPosition();
 
         final int normHeight = starsPriceTopPadding + topicSeparatorTopPadding + suggestionOfferTopPadding + totalHeight + keyboardHeight + askBotForumBottomPadding + bottomActionPadding;
+        photoReaderHeight = hasPhotoReader() ? dp((readerPreview.webpage.cached_page != null || hasReaderAmp() ? 120 : 72) + (!TextUtils.isEmpty(readerPreview.webpage.description) ? 19 : 0)) : hasLinkPreview && !drawInstantView && hasReaderAmp() ? dp(56) : 0;
         int resultHeight = normHeight;
         ChatActivityDraftMessageMeasureController botDraftHeightController = getDraftMessageMeasureController();
         if (botDraftHeightController != null) {
@@ -13694,7 +13912,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
 
         setMeasuredDimension(
             isWidthAdaptive() ? getBoundsRight() - getBoundsLeft() : MeasureSpec.getSize(widthMeasureSpec),
-            resultHeight
+            resultHeight + photoReaderHeight
         );
     }
 
@@ -16008,7 +16226,11 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         giveawayMessageCell.draw(canvas, namesOffset, linkX, resourcesProvider);
         giveawayResultsMessageCell.draw(canvas, namesOffset, linkX, resourcesProvider);
 
-        if (drawInstantView) {
+        if (drawInstantView && drawInstantViewType == 0 && hasReaderAmp()) {
+            final int color = getThemedColor(currentMessageObject.isOutOwner() ? Theme.key_chat_outPreviewInstantText : Theme.key_chat_inPreviewInstantText);
+            drawReaderRow(canvas, instantButtonRect, linkX, startY + linkPreviewHeight + dp(4), instantWidth, true, color);
+        } else if (drawInstantView) {
+            ampButtonRect.setEmpty();
             Drawable instantDrawable;
             if (currentMessageObject.isOutOwner()) {
                 final int color = getThemedColor(Theme.key_chat_outPreviewInstantText);
@@ -19850,7 +20072,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     }
 
     public int getExtraInsetHeight() {
-        int h = addedCaptionHeight;
+        int h = addedCaptionHeight + photoReaderHeight;
         if (hasFactCheck) {
             h += dp(2 + (reactionsLayoutInBubble.isEmpty ? 18 : 0)) + factCheckHeight;
         }
@@ -20367,6 +20589,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         }
 
         canvas.restoreToCount(restore);
+        if (currentMessagesGroup == null) drawPhotoReader(canvas);
     }
 
     public void drawBackgroundInternal(Canvas canvas, boolean fromParent) {
@@ -27037,6 +27260,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         public static final int CONTACT_VIEW = 491;
         public static final int CONTACT_ADD = 490;
         public static final int CONTACT_MESSAGE = 489;
+        public static final int AMP_READER = 488;
+        public static final int PHOTO_INSTANT = 487;
+        public static final int PHOTO_PREVIEW = 486;
         private Path linkPath = new Path();
         private RectF rectF = new RectF();
         private Rect rect = new Rect();
@@ -27436,6 +27662,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     info.addChild(ChatMessageCell.this, POLL_BUTTONS_START + i);
                     i++;
                 }
+                if (hasReaderAmp() && !ampButtonRect.isEmpty()) info.addChild(ChatMessageCell.this, AMP_READER);
+                if (!photoInstantRect.isEmpty()) info.addChild(ChatMessageCell.this, PHOTO_INSTANT);
+                if (!photoReaderRect.isEmpty()) info.addChild(ChatMessageCell.this, PHOTO_PREVIEW);
                 if (drawInstantView && !instantButtonRect.isEmpty()) {
                     info.addChild(ChatMessageCell.this, INSTANT_VIEW);
                 }
@@ -27689,6 +27918,17 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     rect.offset(pos[0], pos[1]);
                     info.setBoundsInScreen(rect);
                     info.setClickable(true);
+                } else if (virtualViewId == AMP_READER || virtualViewId == PHOTO_INSTANT || virtualViewId == PHOTO_PREVIEW) {
+                    info.setClassName("android.widget.Button");
+                    info.setEnabled(true);
+                    info.setText(virtualViewId == AMP_READER ? getString(R.string.AmpReaderOpen) : virtualViewId == PHOTO_INSTANT ? getString(R.string.InstantView) : readerPreview == null ? "" : readerPreview.url);
+                    info.addAction(AccessibilityNodeInfo.ACTION_CLICK);
+                    (virtualViewId == AMP_READER ? ampButtonRect : virtualViewId == PHOTO_INSTANT ? photoInstantRect : photoReaderRect).round(rect);
+                    info.setBoundsInParent(rect);
+                    accessibilityVirtualViewBounds.put(virtualViewId, new Rect(rect));
+                    rect.offset(pos[0], pos[1]);
+                    info.setBoundsInScreen(rect);
+                    info.setClickable(true);
                 } else if (virtualViewId == INSTANT_VIEW) {
                     info.setClassName("android.widget.Button");
                     info.setEnabled(true);
@@ -27919,6 +28159,12 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                         sendAccessibilityEventForVirtualView(virtualViewId, AccessibilityEvent.TYPE_VIEW_CLICKED);
                     } else if (virtualViewId == POLL_HINT) {
                         didPressVoteHint();
+                    } else if (virtualViewId == AMP_READER || virtualViewId == PHOTO_INSTANT || virtualViewId == PHOTO_PREVIEW) {
+                        if (delegate != null && readerPreview != null) {
+                            if (virtualViewId == AMP_READER && hasReaderAmp()) delegate.didPressAmpButton(ChatMessageCell.this, readerPreview.url);
+                            else if (virtualViewId == PHOTO_INSTANT && readerPreview.webpage != null && readerPreview.webpage.cached_page != null) delegate.didPressInstantButton(ChatMessageCell.this, 0);
+                            else if (virtualViewId == PHOTO_PREVIEW) delegate.didPressWebPage(ChatMessageCell.this, readerPreview.webpage, readerPreview.url, false);
+                        }
                     } else if (virtualViewId == INSTANT_VIEW) {
                         if (delegate != null) {
                             delegate.didPressInstantButton(ChatMessageCell.this, drawInstantViewType);

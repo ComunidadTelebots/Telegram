@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="NetworkDiagnosticsOpenNetwork">Open network settings</string>
+    <string name="NetworkDiagnosticsReviewProxy">Review proxy and Tor</string>
+    <string name="NetworkDiagnosticsCauseDns">The DNS name could not be resolved. Check your connection or DNS and measure again; this does not prove a block.</string>
+    <string name="NetworkDiagnosticsCauseTls">The secure TLS connection failed. Check the device date and network; certificate verification stays enabled.</string>
+    <string name="NetworkDiagnosticsCauseTimeout">The destination did not respond in time. The connection, route or server may be slow; measure again.</string>
+    <string name="NetworkDiagnosticsCauseConnection">A connection could not be established. Check the network and, if enabled, your proxy or Tor.</string>
+    <string name="NetworkDiagnosticsCauseRouteChanged">The route changed during the test. Measure again using the current route.</string>
+    <string name="NetworkDiagnosticsCauseUnknown">The test failed without a conclusive cause. This does not mean the domain is blocked.</string>
+    <string name="TelebotsUpdateVerificationInfo">The link opens a Telegram message; it does not verify or install an APK. After downloading, select the file here to compare its hash, package, version and certificate with the release and this installation. Android also performs its own checks when installing.</string>
+    <string name="TelebotsUpdateSelectApk">Select and verify downloaded APK</string>
+    <string name="TelebotsUpdateInstallVerified">Open installer with verified APK</string>
+    <string name="TelebotsUpdateMetadataUnknown">Not provided by the publisher</string>
+    <string name="TelebotsUpdateCompatibility">Android API %1$d or later · Architectures: %2$s</string>
+    <string name="TelebotsUpdateAnyAbi">No native libraries</string>
+    <string name="TelebotsUpdateNotesUnknown">This release does not include release notes.</string>
+    <string name="TelebotsUpdateDetails">Channel: %1$s\nSize: %2$s\nCompatibility: %3$s\n\nRelease notes\n%4$s</string>
+    <string name="TelebotsUpdateVerificationMissing">This release does not yet provide all integrity metadata. You can open the channel, but this screen cannot verify the APK or offer installation.</string>
+    <string name="TelebotsUpdateVerifying">Checking the selected file…</string>
+    <string name="TelebotsUpdateVerified">The APK matches the release, package, version and certificate of this installation. You can open the Android installer to confirm installation.</string>
+    <string name="TelebotsUpdateVerificationFailed">The file could not be verified. Installation will not be offered from this screen.</string>
+    <string name="TelebotsUpdateSignatureMismatch">The APK certificate does not match this installation or the release. Installation is blocked on this screen; a legitimate signing-key rotation also requires review.</string>
+    <string name="TelebotsUpdateHashMismatch">The file does not match the published size or hash. Download it again from the channel for this build.</string>
+    <string name="TelebotsUpdatePackageMismatch">The APK package or version does not match this update. It cannot be installed from this screen.</string>
+    <string name="TelebotsUpdateIncompatible">This release does not declare support for the Android version or architecture of this device.</string>
+</resources>

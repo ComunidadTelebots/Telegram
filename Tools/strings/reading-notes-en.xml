@@ -1,0 +1,7 @@
+<resources>
+    <string name="ReadingNotesTitle">Private article note</string>
+    <string name="ReadingNotesInfo">One personal note for this offline article, stored only on this device for this account. Never synced or sent. Updating the article keeps the note; deleting the article or library deletes it. Maximum 4,000 characters and 8 KiB.</string>
+    <string name="ReadingNotesHint">Write your note…</string>
+    <string name="ReadingNotesLimit">The note exceeds 8 KiB. Shorten the text before saving.</string>
+    <string name="ReadingNotesFailed">Could not read or save this note. The article may have been deleted or storage is unavailable.</string>
+</resources>

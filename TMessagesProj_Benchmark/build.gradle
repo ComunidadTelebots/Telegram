@@ -1,0 +1,39 @@
+apply plugin: 'com.android.test'
+apply plugin: 'kotlin-android'
+
+android {
+    namespace 'org.comunidadtelebots.benchmark'
+    compileSdk 36
+    targetProjectPath = ':TMessagesProj_App'
+    defaultConfig {
+        minSdk 28
+        targetSdk 36
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        testInstrumentationRunnerArguments['targetPackage'] = rootProject.ext.forkApplicationId
+    }
+    buildTypes {
+        benchmark {
+            debuggable true
+            signingConfig signingConfigs.debug
+            matchingFallbacks = ['benchmark']
+        }
+    }
+    flavorDimensions 'minApi'
+    productFlavors { afat { dimension 'minApi' } }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions { jvmTarget = '1.8' }
+    experimentalProperties['android.experimental.self-instrumenting'] = true
+}
+androidComponents {
+    beforeVariants(selector().all()) { variant ->
+        variant.enable = variant.buildType == 'benchmark'
+    }
+}
+dependencies {
+    implementation 'androidx.test.ext:junit:1.2.1'
+    implementation 'androidx.test.uiautomator:uiautomator:2.3.0'
+    implementation 'androidx.benchmark:benchmark-macro-junit4:1.4.1'
+}

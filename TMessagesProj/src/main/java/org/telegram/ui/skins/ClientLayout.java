@@ -32,6 +32,15 @@ public enum ClientLayout {
         }
     }
 
+    public int extentDp(float fontScale) {
+        if (placement == Placement.NATIVE || this == MACOS) return extentDp;
+        return extentDp + (int) Math.ceil(Math.max(0f, fontScale - 1f) * (placement == Placement.SIDE ? 32 : 28));
+    }
+
+    public int bottomInsetDp(int original, float fontScale) {
+        return placement == Placement.NATIVE ? original : placement == Placement.BOTTOM ? extentDp(fontScale) : 0;
+    }
+
     public int bottomInsetDp(int original) {
         return placement == Placement.NATIVE ? original : placement == Placement.BOTTOM ? extentDp : 0;
     }

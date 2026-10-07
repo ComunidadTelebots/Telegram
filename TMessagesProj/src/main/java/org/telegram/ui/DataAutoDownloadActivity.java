@@ -100,7 +100,12 @@ public class DataAutoDownloadActivity extends BaseFragment {
     private String key2;
 
     public DataAutoDownloadActivity(int type) {
+        this(type, org.telegram.messenger.UserConfig.selectedAccount);
+    }
+
+    public DataAutoDownloadActivity(int type, int account) {
         super();
+        setCurrentAccount(account);
         currentType = type;
 
         lowPreset = DownloadController.getInstance(currentAccount).lowPreset;

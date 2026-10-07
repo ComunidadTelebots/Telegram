@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="NetworkDiagnosticsOpenNetwork">Abrir ajustes de red</string>
+    <string name="NetworkDiagnosticsReviewProxy">Revisar proxy y Tor</string>
+    <string name="NetworkDiagnosticsCauseDns">No se pudo resolver el nombre DNS. Revisa tu conexión o DNS y vuelve a medir; esto no demuestra un bloqueo.</string>
+    <string name="NetworkDiagnosticsCauseTls">Falló la conexión TLS segura. Revisa la fecha del dispositivo y la red; no se desactiva la verificación de certificados.</string>
+    <string name="NetworkDiagnosticsCauseTimeout">El destino no respondió dentro del plazo. Puede ser lentitud, la ruta o el servidor; vuelve a medir.</string>
+    <string name="NetworkDiagnosticsCauseConnection">No se pudo establecer la conexión. Revisa la red y, si está activo, el proxy o Tor.</string>
+    <string name="NetworkDiagnosticsCauseRouteChanged">La ruta cambió durante la prueba. Repite la medición con la ruta actual.</string>
+    <string name="NetworkDiagnosticsCauseUnknown">La prueba falló sin una causa concluyente. No implica que el dominio esté bloqueado.</string>
+    <string name="TelebotsUpdateVerificationInfo">El enlace abre el mensaje de Telegram y no verifica ni instala un APK. Tras descargarlo, puedes seleccionar el archivo aquí: se comprobarán su hash, paquete, versión y certificado frente a la publicación y esta instalación. Android realizará además su propia comprobación al instalar.</string>
+    <string name="TelebotsUpdateSelectApk">Seleccionar y verificar APK descargado</string>
+    <string name="TelebotsUpdateInstallVerified">Abrir instalador con el APK verificado</string>
+    <string name="TelebotsUpdateMetadataUnknown">No informado por el publicador</string>
+    <string name="TelebotsUpdateCompatibility">Android API %1$d o superior · Arquitecturas: %2$s</string>
+    <string name="TelebotsUpdateAnyAbi">Sin bibliotecas nativas</string>
+    <string name="TelebotsUpdateNotesUnknown">Esta publicación no incluye novedades.</string>
+    <string name="TelebotsUpdateDetails">Rama: %1$s\nTamaño: %2$s\nCompatibilidad: %3$s\n\nNovedades\n%4$s</string>
+    <string name="TelebotsUpdateVerificationMissing">Esta publicación todavía no aporta todos los datos de integridad. Puedes abrir el canal, pero esta pantalla no puede verificar el APK ni ofrecer su instalación.</string>
+    <string name="TelebotsUpdateVerifying">Comprobando el archivo seleccionado…</string>
+    <string name="TelebotsUpdateVerified">El APK coincide con la publicación, el paquete, la versión y el certificado de esta instalación. Puedes abrir el instalador de Android para confirmar la instalación.</string>
+    <string name="TelebotsUpdateVerificationFailed">No se pudo verificar el archivo. No se ofrecerá instalarlo desde esta pantalla.</string>
+    <string name="TelebotsUpdateSignatureMismatch">El certificado del APK no coincide con esta instalación o con la publicación. Instalación bloqueada en esta pantalla; una rotación legítima de firma también requiere revisión.</string>
+    <string name="TelebotsUpdateHashMismatch">El archivo no coincide con el tamaño o el hash publicado. Descárgalo de nuevo desde el canal de esta rama.</string>
+    <string name="TelebotsUpdatePackageMismatch">El paquete o la versión del APK no corresponden a esta actualización. No se puede instalar desde esta pantalla.</string>
+    <string name="TelebotsUpdateIncompatible">Esta publicación no declara compatibilidad con la versión de Android o la arquitectura de este dispositivo.</string>
+</resources>

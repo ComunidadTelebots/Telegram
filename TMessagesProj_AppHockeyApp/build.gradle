@@ -33,6 +33,8 @@ android {
     buildToolsVersion '36.0.0'
 
     defaultConfig.applicationId = rootProject.ext.forkApplicationId
+    def brandingChannel = providers.gradleProperty('APP_CHANNEL').get()
+    defaultConfig.resValue 'string', 'ForkAppName', brandingChannel == 'stable' ? 'Comunidad Telebots' : "Comunidad Telebots ${brandingChannel.toUpperCase(java.util.Locale.ROOT)}"
 
     sourceSets.main.jniLibs.srcDirs = ['../TMessagesProj/jni/']
 

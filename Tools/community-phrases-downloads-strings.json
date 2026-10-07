@@ -1,0 +1,126 @@
+{
+  "TelebotsPhrases": {
+    "en": "Local phrases",
+    "es": "Frases locales"
+  },
+  "TelebotsPhrasesInfo": {
+    "en": "Stored only on this device. Select a phrase in the chat menu to insert it into the draft; it is never sent automatically.",
+    "es": "Se guardan sólo en este dispositivo. Selecciona una frase en el menú del chat para insertarla en el borrador; nunca se envía automáticamente."
+  },
+  "TelebotsPhraseAdd": {
+    "en": "Add phrase",
+    "es": "Añadir frase"
+  },
+  "TelebotsPhraseCategory": {
+    "en": "Category",
+    "es": "Categoría"
+  },
+  "TelebotsPhraseText": {
+    "en": "Phrase",
+    "es": "Frase"
+  },
+  "TelebotsPhraseEmpty": {
+    "en": "No phrases yet. Add one in Comunidad Telebots settings.",
+    "es": "Todavía no hay frases. Añade una en los ajustes de Comunidad Telebots."
+  },
+  "TelebotsPhraseLimit": {
+    "en": "Enter a category (up to 40 characters) and phrase (up to 1000). Maximum 100 phrases.",
+    "es": "Indica una categoría (hasta 40 caracteres) y una frase (hasta 1000). Máximo 100 frases."
+  },
+  "TelebotsPhraseActions": {
+    "en": "Manage this local phrase",
+    "es": "Gestionar esta frase local"
+  },
+  "TelebotsDownloads": {
+    "en": "Download center",
+    "es": "Centro de descargas"
+  },
+  "TelebotsDownloadsInfo": {
+    "en": "Open Telegram’s existing download manager to prioritize, pause and resume files. Automatic limits do not block downloads you start manually.",
+    "es": "Abre el gestor de descargas que ya incluye Telegram para priorizar, pausar y reanudar archivos. Los límites automáticos no bloquean las descargas que inicias manualmente."
+  },
+  "TelebotsAutoUnmetered": {
+    "en": "Automatic downloads: unmetered networks only",
+    "es": "Descargas automáticas: sólo redes no medidas"
+  },
+  "TelebotsDownloadMobile": {
+    "en": "Automatic limits on mobile data",
+    "es": "Límites automáticos en datos móviles"
+  },
+  "TelebotsDownloadWifi": {
+    "en": "Automatic limits on Wi-Fi",
+    "es": "Límites automáticos en Wi-Fi"
+  },
+  "TelebotsDownloadRoaming": {
+    "en": "Automatic limits while roaming",
+    "es": "Límites automáticos en itinerancia"
+  },
+  "TelebotsDownloadEmpty": {
+    "en": "No pending document downloads for this account.",
+    "es": "No hay descargas de documentos pendientes en esta cuenta."
+  },
+  "TelebotsDownloadFirst": {
+    "en": "Prioritize download",
+    "es": "Priorizar descarga"
+  },
+  "TelebotsDownloadQueueInfo": {
+    "en": "Tap a file for priority, pause or resume. The queue may include paused files.",
+    "es": "Toca un archivo para priorizar, pausar o reanudar. La cola puede incluir archivos pausados."
+  },
+  "TelebotsPhraseDelete": {
+    "en": "Delete this saved phrase?",
+    "es": "¿Eliminar esta frase guardada?"
+  },
+  "TelebotsPhraseExamples": {
+    "en": "Add example phrases",
+    "es": "Añadir frases de ejemplo"
+  },
+  "TelebotsPhraseExamplesAdded": {
+    "en": "New phrases added: %1$d",
+    "es": "Frases nuevas añadidas: %1$d"
+  },
+  "TelebotsPhraseGeneral": {
+    "en": "General",
+    "es": "General"
+  },
+  "TelebotsPhraseReplySoon": {
+    "en": "I’ll get back to you shortly.",
+    "es": "Ahora te contesto."
+  },
+  "TelebotsPhraseDetails": {
+    "en": "Could you send me more details?",
+    "es": "¿Puedes enviarme más detalles?"
+  },
+  "TelebotsPhraseThanks": {
+    "en": "Thank you for letting me know.",
+    "es": "Gracias por avisarme."
+  },
+  "TelebotsPhraseSearch": {
+    "en": "Search phrase or category",
+    "es": "Buscar frase o categoría"
+  },
+  "TelebotsPhraseClearSearch": {
+    "en": "Clear search",
+    "es": "Borrar búsqueda"
+  },
+  "TelebotsPhraseNoResults": {
+    "en": "No matching phrases. Clear the search to see all.",
+    "es": "No hay frases coincidentes. Borra la búsqueda para verlas todas."
+  },
+  "TelebotsPhraseFavorite": {
+    "en": "Favorite",
+    "es": "Favorita"
+  },
+  "TelebotsPhraseAddFavorite": {
+    "en": "Add to favorites",
+    "es": "Añadir a favoritas"
+  },
+  "TelebotsPhraseRemoveFavorite": {
+    "en": "Remove from favorites",
+    "es": "Quitar de favoritas"
+  },
+  "TelebotsOpenNativeDownloads": {
+    "en": "Open Telegram’s download manager",
+    "es": "Abrir el gestor de descargas de Telegram"
+  }
+}

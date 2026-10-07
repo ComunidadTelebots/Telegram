@@ -209,6 +209,7 @@ import org.telegram.ui.Stories.DarkThemeResourceProvider;
 import org.telegram.ui.Stories.recorder.ButtonWithCounterView;
 import org.telegram.ui.Stories.recorder.HintView2;
 import org.telegram.ui.Stories.recorder.KeyboardNotifier;
+import org.telegram.ui.web.OfflineArticleStore;
 import org.telegram.ui.web.AddressBarList;
 import org.telegram.ui.web.BookmarksFragment;
 import org.telegram.ui.web.BotWebViewContainer;
@@ -218,7 +219,9 @@ import org.telegram.ui.web.HistoryFragment;
 import org.telegram.ui.web.SearchEngine;
 import org.telegram.ui.web.WebActionBar;
 import org.telegram.ui.web.WebBrowserSettings;
-import org.telegram.ui.web.AmpViewer;
+import org.telegram.ui.web.AmpResolver;
+import org.telegram.ui.web.AmpUrls;
+import org.telegram.ui.web.AmpArticleReader;
 import org.telegram.ui.web.WebInstantView;
 
 import java.io.File;
@@ -2008,6 +2011,11 @@ public class ArticleViewer extends IArticleViewer implements NotificationCenter.
                 } else {
                     offset = dp(10);
                 }
+                int[] savedReading = OfflineArticleStore.position(currentAccount, webPage.url);
+                if (OfflineArticleStore.contains(currentAccount, webPage.url)) {
+                    position = savedReading[0];
+                    offset = savedReading[1] - pages[index].listView.getPaddingTop();
+                }
                 if (position != -1) {
                     pages[index].layoutManager.scrollToPositionWithOffset(position, offset);
                 }
@@ -2035,6 +2043,111 @@ public class ArticleViewer extends IArticleViewer implements NotificationCenter.
             return pages[0].getWebView();
         }
         return null;
+    }
+
+    private String ampBrowserUrl;
+    private PageLayout ampBrowserSource;
+    private int ampDiscoveryGeneration;
+    private String ampDiscoveryUrl;
+    private boolean ampReaderAvailable;
+    private boolean nativeReaderBusy;
+    private int nativeReaderGeneration;
+    private Runnable nativeReaderCancel;
+
+    private String currentBrowserUrl() {
+        return pages[0] != null && pages[0].isWeb() && pages[0].getWebView() != null ? pages[0].getWebView().getUrl() : null;
+    }
+
+    private void cancelNativeReader() {
+        nativeReaderGeneration++;
+        nativeReaderBusy = false;
+        if (nativeReaderCancel != null) {
+            nativeReaderCancel.run();
+            nativeReaderCancel = null;
+        }
+    }
+
+    private void refreshReaderActions() {
+        if (actionBar == null) return;
+        final String url = currentBrowserUrl();
+        if (pages[0] != ampBrowserSource || !TextUtils.equals(url, ampBrowserUrl)) {
+            ampBrowserSource = pages[0];
+            ampDiscoveryGeneration++;
+            cancelNativeReader();
+            ampBrowserUrl = url;
+            ampDiscoveryUrl = null;
+            ampReaderAvailable = url != null && AmpResolver.peek(url) != null;
+        }
+        actionBar.setReaderActions(url != null, ampReaderAvailable, nativeReaderBusy);
+        // Discover only a document the user has already opened. No chat URL prefetch.
+        if (url != null && pages[0].getWebView().isPageLoaded() && !TextUtils.equals(url, ampDiscoveryUrl)) {
+            ampDiscoveryUrl = url;
+            final PageLayout source = pages[0];
+            final int discoveryGeneration = ampDiscoveryGeneration;
+            AmpResolver.discover(url, result -> {
+                if (discoveryGeneration != ampDiscoveryGeneration || source != pages[0] || !TextUtils.equals(url, currentBrowserUrl()) || !isVisible) return;
+                ampReaderAvailable = result != null;
+                actionBar.setReaderActions(true, ampReaderAvailable, nativeReaderBusy);
+            });
+        }
+    }
+
+    private boolean readerRequestCurrent(int generation, PageLayout source, String url) {
+        return generation == nativeReaderGeneration && source == pages[0] && TextUtils.equals(url, currentBrowserUrl()) && isVisible;
+    }
+
+    private void readerFailed() {
+        cancelNativeReader();
+        refreshReaderActions();
+        if (parentActivity != null) Toast.makeText(parentActivity, LocaleController.getString(R.string.AmpReaderUnavailable), Toast.LENGTH_LONG).show();
+    }
+
+    private void openNativeReader(boolean amp) {
+        final String url = currentBrowserUrl();
+        if (url == null || nativeReaderBusy || amp && (!ampReaderAvailable || !TextUtils.equals(url, ampBrowserUrl))) return;
+        cancelNativeReader();
+        final int generation = nativeReaderGeneration;
+        final PageLayout source = pages[0];
+        nativeReaderBusy = true;
+        refreshReaderActions();
+        if (!amp) {
+            final WebInstantView.Loader loader = source.loadInstant();
+            if (loader == null) { readerFailed(); return; }
+            Runnable ready = () -> {
+                if (!readerRequestCurrent(generation, source, url)) return;
+                if (loader.getWebPage() != null) {
+                    final TLRPC.WebPage article = loader.takeWebPage();
+                    cancelNativeReader();
+                    addPageToStack(article, null, 1);
+                } else if (loader.isDone()) readerFailed();
+            };
+            if (loader.isDone() || loader.getWebPage() != null) ready.run();
+            else nativeReaderCancel = loader.listen(ready);
+            return;
+        }
+        // Provider resolution is explicit: it runs only after the AMP button is pressed.
+        AmpResolver.resolve(url, result -> {
+            if (!readerRequestCurrent(generation, source, url)) return;
+            if (result == null) { readerFailed(); return; }
+            final boolean[] completed = {false};
+            Runnable cancel = AmpArticleReader.read(result, instant -> {
+                completed[0] = true;
+                if (!readerRequestCurrent(generation, source, url)) {
+                    if (instant != null) instant.recycle();
+                    return;
+                }
+                nativeReaderCancel = null;
+                nativeReaderBusy = false;
+                if (instant == null || instant.webpage == null || instant.webpage.cached_page == null) {
+                    if (instant != null) instant.recycle();
+                    readerFailed();
+                    return;
+                }
+                addPageToStack(instant.webpage, null, 1);
+            });
+            if (!completed[0] && nativeReaderBusy && generation == nativeReaderGeneration) nativeReaderCancel = cancel;
+            else if (!completed[0] && cancel != null) cancel.run();
+        });
     }
 
     private boolean addPageToStack(TLRPC.WebPage webPage, String anchor, int order) {
@@ -4378,12 +4491,13 @@ public class ArticleViewer extends IArticleViewer implements NotificationCenter.
             }
 
             @Override
+            public boolean hasReadingNotes() {
+                return pages[0] != null && pages[0].adapter.currentPage != null && OfflineArticleStore.isOffline(currentAccount, pages[0].adapter.currentPage.url);
+            }
+
+            @Override
             public String getAmpUrl() {
-                if (!pages[0].isWeb()) return null;
-                BotWebViewContainer.MyWebView wv = pages[0].getWebView();
-                if (wv == null) return null;
-                String u = wv.getUrl();
-                return AmpViewer.isAmpEligible(u) ? u : null;
+                return ampReaderAvailable && TextUtils.equals(ampBrowserUrl, currentBrowserUrl()) ? ampBrowserUrl : null;
             }
         };
         actionBar.occupyStatusBar(sheet != null && !BOTTOM_ACTION_BAR);
@@ -4919,25 +5033,30 @@ public class ArticleViewer extends IArticleViewer implements NotificationCenter.
                     pages[0].getWebView().reload();
                 }
             } else if (id == WebActionBar.instant_item) {
-                WebInstantView.Loader loader = pages[0].currentInstantLoader;
-                if (loader != null && loader.getWebPage() != null) {
-                    addPageToStack(loader.getWebPage(), null, 1);
-                }
+                openNativeReader(false);
             } else if (id == WebActionBar.amp_item) {
-                String ampUrl = actionBar.getAmpUrl();
-                if (ampUrl != null && parentActivity != null && windowView != null) {
-                    FrameLayout ampContainer = new FrameLayout(parentActivity);
-                    AmpViewer ampViewer = new AmpViewer(parentActivity, ampUrl,
-                            pages[0].adapter != null ? pages[0].adapter.currentPage : null,
-                            () -> {
-                                if (windowView != null) windowView.removeView(ampContainer);
-                            });
-                    ampContainer.addView(ampViewer, new FrameLayout.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-                    if (windowView != null) {
-                        windowView.addView(ampContainer, new FrameLayout.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-                    }
+                openNativeReader(true);
+            } else if (id == WebActionBar.reading_notes_item) {
+                if (pages[0].adapter.currentPage != null && OfflineArticleStore.isOffline(currentAccount, pages[0].adapter.currentPage.url)) {
+                    final TLRPC.WebPage notePage = pages[0].adapter.currentPage;
+                    final int noteAccount = currentAccount;
+                    org.telegram.ui.Components.ReadingNotesDialog.show(parentActivity, noteAccount, notePage.url, dialog -> {
+                        if (isVisible && currentAccount == noteAccount && pages[0].adapter.currentPage == notePage) showDialog(dialog);
+                    });
+                }
+            } else if (id == WebActionBar.reading_later_item || id == WebActionBar.reading_offline_item) {
+                String source = currentBrowserUrl();
+                if (source == null && pages[0].adapter.currentPage != null) source = pages[0].adapter.currentPage.url;
+                if (source == null) return;
+                if (id == WebActionBar.reading_later_item) {
+                    boolean saved = OfflineArticleStore.queue(currentAccount, source, pages[0].adapter.currentPage == null ? null : pages[0].adapter.currentPage.title);
+                    android.widget.Toast.makeText(parentActivity, LocaleController.getString(saved ? R.string.CommunityReadingSaved : R.string.CommunityReadingFailed), android.widget.Toast.LENGTH_LONG).show();
+                } else {
+                    final Activity capturedActivity = parentActivity;
+                    android.widget.Toast.makeText(capturedActivity, LocaleController.getString(R.string.CommunityReadingSaving), android.widget.Toast.LENGTH_SHORT).show();
+                    OfflineArticleStore.save(currentAccount, source, saved -> {
+                        if (!capturedActivity.isFinishing()) android.widget.Toast.makeText(capturedActivity, LocaleController.getString(saved ? R.string.CommunityReadingSaved : R.string.CommunityReadingFailed), android.widget.Toast.LENGTH_LONG).show();
+                    });
                 }
             }
         });
@@ -5515,6 +5634,81 @@ public class ArticleViewer extends IArticleViewer implements NotificationCenter.
         close(false, true);
     }
 
+    private Runnable pendingMessageAmpCancel;
+    private boolean preserveMessageAmpSheet;
+
+    private void cancelMessageAmp() { cancelMessageAmp(false); }
+
+    private void cancelMessageAmp(boolean preserveSheet) {
+        Runnable cancel = pendingMessageAmpCancel;
+        pendingMessageAmpCancel = null;
+        boolean previous = preserveMessageAmpSheet;
+        preserveMessageAmpSheet = preserveSheet;
+        try { if (cancel != null) cancel.run(); }
+        finally { preserveMessageAmpSheet = previous; }
+    }
+
+    private void dismissEmptyMessageAmpSheet() {
+        if (!preserveMessageAmpSheet && sheet != null && pagesStack.isEmpty() && !isVisible) sheet.dismissInstant();
+    }
+
+    /** Explicit chat-preview action. No WebView navigation or Telegram preview RPC is needed. */
+    public Runnable openAmpUrl(String requestedUrl) {
+        cancelMessageAmp(true);
+        final String url = AmpUrls.normalize(requestedUrl);
+        if (parentActivity == null || url == null) { dismissEmptyMessageAmpSheet(); return () -> {}; }
+        final AlertDialog progress = new AlertDialog(parentActivity, AlertDialog.ALERT_TYPE_SPINNER, getResourcesProvider());
+        progress.setCanceledOnTouchOutside(false);
+        final boolean[] cancelled = {false};
+        final Runnable[] parserCancel = new Runnable[1];
+        final Runnable[] operation = new Runnable[1];
+        operation[0] = () -> {
+            if (cancelled[0]) return;
+            cancelled[0] = true;
+            if (parserCancel[0] != null) { parserCancel[0].run(); parserCancel[0] = null; }
+            if (pendingMessageAmpCancel == operation[0]) pendingMessageAmpCancel = null;
+            try { progress.dismiss(); } catch (Exception ignored) { }
+            dismissEmptyMessageAmpSheet();
+        };
+        pendingMessageAmpCancel = operation[0];
+        progress.setOnCancelListener(dialog -> operation[0].run());
+        progress.showDelayed(150);
+        final Runnable failed = () -> {
+            if (cancelled[0]) return;
+            if (parentActivity != null) Toast.makeText(parentActivity, LocaleController.getString(R.string.AmpReaderUnavailable), Toast.LENGTH_LONG).show();
+            operation[0].run();
+        };
+        AmpResolver.resolve(url, result -> {
+            if (cancelled[0] || pendingMessageAmpCancel != operation[0]) return;
+            if (result == null) { failed.run(); return; }
+            final boolean[] completed = {false};
+            Runnable readerCancel = AmpArticleReader.read(result, instant -> {
+                completed[0] = true;
+                if (cancelled[0] || pendingMessageAmpCancel != operation[0]) {
+                    if (instant != null) instant.recycle();
+                    return;
+                }
+                parserCancel[0] = null;
+                if (instant == null || instant.webpage == null || instant.webpage.cached_page == null) {
+                    if (instant != null) instant.recycle();
+                    failed.run();
+                    return;
+                }
+                pendingMessageAmpCancel = null;
+                cancelled[0] = true;
+                try { progress.dismiss(); } catch (Exception ignored) { }
+                if (!open(null, instant.webpage, url, null, null)) {
+                    instant.recycle();
+                    if (parentActivity != null) Toast.makeText(parentActivity, LocaleController.getString(R.string.AmpReaderUnavailable), Toast.LENGTH_LONG).show();
+                    dismissEmptyMessageAmpSheet();
+                }
+            });
+            if (!completed[0] && !cancelled[0] && pendingMessageAmpCancel == operation[0]) parserCancel[0] = readerCancel;
+            else if (!completed[0] && readerCancel != null) readerCancel.run();
+        });
+        return operation[0];
+    }
+
     public boolean open(MessageObject messageObject) {
         return open(messageObject, null, null, null, null);
     }
@@ -5536,6 +5730,7 @@ public class ArticleViewer extends IArticleViewer implements NotificationCenter.
     }
 
     private boolean open(final MessageObject messageObject, TLRPC.WebPage webpage, String url, String webUrl, Browser.Progress progress) {
+        cancelMessageAmp(true);
         if (parentActivity == null || sheet == null && isVisible && !collapsed) {
             return false;
         }
@@ -5544,7 +5739,7 @@ public class ArticleViewer extends IArticleViewer implements NotificationCenter.
             AndroidUtilities.hideKeyboard((ActionBarLayout) parentFragment.getParentLayout());
         }
 
-        boolean localWebpage = false;
+        boolean localWebpage = webpage != null && WebInstantView.instants.containsKey(webpage);
         String anchor = null;
         if (messageObject != null) {
             if (webpage == null) {
@@ -5627,7 +5822,7 @@ public class ArticleViewer extends IArticleViewer implements NotificationCenter.
                     req.hash = webpage.hash;
                 }
                 final TLRPC.WebPage webPageFinal = webpage;
-                final int currentAccount = messageObject != null ? messageObject.currentAccount : UserConfig.selectedAccount;
+                final int currentAccount = messageObject != null ? messageObject.currentAccount : ArticleViewer.this.currentAccount;
                 ConnectionsManager.getInstance(currentAccount).sendRequest(req, (_response, error) -> AndroidUtilities.runOnUIThread(() -> {
                     Object response = _response;
                     if (response instanceof TLRPC.TL_messages_webPage) {
@@ -5892,6 +6087,8 @@ public class ArticleViewer extends IArticleViewer implements NotificationCenter.
             } else {
                 offset = 0;
             }
+            OfflineArticleStore.position(currentAccount, pages[0].adapter.currentPage.url, position, offset);
+            if (OfflineArticleStore.contains(currentAccount, pages[0].adapter.currentPage.url)) return;
             SharedPreferences.Editor editor = ApplicationLoader.applicationContext.getSharedPreferences("articles", Activity.MODE_PRIVATE).edit();
             String key = "article" + pages[0].adapter.currentPage.id;
             editor.putInt(key, position).putInt(key + "o", offset).putBoolean(key + "r", AndroidUtilities.displaySize.x > AndroidUtilities.displaySize.y).commit();
@@ -5925,6 +6122,7 @@ public class ArticleViewer extends IArticleViewer implements NotificationCenter.
     }
 
     public void close(boolean byBackPress, boolean force) {
+        cancelMessageAmp();
         if (parentActivity == null || closeAnimationInProgress || !isVisible || checkAnimation()) {
             return;
         }
@@ -6036,6 +6234,12 @@ public class ArticleViewer extends IArticleViewer implements NotificationCenter.
     }
 
     private void onClosed() {
+        cancelNativeReader();
+        ampBrowserUrl = null;
+        ampBrowserSource = null;
+        ampDiscoveryGeneration++;
+        ampDiscoveryUrl = null;
+        ampReaderAvailable = false;
         isVisible = false;
         for (int i = 0; i < pages.length; i++) {
             pages[i].cleanup();
@@ -14728,6 +14932,7 @@ public class ArticleViewer extends IArticleViewer implements NotificationCenter.
         actionBar.setColors(ColorUtils.blendARGB(pages[0].getActionBarColor(), pages[1].getActionBarColor(), page1Alpha), false);
 
         actionBar.setMenuType((page0Alpha > .5f ? pages[0] : pages[1]).type);
+        refreshReaderActions();
 
         if (sheet != null) {
             sheet.windowView.invalidate();
@@ -14865,6 +15070,7 @@ public class ArticleViewer extends IArticleViewer implements NotificationCenter.
                         currentInstantLoader.retryLocal(getWebView());
                     }
                     super.setPageLoaded(url, animated);
+                    if (PageLayout.this == pages[0]) refreshReaderActions();
                 }
 
                 @Override
@@ -14875,6 +15081,7 @@ public class ArticleViewer extends IArticleViewer implements NotificationCenter.
 
                 @Override
                 protected void onURLChanged(String url, boolean first, boolean last) {
+                    if (PageLayout.this == pages[0]) refreshReaderActions();
                     backButton = !first;
                     forwardButton = !last;
                     updateTitle(true);
@@ -16474,6 +16681,9 @@ public class ArticleViewer extends IArticleViewer implements NotificationCenter.
     }
 
     public void destroy() {
+        cancelMessageAmp(true);
+        cancelNativeReader();
+        ampDiscoveryGeneration++;
         for (int i = 0; i < pagesStack.size(); ++i) {
             Object obj = pagesStack.get(i);
             if (obj instanceof CachedWeb) {

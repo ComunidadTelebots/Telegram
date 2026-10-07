@@ -60,6 +60,7 @@ class FeedRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory, N
     }
 
     public int getCount() {
+        if (ReleaseAccess.restricted()) return 1;
         return messages.size();
     }
 
@@ -74,6 +75,11 @@ class FeedRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory, N
     }
 
     public RemoteViews getViewAt(int position) {
+        if (ReleaseAccess.restricted()) {
+            RemoteViews locked = new RemoteViews(mContext.getPackageName(), R.layout.widget_deleted);
+            locked.setTextViewText(R.id.widget_deleted_text, "Contenido privado: abre la aplicaci\u00f3n");
+            return locked;
+        }
         MessageObject messageObject = messages.get(position);
         String name;
 

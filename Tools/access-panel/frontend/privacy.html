@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Privacidad del control de acceso · Todosobrealltech</title><link rel="stylesheet" href="/access/styles.css"></head>
+<body>
+<header class="topbar"><a class="brand" href="/access/">todosobrealltech / Accesos</a></header>
+<main>
+<article>
+<p class="eyebrow">INFORMACIÓN DEL SERVICIO · 7 OCTUBRE 2026</p>
+<h1>Datos del control de acceso</h1>
+<p>Esta página explica el control de versiones privadas de Comunidad Telebots Android y React. Su alcance es el panel de Todosobrealltech y su conexión con Moonbot; no describe todos los tratamientos de Telegram, Moonbot o los demás componentes de la aplicación.</p>
+<h2>Qué recibe el panel</h2>
+<p>Moonbot consulta primero el código sin enviar tu identidad al panel. Al pulsar el botón de confirmación del bot, comunica tu ID de Telegram, nombre y nombre de usuario, si lo tienes. El panel guarda los permisos y solicitudes por aplicación y rama. Aunque todavía no tengas permiso, esa confirmación registra tu solicitud para que el administrador pueda gestionarla. En Android recibe también la versión de la aplicación; el paquete identifica la rama. Para comprobar actualizaciones se comunica el código de versión instalado.</p>
+<p>Las sesiones guardan la aplicación, rama, versión cuando se informa, fecha de creación, última comprobación, caducidad y estado de revocación. Los cambios de permisos y confirmaciones quedan registrados con actor, acción y fecha. Los códigos y cookies de sesión permiten verificar el acceso.</p>
+<h2>Qué significa «activo»</h2>
+<p>Indica una comprobación válida recibida durante los últimos tres minutos. No indica que estés mirando la pantalla ni equivale al estado «en línea» de Telegram. Las versiones anteriores de Android pueden comprobar el permiso cada minuto incluso en segundo plano; las nuevas versiones limitan estas comprobaciones a la aplicación visible. React privado realiza comprobaciones periódicas; las nuevas versiones las pausan cuando la pestaña está oculta. El servidor puede mostrar una sesión como reciente durante esa ventana de tres minutos después de dejar de usarla.</p>
+<p>La versión stable puede utilizarse sin este registro de acceso privado. Sus usuarios anónimos no aparecen en un censo de personas conectadas. Las versiones React privadas solo generan actividad cuando su despliegue está conectado a este servicio.</p>
+<h2>Estadística de país opcional</h2>
+<p>En «Mis datos y estadísticas opcionales» puedes indicar manualmente un país y marcar la casilla para aportarlo a las estadísticas. No es una ubicación detectada. No usamos GPS ni geolocalización de IP para completarlo. Puedes omitirlo sin perder acceso a las ramas que tengas autorizadas.</p>
+<p>Se conserva el código del país, la fecha de tu elección y la versión del aviso aceptado hasta que retires la elección o elimines tu perfil de acceso. El panel del administrador solo ofrece recuentos por país con al menos tres participantes; no añade el país a las fichas individuales. El servidor necesita guardar tu elección asociada a tu perfil para que puedas cambiarla o retirarla: esos datos no son anónimos en la base de datos. Una estadística agrupada tampoco garantiza por sí sola anonimato frente a toda inferencia.</p>
+<h2>Ubicación y comunicaciones</h2>
+<p>Este control de acceso no solicita ni envía coordenadas GPS, mensajes, contactos, teléfono o contraseña de Telegram. Compartir una ubicación dentro de un chat de Telegram es una función distinta y no alimenta un mapa de usuarios en este panel.</p>
+<p>Como en cualquier conexión web, la infraestructura de red procesa una dirección IP. El servicio utiliza una huella SHA-256 de la dirección del interlocutor HTTP inmediato para limitar solicitudes; detrás del proxy puede corresponder al propio proxy. No calcula ciudades, países ni coordenadas a partir de esa huella. Los registros y copias de seguridad de la infraestructura tienen un alcance distinto al de la base de datos del panel.</p>
+<h2>Finalidad y acceso</h2>
+<p>Los datos se utilizan para identificar solicitudes, autorizar o revocar ramas, comprobar sesiones y mostrar su actividad reciente al administrador configurado. El listado de personas requiere autenticación de administrador. La integración utiliza Moonbot/Telegram para verificar tu identidad y el servidor alojado en Hostinger para gestionar el acceso.</p>
+<h2>Conservación actual</h2>
+<p>Los códigos caducan a los cinco minutos. Al iniciar nuevas solicitudes se limpian los códigos caducados hace más de cinco minutos, las sesiones caducadas hace más de treinta días y las acciones de auditoría de hace más de noventa días. Esta limpieza depende de nuevas solicitudes; no es un borrado programado independiente.</p>
+<p>No hay caducidad automática para el perfil, permisos y solicitudes de rama. Cerrar sesión o revocar un permiso no borra esos datos. Puedes eliminar tu perfil desde sus controles. La conservación de copias de seguridad y registros de infraestructura todavía necesita una política documentada.</p>
+<h2>Tus controles</h2>
+<p>Tras identificarte, abre «Mis datos y estadísticas opcionales» para descargar un JSON con tus datos del control de acceso o eliminar ese perfil. El borrado retira tu identidad, permisos, solicitudes, sesiones, elección de país y auditoría asociada de la base de datos activa, y cierra tus sesiones de acceso. No elimina tu cuenta de Telegram, conversaciones, mensajes del bot ni copias de seguridad. Las credenciales secretas de sesión no se incluyen en la exportación.</p>
+<p>Si vuelves a identificarte se creará un nuevo perfil de acceso; las ramas privadas requerirán permisos de nuevo. El administrador configurado conserva su condición por la configuración del servicio aunque elimine su propio perfil.</p>
+<h2>Otros componentes de la aplicación</h2>
+<p>Android incorpora funciones de Telegram y dependencias de Firebase y Google para notificaciones, mapas, ubicación y autenticación, entre otras. Esas funciones pueden tratar datos distintos de los de este panel. Esta descripción no afirma que la aplicación completa no recopile datos: falta completar el inventario de cada SDK y variante.</p>
+<p>Consulta la <a href="https://telegram.org/privacy">privacidad de Telegram</a>, la <a href="https://firebase.google.com/support/privacy">información de Firebase</a>, la <a href="https://policies.google.com/privacy">privacidad de Google</a> y la <a href="https://support.torproject.org/about-tor/">documentación de Tor</a>. Estos documentos no sustituyen las obligaciones del responsable del proyecto.</p>
+<h2>Controles pendientes</h2>
+<p>Antes de publicar una política completa deben identificarse el responsable del tratamiento, país y un contacto verificable para solicitudes sobre datos, incluidos registros y copias de seguridad. También debe definirse su conservación y comprobarse el resto de la aplicación. Esta descripción técnica no sustituye esa política ni certifica cumplimiento de las condiciones de Telegram, Google Play o la normativa aplicable.</p>
+<p><a href="/access/">Volver al acceso</a> · <a href="/access/terms">Condiciones de uso (borrador)</a></p>
+</article>
+</main>
+</body></html>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ForkLoginConfigurationErrorTitle">This app version cannot sign in</string>
+    <string name="ForkLoginApiPublishedFlood">Telegram has restricted the application identifier used by this build. Contact the Comunidad Telebots administrator for an updated version. This error concerns the app configuration, not your phone number. Repeated requests for a code will not fix it.</string>
+    <string name="ForkLoginApiInvalid">Telegram rejected this build’s application credentials. Contact the Comunidad Telebots administrator to update the app. Check the app configuration before requesting another code.</string>
+</resources>

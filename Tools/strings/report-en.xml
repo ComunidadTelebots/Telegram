@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="TelebotsReportReview">Review connection report</string>
+    <string name="TelebotsReportSave">Save file</string>
+    <string name="TelebotsReportSaved">Report saved</string>
+    <string name="TelebotsReportFailed">The report could not be saved. Try again after any pending save finishes.</string>
+    <string name="TelebotsReportScope">Review this snapshot before saving. It contains app and Android versions, selected connection settings and aggregated states from the partial diagnostic inventory. Results may be from earlier checks and do not prove the current route works. It does not include account identity, IP addresses, domains, proxy names, credentials or general logs. No new connection test is run and nothing is sent automatically. Saving to a cloud document provider may upload the file to the provider you choose.</string>
+</resources>

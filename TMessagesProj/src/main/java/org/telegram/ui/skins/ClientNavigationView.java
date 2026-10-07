@@ -38,6 +38,14 @@ public final class ClientNavigationView extends LinearLayout {
         boolean side = layout.placement == ClientLayout.Placement.SIDE;
         setOrientation(side ? VERTICAL : HORIZONTAL);
         setGravity(side ? Gravity.TOP : Gravity.CENTER);
+        LinearLayout destinations = this;
+        if (side) {
+            android.widget.ScrollView scroll = new android.widget.ScrollView(context);
+            scroll.setFillViewport(false);
+            destinations = new LinearLayout(context); destinations.setOrientation(VERTICAL);
+            scroll.addView(destinations, new android.widget.ScrollView.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+            addView(scroll, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        }
         int[] drawableIds = {R.drawable.msg_discussion, R.drawable.msg_contacts,
                 R.drawable.msg_calls, R.drawable.msg_settings};
         int[] order = layout == ClientLayout.IOS || layout == ClientLayout.MACOS
@@ -57,11 +65,13 @@ public final class ClientNavigationView extends LinearLayout {
             TextView label = new TextView(context);
             label.setTextSize(layout == ClientLayout.TELEGRAM_X ? 14 : 10);
             label.setGravity(Gravity.CENTER);
-            label.setMaxLines(1);
+            label.setMaxLines(2);
             label.setEllipsize(android.text.TextUtils.TruncateAt.END);
             label.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
             if (layout != ClientLayout.MACOS) button.addView(label);
-            addView(button, side ? new LayoutParams(LayoutParams.MATCH_PARENT, AndroidUtilities.dp(64))
+            button.setPadding(AndroidUtilities.dp(4), AndroidUtilities.dp(6), AndroidUtilities.dp(4), AndroidUtilities.dp(6));
+            org.telegram.ui.Components.CommunitySettingsUi.button(button);
+            destinations.addView(button, side ? new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
                     : new LayoutParams(0, LayoutParams.MATCH_PARENT, 1f));
             button.setOnClickListener(v -> listener.select(destination));
             button.setOnLongClickListener(v -> listener.longSelect(destination, v));
@@ -73,7 +83,8 @@ public final class ClientNavigationView extends LinearLayout {
             ImageView more = new ImageView(context);
             more.setImageResource(R.drawable.ic_ab_other);
             more.setColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText, resources));
-            more.setContentDescription(LocaleController.getString(R.string.Settings));
+            more.setContentDescription(LocaleController.getString(R.string.AccDescrMoreOptions));
+            org.telegram.ui.Components.CommunitySettingsUi.button(more);
             addView(more, new LayoutParams(AndroidUtilities.dp(48), LayoutParams.MATCH_PARENT));
             more.setOnClickListener(v -> {
                 PopupMenu menu = new PopupMenu(context, more);

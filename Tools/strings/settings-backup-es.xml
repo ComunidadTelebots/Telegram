@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="TelebotsBackupTitle">Copia de ajustes propios</string>
+    <string name="TelebotsBackupScope">Solo copia el diseño seleccionado, estilo de animación, AMP automático en redes no medidas y política propia de precarga. Estos ajustes afectan a todas las cuentas del dispositivo. Aplicar un diseño también aplica su radio de burbuja. No es una copia completa de Telegram: excluye cuentas, chats, artículos guardados, temas, proxies, servidores DNS, credenciales y permisos de acceso. Si no elegiste un diseño explícitamente, la copia conserva el diseño del destino. Revisa antes de aplicar. Un proveedor de archivos en la nube puede subir el archivo que decidas guardar.</string>
+    <string name="TelebotsBackupExport">Guardar copia de ajustes</string>
+    <string name="TelebotsBackupImport">Abrir copia de ajustes</string>
+    <string name="TelebotsBackupPreview">Revisar ajustes exactos</string>
+    <string name="TelebotsBackupApply">Aplicar estos ajustes</string>
+    <string name="TelebotsBackupSkin">Diseño</string>
+    <string name="TelebotsBackupMotion">Estilo de animación</string>
+    <string name="TelebotsBackupAmp">AMP automático solo en redes no medidas</string>
+    <string name="TelebotsBackupPreload">Política propia de precarga</string>
+    <string name="TelebotsBackupPreloadDefault">Sin restricción adicional</string>
+    <string name="TelebotsBackupPreloadOff">Desactivar precarga</string>
+    <string name="TelebotsBackupPreloadUnmetered">Solo en redes conectadas no medidas</string>
+    <string name="TelebotsBackupPreloadNormal">Permitir según las reglas de descarga existentes</string>
+    <string name="TelebotsBackupKeepSkin">Conservar el diseño del destino</string>
+    <string name="TelebotsBackupYes">Sí</string>
+    <string name="TelebotsBackupNo">No</string>
+    <string name="TelebotsBackupDone">Operación completada</string>
+    <string name="TelebotsBackupError">No se pudo completar la operación. El archivo puede ser inválido, incompatible o no estar disponible.</string>
+</resources>

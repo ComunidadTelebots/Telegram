@@ -1,0 +1,27 @@
+# Template ONLY for an explicitly provisioned private React branch deployment.
+# Replace dev in the fixed upstream authorization URI for alfa/beta/rc builds.
+# Add the deployment HTTPS origin to ACCESS_TRUSTED_ORIGINS. Do not modify stable.
+# Nginx must include ngx_http_auth_request_module and share a network with access.
+server {
+    listen 80;
+    root /usr/share/nginx/html;
+    location /access/ {
+        proxy_pass http://access:8080;
+        proxy_set_header Host $host;
+        proxy_set_header Cookie $http_cookie;
+    }
+    location = /_branch_authorization {
+        internal;
+        proxy_pass http://access:8080/access/api/react/authorize?channel=dev;
+        proxy_pass_request_body off;
+        proxy_set_header Content-Length "";
+        proxy_set_header Cookie $http_cookie;
+    }
+    location / {
+        auth_request /_branch_authorization;
+        error_page 401 =302 /access/?next=/;
+        # A denied logged-in user sees 403, never an unprotected application bundle.
+        try_files $uri $uri/ /index.html;
+        add_header Cache-Control "no-store" always;
+    }
+}

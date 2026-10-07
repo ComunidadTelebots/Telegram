@@ -34,6 +34,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -127,6 +128,15 @@ public class WebActionBar extends FrameLayout {
     public static final int forward_item = 9;
     public static final int instant_item = 10;
     public static final int amp_item = 11;
+    public static final int reading_later_item = 21;
+    public static final int reading_offline_item = 22;
+    public static final int reading_notes_item = 23;
+    private final TextView instantReaderButton;
+    private final TextView ampReaderButton;
+    private boolean readerBusy;
+    private boolean readerWeb;
+    private boolean readerAmpAvailable;
+    private boolean compactReaderActions;
 
     public WebActionBar(Context context, Theme.ResourcesProvider resourcesProvider) {
         super(context);
@@ -179,6 +189,27 @@ public class WebActionBar extends FrameLayout {
         rightmenu.setOrientation(LinearLayout.HORIZONTAL);
         addView(rightmenu, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 56, Gravity.RIGHT | Gravity.BOTTOM));
 
+        instantReaderButton = new TextView(context);
+        instantReaderButton.setText("IV");
+        instantReaderButton.setTextSize(13);
+        instantReaderButton.setGravity(Gravity.CENTER);
+        instantReaderButton.setTypeface(AndroidUtilities.bold());
+        instantReaderButton.setContentDescription(getString(R.string.OpenLocalInstantView));
+        instantReaderButton.setBackground(Theme.createSelectorDrawable(Theme.ACTION_BAR_WHITE_SELECTOR_COLOR));
+        instantReaderButton.setOnClickListener(v -> { if (menuListener != null && !readerBusy) menuListener.run(instant_item); });
+        instantReaderButton.setVisibility(GONE);
+        rightmenu.addView(instantReaderButton, LayoutHelper.createLinear(48, 56));
+        ampReaderButton = new TextView(context);
+        ampReaderButton.setText("AMP");
+        ampReaderButton.setTextSize(12);
+        ampReaderButton.setGravity(Gravity.CENTER);
+        ampReaderButton.setTypeface(AndroidUtilities.bold());
+        ampReaderButton.setContentDescription(getString(R.string.AmpReaderOpen));
+        ampReaderButton.setBackground(Theme.createSelectorDrawable(Theme.ACTION_BAR_WHITE_SELECTOR_COLOR));
+        ampReaderButton.setOnClickListener(v -> { if (menuListener != null && !readerBusy) menuListener.run(amp_item); });
+        ampReaderButton.setVisibility(GONE);
+        rightmenu.addView(ampReaderButton, LayoutHelper.createLinear(48, 56));
+
         forwardButton = new ImageView(context);
         forwardButton.setScaleType(ImageView.ScaleType.CENTER);
         forwardButton.setImageDrawable(forwardButtonDrawable = new ForwardDrawable() {
@@ -212,7 +243,13 @@ public class WebActionBar extends FrameLayout {
                 o.setBackgroundColor(0xFF1F1F1F);
                 o.setGapBackgroundColor(0xFF121212);
             }
+            if (menuType == ArticleViewer.PageLayout.TYPE_ARTICLE || menuType == ArticleViewer.PageLayout.TYPE_WEB) {
+                o.add(R.drawable.msg_saved, getString(R.string.CommunityReadingLater), click.run(reading_later_item));
+                o.add(R.drawable.menu_instant_view, getString(R.string.CommunityReadingDownload), click.run(reading_offline_item));
+                o.addGap();
+            }
             if (menuType == ArticleViewer.PageLayout.TYPE_ARTICLE) {
+                if (hasReadingNotes()) o.add(R.drawable.msg_edit, getString(R.string.ReadingNotesTitle), click.run(reading_notes_item));
                 o.add(R.drawable.msg_openin, getString(R.string.OpenInExternalApp), click.run(open_item));
                 o.add(R.drawable.msg_search, getString(R.string.Search), click.run(search_item));
                 o.addIf(!isLocal, R.drawable.msg_share, getString(R.string.ShareFile), click.run(share_item));
@@ -238,7 +275,7 @@ public class WebActionBar extends FrameLayout {
                     o.setOnDismiss(cancel);
                 }
                 if (getAmpUrl() != null) {
-                    o.add(R.drawable.menu_instant_view, "⚡ AMP", click.run(amp_item));
+                    o.add(R.drawable.menu_instant_view, getString(R.string.AmpReaderOpen), click.run(amp_item));
                 }
                 o.add(R.drawable.msg_reset, getString(R.string.Refresh), click.run(reload_item));
                 o.add(R.drawable.msg_search, getString(R.string.Search), click.run(search_item));
@@ -370,9 +407,29 @@ public class WebActionBar extends FrameLayout {
         return null;
     }
 
-    /** Devuelve la URL actual si es elegible para AMP, o null si no corresponde mostrar el botón. */
+    /** Return the current URL only after AMP availability has been validated. */
+    public boolean hasReadingNotes() { return false; }
+
     public String getAmpUrl() {
         return null;
+    }
+
+    public void setReaderActions(boolean web, boolean available, boolean busy) {
+        readerBusy = busy;
+        readerWeb = web;
+        readerAmpAvailable = available;
+        updateReaderVisibility();
+        instantReaderButton.setEnabled(!busy);
+        ampReaderButton.setEnabled(!busy);
+        instantReaderButton.setAlpha(busy ? .45f : 1f);
+        ampReaderButton.setAlpha(busy ? .45f : 1f);
+        ampReaderButton.setContentDescription(getString(busy ? R.string.AmpReaderLoading : R.string.AmpReaderOpen));
+    }
+
+    private void updateReaderVisibility() {
+        boolean visible = readerWeb && menuType == ArticleViewer.PageLayout.TYPE_WEB && !searching && !addressing && !compactReaderActions;
+        instantReaderButton.setVisibility(visible ? VISIBLE : GONE);
+        ampReaderButton.setVisibility(visible && readerAmpAvailable ? VISIBLE : GONE);
     }
 
     private boolean occupyStatusBar;
@@ -451,6 +508,7 @@ public class WebActionBar extends FrameLayout {
     public void setMenuType(int type) {
         if (menuType != type) {
             menuType = type;
+            updateReaderVisibility();
         }
     }
 
@@ -469,6 +527,8 @@ public class WebActionBar extends FrameLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        compactReaderActions = MeasureSpec.getSize(widthMeasureSpec) < dp(320);
+        updateReaderVisibility();
         super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(topPadding() + dp(56), MeasureSpec.EXACTLY));
     }
 
@@ -568,6 +628,8 @@ public class WebActionBar extends FrameLayout {
             backButtonDrawable.setColor(ColorUtils.blendARGB(textColor, addressTextColor, addressingProgress));
             backButtonDrawable.setRotatedColor(ColorUtils.blendARGB(textColor, addressTextColor, addressingProgress));
             forwardButtonDrawable.setColor(textColor);
+            instantReaderButton.setTextColor(textColor);
+            ampReaderButton.setTextColor(textColor);
             menuButton.setColorFilter(new PorterDuffColorFilter(textColor, PorterDuff.Mode.SRC_IN));
             forwardButton.setColorFilter(new PorterDuffColorFilter(textColor, PorterDuff.Mode.SRC_IN));
             clearButton.setColorFilter(new PorterDuffColorFilter(textColor, PorterDuff.Mode.SRC_IN));
@@ -835,6 +897,7 @@ public class WebActionBar extends FrameLayout {
             searchAnimator.cancel();
         }
         searching = show;
+        updateReaderVisibility();
         if (animated) {
             searchEditText.setVisibility(VISIBLE);
             backButtonDrawable.setRotation(backButtonShown || show ? 0f : 1f, true);
@@ -931,6 +994,7 @@ public class WebActionBar extends FrameLayout {
             addressAnimator.cancel();
         }
         addressing = show;
+        updateReaderVisibility();
         if (show) {
             if (searchEngineIndex != SharedConfig.searchEngineType) {
                 searchEngineIndex = SharedConfig.searchEngineType;

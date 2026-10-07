@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Telegram Web y Android · ComunidadTelebots</title>
+  <meta name="description" content="Versiones estables de Telegram React y Telegram Android de ComunidadTelebots. Descargas, código fuente y versiones verificadas.">
+  <style>
+    :root{color-scheme:dark;font-family:system-ui,sans-serif;background:#0c1524;color:#f3f6fc}*{box-sizing:border-box}body{margin:0}a{color:#82d9ff}header,main,footer{max-width:1100px;margin:auto;padding:28px}header{display:flex;justify-content:space-between;gap:20px;border-bottom:1px solid #28354b}header a{text-decoration:none}main{padding-top:70px}.eyebrow{color:#82d9ff;text-transform:uppercase;letter-spacing:.15em;font-size:12px}h1{font-size:clamp(36px,6vw,64px);line-height:1.08;max-width:800px;margin:20px 0}p{line-height:1.7;color:#b8c7dd}.intro{max-width:680px;font-size:19px}.cards{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:48px 0}article{border:1px solid #304059;border-radius:24px;padding:30px;background:#142137}.badge{display:inline-block;color:#9cf0c7;font-size:12px;border:1px solid #3b755f;border-radius:30px;padding:6px 12px}h2{font-size:28px;margin:22px 0 8px}dl{margin:25px 0}dt{font-size:12px;color:#9babc1;margin-top:16px}dd{margin:5px 0;overflow-wrap:anywhere;font-size:14px}.button{display:inline-block;background:#8edfff;color:#082335;padding:12px 18px;border-radius:12px;text-decoration:none;font-weight:650;margin:8px 8px 8px 0}.source{display:inline-block;margin:12px 0}.status{min-height:52px}section.note{border-top:1px solid #28354b;padding:20px 0}footer{color:#aab8cb;font-size:13px}button{font:inherit}@media(max-width:700px){.cards{grid-template-columns:1fr}header,main,footer{padding:22px}main{padding-top:40px}article{padding:24px}}
+  </style>
+  <style>[hidden]{display:none!important}</style>
+</head>
+<body>
+<header><a href="https://todosobreall.tech/">Todo Sobre AllTech</a><span>ComunidadTelebots</span></header>
+<main>
+  <div class="eyebrow">Publicaciones oficiales del proyecto</div>
+  <h1>Telegram en la web.<br>Telegram en Android.</h1>
+  <p class="intro">Información y descargas de las versiones estables de nuestros dos clientes. Cada publicación identifica el código utilizado y la huella del archivo.</p>
+  <div class="cards">
+    <article id="react"><span class="badge">Canal estable</span><h2>Telegram React</h2><p>El cliente para el navegador. Consulta su publicación estable y accede al servicio web.</p><p class="status" aria-live="polite">Consultando la última publicación estable…</p><dl hidden></dl><a class="button" href="https://tg.todosobreall.tech/">Abrir cliente web</a><a class="download button" hidden>Descargar paquete web</a><br><a class="source" href="https://github.com/ComunidadTelebots/telegram-react">Código fuente de Telegram React ↗</a></article>
+    <article id="android"><span class="badge">Canal estable</span><h2>Telegram Android</h2><p>La aplicación para Android. Las publicaciones incluyen el APK firmado y su referencia de código fuente.</p><p class="status" aria-live="polite">Consultando la última publicación estable…</p><dl hidden></dl><a class="download button" hidden>Descargar APK</a><br><a class="source" href="https://github.com/ComunidadTelebots/Telegram">Código fuente de Android ↗</a></article>
+  </div>
+  <section class="note"><h2>Una referencia para cada descarga</h2><p>Los datos aparecen tras compilar y publicar correctamente una versión estable. La huella SHA-256 permite comprobar que el archivo descargado coincide con el publicado. Si todavía no hay una publicación verificada, no se muestra una versión como disponible.</p></section>
+</main>
+<footer>Proyecto comunitario independiente. Telegram es una marca de sus respectivos titulares.</footer>
+<script>
+  for (const product of ['android', 'react']) {
+    const card = document.getElementById(product);
+    fetch('./releases/' + product + '.json', {cache: 'no-store'})
+      .then(response => { if (!response.ok) throw Error(); return response.json(); })
+      .then(data => {
+        if (data.channel !== 'stable' || data.product !== product || !/^\d+\.\d+\.\d+$/.test(data.version) || !/^[a-f0-9]{40}$/.test(data.commit) || !/^[a-f0-9]{64}$/.test(data.sha256)) throw Error();
+        card.querySelector('.status').textContent = 'Versión estable publicada: ' + data.version;
+        const list = card.querySelector('dl');
+        for (const [label, value] of [['Versión', data.version], ['Commit', data.commit], ['SHA-256', data.sha256]]) {
+          const dt = document.createElement('dt'), dd = document.createElement('dd');
+          dt.textContent = label; dd.textContent = value; list.append(dt, dd);
+        }
+        list.hidden = false;
+        if (typeof data.download_url === 'string' && /^https:\/\/t\.me\/[A-Za-z][A-Za-z0-9_]{4,31}\/[0-9]+$/.test(data.download_url)) {
+          const link = card.querySelector('.download'); link.href = data.download_url; link.hidden = false;
+        }
+      }).catch(() => { card.querySelector('.status').textContent = 'Todavía no hay una publicación estable verificada disponible.'; });
+  }
+</script>
+</body>
+</html>

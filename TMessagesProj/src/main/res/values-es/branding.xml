@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ForkIndependentClient">Cliente independiente que utiliza la API de Telegram. No está afiliado a Telegram ni cuenta con su respaldo.</string>
+</resources>

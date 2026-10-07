@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ForkLoginConfigurationErrorTitle">Esta versión no puede iniciar sesión</string>
+    <string name="ForkLoginApiPublishedFlood">Telegram ha restringido el identificador de aplicación utilizado por esta compilación. Contacta con el administrador de Comunidad Telebots para obtener una versión actualizada. El error corresponde a la configuración de la app, no a tu número de teléfono. Pedir el código repetidamente no lo resolverá.</string>
+    <string name="ForkLoginApiInvalid">Telegram ha rechazado las credenciales de aplicación de esta compilación. Contacta con el administrador de Comunidad Telebots para actualizar la app. Hay que revisar su configuración antes de solicitar otro código.</string>
+</resources>

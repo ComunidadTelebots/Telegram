@@ -1,0 +1,8 @@
+secrets
+signing
+work
+.env
+channels.json
+__pycache__
+site
+test_*.py

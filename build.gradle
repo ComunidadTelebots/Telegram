@@ -65,3 +65,5 @@ subprojects {
         }
     }
 }
+
+apply from: rootProject.file('gradle/community-branding.gradle')

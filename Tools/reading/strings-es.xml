@@ -1,0 +1,31 @@
+<resources>
+    <string name="CommunityReadingPostOriginal">Abrir publicación original de Telegram</string>
+    <string name="TelebotsReadingLibrary">Biblioteca de lectura</string>
+    <string name="CommunityReadingLibrary">Biblioteca de lectura</string>
+    <string name="CommunityReadingLater">Leer después</string>
+    <string name="CommunityReadingDownload">Guardar artículo público sin conexión</string>
+    <string name="CommunityReadingAdd">Añadir enlace original</string>
+    <string name="CommunityReadingOriginal">Abrir web original (con conexión)</string>
+    <string name="CommunityReadingOpenOffline">Leer sin conexión</string>
+    <string name="CommunityReadingClear">Borrar la biblioteca de esta cuenta</string>
+    <string name="CommunityReadingClearInfo">Borra artículos, imágenes, enlaces y posiciones de lectura guardados en este dispositivo.</string>
+    <string name="CommunityReadingLimits">Privada para esta cuenta en este dispositivo. Hasta 100 enlaces y 20 artículos públicos, 5 MB y 20 imágenes por artículo. Guardar descarga el original público sin cookies de sesión; se rechazan artículos restringidos. Leer sin conexión no descarga imágenes ausentes. Los enlaces originales se abren con conexión.</string>
+    <string name="CommunityReadingEmpty">Todavía no hay artículos. Añade un enlace aquí o usa Leer después en el menú del navegador o artículo.</string>
+    <string name="CommunityReadingImages">Imágenes guardadas: %1$d · no disponibles o fuera del límite: %2$d</string>
+    <string name="CommunityReadingSaving">Guardando artículo público…</string>
+    <string name="CommunityReadingSaved">Guardado en la biblioteca de lectura.</string>
+    <string name="CommunityReadingFailed">No se pudo guardar o abrir este artículo. El original puede estar restringido, no disponible, no ser legible o superar los límites de la biblioteca.</string>
+    <string name="CommunityReadingSearch">Buscar títulos o enlaces</string>
+    <string name="CommunityReadingFilter">Filtrar biblioteca de lectura</string>
+    <string name="CommunityReadingFilterAll">Todos</string>
+    <string name="CommunityReadingFilterOffline">Artículos sin conexión</string>
+    <string name="CommunityReadingFilterLater">Leer después (solo enlaces)</string>
+    <string name="CommunityReadingFilterPosts">Publicaciones de Telegram</string>
+    <string name="CommunityReadingCalculating">Calculando tamaño de archivos locales…</string>
+    <string name="CommunityReadingStorage">Archivos locales de esta cuenta: %1$s (incluye descargas temporales)</string>
+    <string name="CommunityReadingResults">%1$d de %2$d entradas</string>
+    <string name="CommunityReadingNoResults">No hay coincidencias con esta búsqueda y filtro.</string>
+    <string name="CommunityReadingLocalOnly">Biblioteca local de lectura. Enlaces, descargas y filtros permanecen en este dispositivo y no se sincronizan con Telegram.</string>
+    <string name="CommunityReadingNativeInfo">Telegram ya ofrece Marcadores y Mensajes guardados sincronizados. Estos accesos abren las pantallas nativas; no se copia ni se envía nada automáticamente.</string>
+    <string name="CommunityReadingStorageUnavailable">No se pudo calcular el tamaño de los archivos locales.</string>
+</resources>

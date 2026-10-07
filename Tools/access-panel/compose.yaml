@@ -1,0 +1,33 @@
+name: telebots-access
+services:
+  access:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - access-data:/data
+      - ${PRIVATE_RELEASE_DIR:?Private release metadata directory required}:/releases:ro
+    networks:
+      - traefik
+    mem_limit: 256m
+    cpus: 0.50
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    labels:
+      traefik.enable: 'true'
+      traefik.docker.network: traefik
+      traefik.http.routers.telebots-access.rule: 'Host(`chat.todosobreall.tech`) && PathPrefix(`/access/`)'
+      traefik.http.routers.telebots-access.priority: '100'
+      traefik.http.routers.telebots-access.entrypoints: websecure
+      traefik.http.routers.telebots-access.tls.certresolver: letsencrypt
+      traefik.http.services.telebots-access.loadbalancer.server.port: '8080'
+volumes:
+  access-data:
+networks:
+  traefik:
+    external: true

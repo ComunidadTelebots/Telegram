@@ -1,0 +1,7 @@
+<resources>
+    <string name="ReadingNotesTitle">Nota privada del artículo</string>
+    <string name="ReadingNotesInfo">Una nota personal para este artículo sin conexión, guardada solo en este dispositivo para esta cuenta. Nunca se sincroniza ni se envía. Actualizar el artículo conserva la nota; borrar el artículo o la biblioteca la elimina. Máximo 4.000 caracteres y 8 KiB.</string>
+    <string name="ReadingNotesHint">Escribe tu nota…</string>
+    <string name="ReadingNotesLimit">La nota supera 8 KiB. Acorta el texto antes de guardar.</string>
+    <string name="ReadingNotesFailed">No se pudo leer o guardar la nota. Puede que el artículo se haya borrado o el almacenamiento no esté disponible.</string>
+</resources>

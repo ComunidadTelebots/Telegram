@@ -73,6 +73,7 @@ class ChatsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
     }
 
     public int getCount() {
+        if (ReleaseAccess.restricted()) return 1;
         if (deleted) {
             return 1;
         }
@@ -80,6 +81,11 @@ class ChatsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
     }
 
     public RemoteViews getViewAt(int position) {
+        if (ReleaseAccess.restricted()) {
+            RemoteViews locked = new RemoteViews(mContext.getPackageName(), R.layout.widget_deleted);
+            locked.setTextViewText(R.id.widget_deleted_text, "Contenido privado: abre la aplicaci\u00f3n");
+            return locked;
+        }
         if (deleted) {
             RemoteViews rv = new RemoteViews(mContext.getPackageName(), R.layout.widget_deleted);
             rv.setTextViewText(R.id.widget_deleted_text, LocaleController.getString(R.string.WidgetLoggedOff));

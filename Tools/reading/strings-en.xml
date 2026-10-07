@@ -1,0 +1,31 @@
+<resources>
+    <string name="CommunityReadingPostOriginal">Open original Telegram post</string>
+    <string name="TelebotsReadingLibrary">Reading library</string>
+    <string name="CommunityReadingLibrary">Reading library</string>
+    <string name="CommunityReadingLater">Read later</string>
+    <string name="CommunityReadingDownload">Save public article offline</string>
+    <string name="CommunityReadingAdd">Add original link</string>
+    <string name="CommunityReadingOriginal">Open original website (online)</string>
+    <string name="CommunityReadingOpenOffline">Read offline</string>
+    <string name="CommunityReadingClear">Delete this account’s reading library</string>
+    <string name="CommunityReadingClearInfo">Deletes saved articles, images, links and reading positions from this device.</string>
+    <string name="CommunityReadingLimits">Private to this account on this device. Up to 100 links and 20 public articles, 5 MB and 20 images per article. Saving fetches the public original without login cookies; restricted articles are rejected. Offline reading does not download missing images. Original links open online.</string>
+    <string name="CommunityReadingEmpty">No articles yet. Add a link here or use Read later in the browser or article menu.</string>
+    <string name="CommunityReadingImages">Images saved: %1$d · unavailable or over limit: %2$d</string>
+    <string name="CommunityReadingSaving">Saving public article…</string>
+    <string name="CommunityReadingSaved">Saved to the reading library.</string>
+    <string name="CommunityReadingFailed">Could not save or open this article. The original may be restricted, unavailable, unreadable or over the library limits.</string>
+    <string name="CommunityReadingSearch">Search titles or links</string>
+    <string name="CommunityReadingFilter">Filter reading library</string>
+    <string name="CommunityReadingFilterAll">All</string>
+    <string name="CommunityReadingFilterOffline">Offline articles</string>
+    <string name="CommunityReadingFilterLater">Read later (links only)</string>
+    <string name="CommunityReadingFilterPosts">Telegram publications</string>
+    <string name="CommunityReadingCalculating">Calculating local file size…</string>
+    <string name="CommunityReadingStorage">Local files for this account: %1$s (including temporary downloads)</string>
+    <string name="CommunityReadingResults">%1$d of %2$d entries</string>
+    <string name="CommunityReadingNoResults">No matches for this search and filter.</string>
+    <string name="CommunityReadingLocalOnly">Local reading library. Links, downloads and filters stay on this device and do not sync with Telegram.</string>
+    <string name="CommunityReadingNativeInfo">Telegram already provides synced Bookmarks and Saved Messages. These shortcuts open the native screens; nothing is copied or sent automatically.</string>
+    <string name="CommunityReadingStorageUnavailable">Could not calculate local file size.</string>
+</resources>

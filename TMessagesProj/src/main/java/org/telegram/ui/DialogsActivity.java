@@ -328,6 +328,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
     private boolean canShowFilterTabsView;
     private int initialSearchType = -1;
+    private boolean initialDownloads;
 
     private final String ACTION_MODE_SEARCH_DIALOGS_TAG = "search_dialogs_action_mode";
     private boolean rightFragmentTransitionInProgress;
@@ -3522,12 +3523,12 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             } else {
                 statusDrawable = new AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable(null, dp(26));
                 statusDrawable.center = true;
-                logoDrawable = context.getResources().getDrawable(R.drawable.telegram_logo_2).mutate();
-                logoDrawable.setBounds(0, dp(2), logoDrawable.getIntrinsicWidth(), dp(2) + logoDrawable.getIntrinsicHeight());
-                logoDrawable.setColorFilter(getThemedColor(Theme.key_telegram_color_dialogsLogo), PorterDuff.Mode.MULTIPLY);
-                SpannableStringBuilder ssb = new SpannableStringBuilder(getString(R.string.AppName));
-                ssb.setSpan(new ImageSpan(logoDrawable), 0, ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                actionBar.setTitle(ssb, statusDrawable);
+                // Product identity is text, not Telegram's wordmark ImageSpan.
+                logoDrawable = null;
+                String brand = "Comunidad Telebots";
+                SpannableStringBuilder title = new SpannableStringBuilder(brand + " · " + org.telegram.messenger.ReleaseAccess.channel().toUpperCase(java.util.Locale.ROOT));
+                title.setSpan(new android.text.style.RelativeSizeSpan(.75f), brand.length(), title.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                actionBar.setTitle(title, statusDrawable);
                 updateStatus(UserConfig.getInstance(currentAccount).getCurrentUser(), false);
             }
             if (folderId == 0) {
@@ -5414,7 +5415,10 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
 
         searchIsShowed = false;
 
-        if (searchString != null) {
+        if (initialDownloads) {
+            initialDownloads = false;
+            showSearch(true, true, false, true);
+        } else if (searchString != null) {
             showSearch(true, false, false);
             fragmentSearchField.editText.setText(searchString);
             fragmentSearchField.editText.setSelection(searchString.length());
@@ -11661,6 +11665,11 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         searchString = string;
     }
 
+    /** Open the existing Downloads search page after its views are created. */
+    public void setInitialDownloads() {
+        initialDownloads = true;
+    }
+
     public void setInitialSearchString(String initialSearchString) {
         this.initialSearchString = initialSearchString;
     }
@@ -13778,9 +13787,6 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             });
         }
 
-        io.add(R.drawable.msg_channel, getString(R.string.OfficialChannel), () -> {
-            getMessagesController().openByUserName("comunidadtelebots", DialogsActivity.this, 0);
-        });
         if (proxyMenuSubItem != null) {
             proxyMenuSubItem.subtextView.setTextColor(getThemedColor(Theme.key_groupcreate_sectionText));
             proxyMenuSubItem.setOnClickListener(v -> {

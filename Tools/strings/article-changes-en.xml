@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+  <string name="ArticleChangesTitle">Compare saved versions</string>
+  <string name="ArticleChangesInfo">Compares the text of the two latest explicit saves on this device. Dates are save times, not publication dates. No server receives this comparison. Formatting and images are not compared.</string>
+  <string name="ArticleChangesNeedTwo">Save this public article offline again to compare two versions. Articles saved before this feature need one new save.</string>
+  <string name="ArticleChangesPrevious">Previous save</string>
+  <string name="ArticleChangesCurrent">Latest save</string>
+  <string name="ArticleChangesTruncated">Partial comparison: limited to the first 8,000 characters and 200 paragraphs of each version. Changes after that limit are not shown.</string>
+  <string name="ArticleChangesAdded">Added</string>
+  <string name="ArticleChangesRemoved">Removed</string>
+  <string name="ArticleChangesNone">No text changes within the compared portion. Whitespace differences are ignored.</string>
+</resources>

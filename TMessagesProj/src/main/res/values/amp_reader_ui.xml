@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="AmpReaderOpen">Open AMP reader</string>
+    <string name="AmpReaderLoading">Loading article reader</string>
+    <string name="AmpReaderUnavailable">A readable article could not be loaded. You can continue with the original page.</string>
+</resources>

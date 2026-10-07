@@ -286,7 +286,18 @@ public class AlertsCreator {
     }
 
     public static Dialog processError(int currentAccount, TLRPC.TL_error error, BaseFragment fragment, TLObject request, Object... args) {
-        if (error == null || error.code == 406 || error.text == null) {
+        if (error == null || error.text == null) {
+            return null;
+        }
+        // These errors concern the client build, not the user's phone number.
+        // Handle them before the generic 406 suppression so login never fails silently.
+        if ("API_ID_PUBLISHED_FLOOD".equals(error.text)) {
+            return showSimpleAlert(fragment, LocaleController.getString(R.string.ForkLoginConfigurationErrorTitle), LocaleController.getString(R.string.ForkLoginApiPublishedFlood));
+        }
+        if ("API_ID_INVALID".equals(error.text)) {
+            return showSimpleAlert(fragment, LocaleController.getString(R.string.ForkLoginConfigurationErrorTitle), LocaleController.getString(R.string.ForkLoginApiInvalid));
+        }
+        if (error.code == 406) {
             return null;
         }
         if ("BALANCE_TOO_LOW".equalsIgnoreCase(error.text)) {
@@ -549,6 +560,10 @@ public class AlertsCreator {
             } else {
                 return showSimpleAlert(fragment, error.text);
             }
+        } else if (request instanceof TLRPC.TL_auth_sendCode) {
+            // Phone-specific errors are handled by LoginActivity. Do not silently drop
+            // an unrecognized server error in its send-code fallback path.
+            return showSimpleAlert(fragment, LocaleController.getString(R.string.ErrorOccurred));
         } else if (request instanceof TLRPC.TL_auth_resendCode) {
             if (error.text.contains("PHONE_NUMBER_INVALID")) {
                 return showSimpleAlert(fragment, LocaleController.getString(R.string.InvalidPhoneNumber));

@@ -1,0 +1,4 @@
+secrets/
+channels.json
+.env
+__pycache__/

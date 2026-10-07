@@ -26,6 +26,8 @@ android {
     buildToolsVersion '36.0.0'
 
     defaultConfig.applicationId = rootProject.ext.forkApplicationId
+    def brandingChannel = providers.gradleProperty('APP_CHANNEL').get()
+    defaultConfig.resValue 'string', 'ForkAppName', brandingChannel == 'stable' ? 'Comunidad Telebots' : "Comunidad Telebots ${brandingChannel.toUpperCase(java.util.Locale.ROOT)}"
 
     sourceSets.main.jniLibs.srcDirs = ['../TMessagesProj/jni/']
 
@@ -220,3 +222,16 @@ android {
 }
 
 apply from: rootProject.file('gradle/firebase.gradle')
+
+// Unobfuscated, non-debuggable target used only for explicit performance profiling.
+if (providers.gradleProperty('ENABLE_BENCHMARKS').getOrElse('false') == 'true') {
+    android.buildTypes.create('benchmark') {
+        initWith android.buildTypes.release
+        matchingFallbacks = ['release']
+        debuggable false
+        minifyEnabled false
+        shrinkResources false
+    }
+    android.sourceSets.benchmark.manifest.srcFile 'src/benchmark/AndroidManifest.xml'
+    dependencies { implementation 'androidx.profileinstaller:profileinstaller:1.4.1' }
+}

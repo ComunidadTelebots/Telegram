@@ -1,0 +1,176 @@
+name: Android APK firmado
+run-name: Android ${{ inputs.channel || 'dev' }} · ${{ inputs.abi || 'arm64-v8a' }} · ${{ github.ref_name }}
+
+on:
+  push:
+    branches: [codex/downloadable-builds]
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: Paquete y canal de distribución
+        type: choice
+        required: true
+        default: dev
+        options: [dev, alfa, beta, rc, stable]
+      abi:
+        description: Arquitectura (universal requiere más tiempo y espacio)
+        type: choice
+        required: true
+        default: arm64-v8a
+        options: [arm64-v8a, universal]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-apk-${{ github.ref }}-${{ inputs.channel || 'dev' }}-${{ inputs.abi || 'arm64-v8a' }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.repository == 'ComunidadTelebots/Telegram'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    environment: android-${{ inputs.channel || 'dev' }}
+    env:
+      CHANNEL: ${{ inputs.channel || 'dev' }}
+      BUILD_ABI: ${{ inputs.abi || 'arm64-v8a' }}
+      GRADLE_USER_HOME: ${{ runner.temp }}/telebots-gradle
+    steps:
+      - name: Descargar exactamente el commit solicitado
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          submodules: recursive
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Instalar Java 21
+        uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a # v5.5.0
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Preparar firma y credenciales sin mostrarlas
+        env:
+          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
+          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          CERT_SHA256: ${{ secrets.CERT_SHA256 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 - <<'PY'
+          import base64, os, pathlib, re
+          required = ('TELEGRAM_API_ID','TELEGRAM_API_HASH','KEYSTORE_BASE64','STORE_PASSWORD','KEY_ALIAS','KEY_PASSWORD','CERT_SHA256')
+          missing = [key for key in required if not os.environ.get(key)]
+          if missing:
+              raise SystemExit('Faltan secretos del entorno GitHub: ' + ', '.join(missing))
+          if not re.fullmatch(r'[1-9][0-9]{0,9}', os.environ['TELEGRAM_API_ID']) or int(os.environ['TELEGRAM_API_ID']) > 2147483647:
+              raise SystemExit('TELEGRAM_API_ID no tiene formato válido')
+          if not re.fullmatch(r'[a-fA-F0-9]{32}', os.environ['TELEGRAM_API_HASH']):
+              raise SystemExit('TELEGRAM_API_HASH no tiene formato válido')
+          cert = re.sub(r'[:\s]', '', os.environ['CERT_SHA256']).lower()
+          if not re.fullmatch(r'[a-f0-9]{64}', cert):
+              raise SystemExit('CERT_SHA256 no tiene formato válido')
+          try:
+              keystore = base64.b64decode(''.join(os.environ['KEYSTORE_BASE64'].split()), validate=True)
+          except ValueError:
+              raise SystemExit('KEYSTORE_BASE64 no tiene formato válido') from None
+          if not keystore:
+              raise SystemExit('El keystore está vacío')
+          pathlib.Path('TMessagesProj/config').mkdir(parents=True, exist_ok=True)
+          pathlib.Path('TMessagesProj/config/release.keystore').write_bytes(keystore)
+          source = pathlib.Path('Tools/release/BuildVars.java.template').read_text(encoding='utf-8')
+          source, count = re.subn(r'public static int APP_ID = 0;', 'public static int APP_ID = ' + os.environ['TELEGRAM_API_ID'] + ';', source)
+          assert count == 1, 'Plantilla APP_ID inválida'
+          source, count = re.subn(r'public static String APP_HASH = "";', 'public static String APP_HASH = "' + os.environ['TELEGRAM_API_HASH'] + '";', source)
+          assert count == 1, 'Plantilla APP_HASH inválida'
+          pathlib.Path('TMessagesProj/src/main/java/org/telegram/messenger/BuildVars.java').write_text(source, encoding='utf-8')
+          def escape(value):
+              encoded = value.encode('utf-16-be').hex()
+              return ''.join('\\u' + encoded[i:i+4] for i in range(0, len(encoded), 4))
+          home = pathlib.Path(os.environ['GRADLE_USER_HOME'])
+          home.mkdir(parents=True, exist_ok=True)
+          home.joinpath('gradle.properties').write_text('\n'.join(key + '=' + escape(os.environ[name]) for key, name in (
+              ('RELEASE_STORE_PASSWORD','STORE_PASSWORD'),('RELEASE_KEY_ALIAS','KEY_ALIAS'),('RELEASE_KEY_PASSWORD','KEY_PASSWORD'))), encoding='ascii')
+          pathlib.Path(os.environ['RUNNER_TEMP'],'expected-certificate.sha256').write_text(cert,encoding='ascii')
+          PY
+
+      - name: Instalar SDK Android exacto
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${ANDROID_HOME:-}"
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          test -x "$SDKMANAGER"
+          "$SDKMANAGER" 'platforms;android-36' 'build-tools;36.0.0' 'ndk;27.2.12479018' 'cmake;3.22.1' 'platform-tools'
+          echo "$ANDROID_HOME/build-tools/36.0.0" >> "$GITHUB_PATH"
+
+      - name: Compilar APK release
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$CHANNEL" in dev|alfa|beta|rc|stable) ;; *) exit 1 ;; esac
+          abi_args=()
+          case "$BUILD_ABI" in
+            arm64-v8a) abi_args=(-Pandroid.injected.build.abi=arm64-v8a) ;;
+            universal) ;;
+            *) exit 1 ;;
+          esac
+          java -classpath gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain \
+            :TMessagesProj_App:assembleAfatRelease --no-daemon --max-workers=2 --console=plain \
+            "-PAPP_CHANNEL=$CHANNEL" -Pkotlin.incremental=false \
+            '-Dorg.gradle.jvmargs=-Xmx5g -XX:MaxMetaspaceSize=1g' \
+            -Pkotlin.compiler.execution.strategy=in-process "${abi_args[@]}"
+
+      - name: Verificar firma, paquete y preparar descarga
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk=$(python3 Tools/release/select_apk.py --build-root TMessagesProj_App/build --channel "$CHANNEL")
+          apksigner verify --verbose --print-certs "$apk" > "$RUNNER_TEMP/apk-certificate.txt"
+          actual=$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' "$RUNNER_TEMP/apk-certificate.txt" | tr '[:upper:]' '[:lower:]')
+          test "$actual" = "$(cat "$RUNNER_TEMP/expected-certificate.sha256")"
+          zipalign -c -P 16 4 "$apk"
+          aapt dump badging "$apk" > "$RUNNER_TEMP/apk-badging.txt"
+          grep -Fq "package: name='org.comunidadtelebots.$CHANNEL'" "$RUNNER_TEMP/apk-badging.txt"
+          if grep -q 'application-debuggable' "$RUNNER_TEMP/apk-badging.txt"; then exit 1; fi
+          mkdir -p artifacts
+          cp "$apk" "artifacts/telebots-$CHANNEL-$BUILD_ABI.apk"
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re
+          apk = next(pathlib.Path('artifacts').glob('*.apk'))
+          line = next(line for line in pathlib.Path(os.environ['RUNNER_TEMP'],'apk-badging.txt').read_text().splitlines() if line.startswith('package: '))
+          fields = dict(re.findall(r"(name|versionCode|versionName)='([^']*)'", line))
+          assert fields['name'] == 'org.comunidadtelebots.' + os.environ['CHANNEL']
+          assert 0 < int(fields['versionCode']) <= 2100000000
+          sha = hashlib.file_digest(apk.open('rb'),'sha256').hexdigest()
+          pathlib.Path('artifacts/SHA256SUMS.txt').write_text(sha + '  ' + apk.name + '\n')
+          pathlib.Path('artifacts/build.json').write_text(json.dumps(dict(commit=os.environ['GITHUB_SHA'],channel=os.environ['CHANNEL'],abi=os.environ['BUILD_ABI'],sha256=sha,**fields),indent=2))
+          PY
+
+      - name: Publicar descarga de APK verificado
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: telebots-${{ inputs.channel || 'dev' }}-${{ inputs.abi || 'arm64-v8a' }}-${{ github.run_number }}
+          path: |
+            artifacts/*.apk
+            artifacts/SHA256SUMS.txt
+            artifacts/build.json
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+          include-hidden-files: false
+
+      - name: Eliminar material de firma del runner
+        if: always()
+        shell: bash
+        run: |
+          rm -f -- TMessagesProj/config/release.keystore \
+            TMessagesProj/src/main/java/org/telegram/messenger/BuildVars.java \
+            "$GRADLE_USER_HOME/gradle.properties" "$RUNNER_TEMP/expected-certificate.sha256"

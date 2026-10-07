@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="TelebotsBackupTitle">Copy own settings</string>
+    <string name="TelebotsBackupScope">Copies only the selected skin, motion style, automatic AMP on unmetered networks and own preload policy. These settings apply across accounts on this device. Applying a skin also applies its bubble radius. No full Telegram backup: accounts, chats, saved articles, themes, proxies, DNS servers, credentials and access permissions are excluded. If no skin was explicitly selected, the copy leaves the destination skin unchanged. Review before applying. A cloud file provider may upload the file you choose to save.</string>
+    <string name="TelebotsBackupExport">Save settings copy</string>
+    <string name="TelebotsBackupImport">Open settings copy</string>
+    <string name="TelebotsBackupPreview">Review exact settings</string>
+    <string name="TelebotsBackupApply">Apply these settings</string>
+    <string name="TelebotsBackupSkin">Design</string>
+    <string name="TelebotsBackupMotion">Motion style</string>
+    <string name="TelebotsBackupAmp">Automatic AMP only on unmetered networks</string>
+    <string name="TelebotsBackupPreload">Own preload policy</string>
+    <string name="TelebotsBackupPreloadDefault">No additional restriction</string>
+    <string name="TelebotsBackupPreloadOff">Disable preload</string>
+    <string name="TelebotsBackupPreloadUnmetered">Only on connected unmetered networks</string>
+    <string name="TelebotsBackupPreloadNormal">Allow within existing download rules</string>
+    <string name="TelebotsBackupKeepSkin">Leave destination design unchanged</string>
+    <string name="TelebotsBackupYes">Yes</string>
+    <string name="TelebotsBackupNo">No</string>
+    <string name="TelebotsBackupDone">Operation completed</string>
+    <string name="TelebotsBackupError">The operation could not be completed. The file may be invalid, unsupported or unavailable.</string>
+</resources>

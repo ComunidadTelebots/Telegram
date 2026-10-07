@@ -1,0 +1,6 @@
+Comunidad Telebots — original icon concept v1
+Generated with the built-in image_gen tool, 2026-10-07.
+Asset: comunidad-telebots-icon-v1.png
+Status: original raster integrated unchanged in default Android launcher, first intro page and release access screen. Alternate launcher icons and later intro animations are not fully rebranded.
+
+Use case: logo-brand. Create a finished original Android app icon for Comunidad Telebots, an independent community messaging application. Square 1024x1024 raster master, edge-to-edge deep midnight navy background with no rounded outer corners (Android supplies mask). Central distinctive flat symbol: two interlocking rounded conversation shapes forming an abstract friendly community/bot face, clear simple silhouette, two small eyes in negative space, tasteful teal and warm off-white accents. Bold precise geometry and generous safe margins, all essential symbol within central 60% of canvas for adaptive Android masking. Modern, welcoming, professional, legible at tiny launcher size. No text or letters. No paper airplane, no Telegram logo, no blue circle, no third-party trademarks, no 3D, no mockup, no shadow, no watermark. Deliver one single icon, not a grid.

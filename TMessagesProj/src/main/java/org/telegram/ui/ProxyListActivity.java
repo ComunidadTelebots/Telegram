@@ -108,6 +108,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
         }
     }
     private int torInfoRow;
+    private int diagnosticsRow;
     private int rowCount;
     @Keep
     private int useProxyRow;
@@ -413,6 +414,10 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
         frameLayout.addView(listView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.MATCH_PARENT, Gravity.TOP | Gravity.LEFT));
         listView.setAdapter(listAdapter);
         listView.setOnItemClickListener((view, position) -> {
+            if (position == diagnosticsRow) {
+                presentFragment(new NetworkDiagnosticsActivity());
+                return;
+            }
             if (position == torRow) {
                 if (!TorProxyController.isEnabled() && org.telegram.messenger.voip.VoIPService.getSharedInstance() != null) {
                     android.widget.Toast.makeText(context, getString(R.string.TorEndCallFirst), android.widget.Toast.LENGTH_LONG).show();
@@ -629,8 +634,8 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
 
     private void updateRows(boolean notify) {
         rowCount = 0;
-        torRow = rowCount++;
-        torInfoRow = rowCount++;
+        // Custom network controls live in Comunidad Telebots settings.
+        torRow = torInfoRow = diagnosticsRow = -1;
         useProxyRow = rowCount++;
         if (!TorProxyController.isEnabled() && useProxySettings && SharedConfig.currentProxy != null && SharedConfig.proxyList.size() > 1 && IS_PROXY_ROTATION_AVAILABLE) {
             rotationRow = rowCount++;
@@ -739,7 +744,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
         super.onResume();
         TorProxyController.ensureRunning();
         AndroidUtilities.cancelRunOnUIThread(latencyRefresh);
-        AndroidUtilities.runOnUIThread(latencyRefresh, 1000);
+        if (torInfoRow >= 0) AndroidUtilities.runOnUIThread(latencyRefresh, 1000);
         if (listAdapter != null) {
             listAdapter.notifyDataSetChanged();
         }
@@ -880,7 +885,9 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
                 case VIEW_TYPE_TEXT_SETTING: {
                     TextSettingsCell textCell = (TextSettingsCell) holder.itemView;
                     textCell.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
-                    if (position == proxyAddRow) {
+                    if (position == diagnosticsRow) {
+                        textCell.setText(getString(R.string.NetworkDiagnosticsTitle), true);
+                    } else if (position == proxyAddRow) {
                         textCell.setText(getString(R.string.AddProxy), deleteAllRow != -1);
                     } else if (position == deleteAllRow) {
                         textCell.setTextColor(Theme.getColor(Theme.key_text_RedRegular));
@@ -986,6 +993,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
         @Override
         public boolean isEnabled(RecyclerView.ViewHolder holder) {
             int position = holder.getAdapterPosition();
+            if (position == diagnosticsRow) return true;
             if (position == torRow) return TorProxyController.isSupported();
             if (TorProxyController.isEnabled()) return false;
             return position == useProxyRow || position == rotationRow || position == proxyAddRow || position == deleteAllRow || position >= proxyStartRow && position < proxyEndRow;
@@ -1032,6 +1040,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
             // Random stable ids, could be anything non-repeating
             if (position == torRow) return -20;
             if (position == torInfoRow) return -21;
+            if (position == diagnosticsRow) return -22;
             if (position == useProxyShadowRow) {
                 return -1;
             } else if (position == proxyShadowRow) {
@@ -1061,7 +1070,7 @@ public class ProxyListActivity extends BaseFragment implements NotificationCente
         public int getItemViewType(int position) {
             if (position == useProxyShadowRow || position == proxyShadowRow) {
                 return VIEW_TYPE_SHADOW;
-            } else if (position == proxyAddRow || position == deleteAllRow) {
+            } else if (position == proxyAddRow || position == deleteAllRow || position == diagnosticsRow) {
                 return VIEW_TYPE_TEXT_SETTING;
             } else if (position == torRow || position == useProxyRow || position == rotationRow) {
                 return VIEW_TYPE_TEXT_CHECK;

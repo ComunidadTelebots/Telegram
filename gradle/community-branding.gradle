@@ -1,0 +1,15 @@
+// Application resources override the shared library icon without changing its original asset.
+// Applied once by the root project; APP_CHANNEL is already validated there.
+subprojects { appProject ->
+    appProject.plugins.withId('com.android.application') {
+        def channel = rootProject.providers.gradleProperty('APP_CHANNEL').get()
+        if (!['dev', 'alfa', 'beta', 'rc', 'stable'].contains(channel)) {
+            throw new GradleException("Unsupported branding channel: ${channel}")
+        }
+        def channelResources = rootProject.file("Tools/branding/channels/${channel}/res")
+        if (!new File(channelResources, 'drawable-nodpi/comunidad_telebots_icon.png').isFile()) {
+            throw new GradleException("Missing Comunidad Telebots icon for ${channel}")
+        }
+        appProject.android.sourceSets.main.res.srcDir(channelResources)
+    }
+}

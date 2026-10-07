@@ -1,0 +1,5 @@
+FROM docker:29-cli
+RUN apk add --no-cache python3 git
+WORKDIR /opt/release
+COPY worker.py build_resources.py /opt/release/
+CMD ["python3", "-u", "worker.py"]

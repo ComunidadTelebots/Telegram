@@ -20,6 +20,9 @@ public final class ClientLayoutTest {
         check(ClientLayout.MACOS.bottomInsetDp(80) == 48, "Compact bottom bar reserves own height");
         check(ClientLayout.TELEGRAM_X.bottomInsetDp(80) == 0, "Top bar removes obsolete bottom inset");
         check(ClientLayout.UNIGRAM.bottomInsetDp(80) == 0, "Side bar removes obsolete bottom inset");
+        check(ClientLayout.IOS.extentDp(2f) > ClientLayout.IOS.extentDp(1f), "Large font expands navigation");
+        check(ClientLayout.ANDROID.extentDp(2f) == 0, "Native layout unchanged");
+        check(ClientLayout.IOS.bottomInsetDp(80, 2f) == ClientLayout.IOS.extentDp(2f), "Insets follow scaled bar");
         System.out.println("Client layout and inset regression tests passed");
     }
 }

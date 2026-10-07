@@ -17,3 +17,7 @@ dependencyResolutionManagement {
 
 gradle.ext.androidxMediaModulePrefix = 'TMessagesProj_Modules:media3:media-'
 apply from: file("TMessagesProj_Modules/media/core_settings.gradle")
+// Optional tooling; normal APK builds do not resolve benchmark dependencies.
+if (providers.gradleProperty("ENABLE_BENCHMARKS").getOrElse("false") == "true") {
+    include ":TMessagesProj_Benchmark"
+}

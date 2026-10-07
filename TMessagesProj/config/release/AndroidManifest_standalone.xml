@@ -34,9 +34,9 @@
     <uses-permission android:name="android.permission.SEND_SMS" />
 
     <application
-        android:icon="@mipmap/ic_launcher_sa"
-        android:roundIcon="@mipmap/ic_launcher_sa"
-        android:label="@string/AppName"
+        android:icon="@mipmap/comunidad_telebots_launcher_sa"
+        android:roundIcon="@mipmap/comunidad_telebots_launcher_sa"
+        android:label="@string/ForkAppName"
         android:theme="@style/Theme.TMessages.Start"
         android:hardwareAccelerated="true"
         android:largeHeap="true"

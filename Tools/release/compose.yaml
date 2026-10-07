@@ -1,0 +1,62 @@
+name: telebots-release
+services:
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    restart: unless-stopped
+    environment:
+      WORK_ROOT: ${WORK_ROOT:?Absolute host directory required}
+      SIGNING_DIR: ${SIGNING_DIR:?Signing directory required}
+      BOT_API_URL: http://bot-api:8081
+      PRODUCTS: ${PRODUCTS:-android}
+      ANDROID_BUILD_MEMORY_MB: ${ANDROID_BUILD_MEMORY_MB:-3072}
+      ANDROID_BUILD_SWAP_MB: ${ANDROID_BUILD_SWAP_MB:-4096}
+      ANDROID_BUILD_CPUS: ${ANDROID_BUILD_CPUS:-1}
+      ANDROID_GRADLE_HEAP_MB: ${ANDROID_GRADLE_HEAP_MB:-1800}
+      ANDROID_GRADLE_METASPACE_MB: ${ANDROID_GRADLE_METASPACE_MB:-512}
+      ANDROID_GRADLE_WORKERS: ${ANDROID_GRADLE_WORKERS:-1}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${WORK_ROOT}:${WORK_ROOT}
+      - ./channels.json:/config/channels.json:ro
+      - ${PUBLIC_DIR:?Directory for stable JSON}:/public
+      - ${PRIVATE_RELEASE_DIR:?Private release metadata directory required}:/releases
+    secrets: [bot_token]
+    depends_on: [bot-api]
+    networks: [release]
+  bot-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.bot-api
+      args:
+        BOT_API_COMMIT: ${BOT_API_COMMIT:?Pin an official 40-character commit}
+    restart: unless-stopped
+    volumes:
+      - bot-api-data:/var/lib/telegram-bot-api
+    secrets: [api_id, api_hash]
+    networks: [release]
+  android-builder:
+    profiles: [images]
+    image: telebots-android-builder:local
+    build:
+      context: .
+      dockerfile: Dockerfile.android
+  react-builder:
+    profiles: [images]
+    image: telebots-react-builder:local
+    build:
+      context: .
+      dockerfile: Dockerfile.react
+networks:
+  release:
+    name: telebots-release
+volumes:
+  bot-api-data:
+secrets:
+  bot_token:
+    file: ./secrets/bot_token
+  api_id:
+    file: ./secrets/api_id
+  api_hash:
+    file: ./secrets/api_hash

@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+  <string name="ArticleChangesTitle">Comparar versiones guardadas</string>
+  <string name="ArticleChangesInfo">Compara el texto de los dos últimos guardados explícitos en este dispositivo. Las fechas son de guardado, no de publicación. No se envía la comparación a ningún servidor. No compara formato ni imágenes.</string>
+  <string name="ArticleChangesNeedTwo">Vuelve a guardar este artículo público sin conexión para comparar dos versiones. Los artículos guardados antes de esta función necesitan un guardado nuevo.</string>
+  <string name="ArticleChangesPrevious">Guardado anterior</string>
+  <string name="ArticleChangesCurrent">Último guardado</string>
+  <string name="ArticleChangesTruncated">Comparación parcial: limitada a los primeros 8000 caracteres y 200 párrafos de cada versión. No muestra cambios posteriores a ese límite.</string>
+  <string name="ArticleChangesAdded">Añadido</string>
+  <string name="ArticleChangesRemoved">Eliminado</string>
+  <string name="ArticleChangesNone">No hay cambios de texto en la parte comparada. Se ignoran diferencias de espacios.</string>
+</resources>
