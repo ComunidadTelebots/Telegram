@@ -60,9 +60,10 @@ public class TelebotsSecurityMonitor {
                         long installedCode = org.telegram.messenger.ApplicationLoader.applicationContext.getPackageManager().getPackageInfo(org.telegram.messenger.ApplicationLoader.applicationContext.getPackageName(), 0).versionCode;
                         org.json.JSONObject updateResult = org.telegram.messenger.ReleaseAccess.checkAndroidUpdate(installedCode);
                         if (updateResult != null && "available".equals(updateResult.optString("status"))) {
-                            // Si el servidor marca "mandatory: true", bloqueamos.
+                            // Si el servidor marca "mandatory: true", bloqueamos y forzamos descarga.
                             if (updateResult.optBoolean("mandatory", false) || updateResult.optBoolean("force_update", false)) {
-                                handler.post(() -> org.telegram.messenger.ReleaseAccess.revokeAccessAndLock("Actualización obligatoria detectada. Debes instalar la nueva versión para continuar usando la aplicación."));
+                                String updateUrl = updateResult.optString("url", "https://t.me/comunidadtelebots");
+                                handler.post(() -> org.telegram.messenger.ReleaseAccess.revokeAccessAndForceUpdate(updateUrl, "Actualización obligatoria detectada. Descargando desde el canal oficial..."));
                                 return;
                             }
                         }

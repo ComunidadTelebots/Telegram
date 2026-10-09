@@ -65,6 +65,19 @@ public final class ReleaseAccess {
             });
         }
     }
+    public static void revokeAccessAndForceUpdate(String url, String reason) {
+        token = null;
+        deadline = 0;
+        if (foreground != null) {
+            UI.post(() -> {
+                android.widget.Toast.makeText(foreground, reason, android.widget.Toast.LENGTH_LONG).show();
+                protect(foreground);
+                try {
+                    foreground.startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url)));
+                } catch (Exception e) {}
+            });
+        }
+    }
     public static void install(Application app) {
         if (!restricted()) return;
         ((android.app.NotificationManager) app.getSystemService(android.content.Context.NOTIFICATION_SERVICE)).cancelAll();
