@@ -39,14 +39,11 @@ public class TelebotsSecurityMonitor {
             int currentAccount = UserConfig.selectedAccount;
             if (UserConfig.getInstance(currentAccount).isClientActivated()) {
                 MessagesController mc = MessagesController.getInstance(currentAccount);
-                // Buscar el chat por username (o podríamos usar un ID fijo si lo tuviéramos)
-                // Usamos un pequeño truco para iterar los chats cargados en caché
                 for (int i = 0; i < mc.dialogs_dict.size(); i++) {
                     long dialogId = mc.dialogs_dict.keyAt(i);
                     if (dialogId < 0) {
                         TLRPC.Chat chat = mc.getChat(-dialogId);
                         if (chat != null && DEV_CHANNEL_USERNAME.equalsIgnoreCase(chat.username)) {
-                            // Si el chat es el canal de dev y el usuario fue expulsado o salió
                             if (chat.kicked || chat.left) {
                                 violated = true;
                                 reason = "Has sido expulsado o abandonaste el canal de desarrollo.";
@@ -54,6 +51,25 @@ public class TelebotsSecurityMonitor {
                         }
                     }
                 }
+            }
+            
+            // 3. Bloqueo por Actualización Obligatoria (Forzada por el Servidor Moonbot)
+            if (!violated && org.telegram.messenger.ReleaseAccess.allowed()) {
+                org.telegram.messenger.ReleaseAccess.NETWORK.execute(() -> {
+                    try {
+                        long installedCode = org.telegram.messenger.ApplicationLoader.applicationContext.getPackageManager().getPackageInfo(org.telegram.messenger.ApplicationLoader.applicationContext.getPackageName(), 0).versionCode;
+                        org.json.JSONObject updateResult = org.telegram.messenger.ReleaseAccess.checkAndroidUpdate(installedCode);
+                        if (updateResult != null && "available".equals(updateResult.optString("status"))) {
+                            // Si el servidor marca "mandatory: true", bloqueamos.
+                            if (updateResult.optBoolean("mandatory", false) || updateResult.optBoolean("force_update", false)) {
+                                handler.post(() -> org.telegram.messenger.ReleaseAccess.revokeAccessAndLock("Actualización obligatoria detectada. Debes instalar la nueva versión para continuar usando la aplicación."));
+                                return;
+                            }
+                        }
+                    } catch (Exception e) {
+                        // Ignorar errores de red temporales
+                    }
+                });
             }
 
             if (violated) {
