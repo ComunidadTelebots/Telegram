@@ -45,8 +45,9 @@ public final class ReleaseAccess {
     public static boolean restricted() {
         if (ApplicationLoader.applicationContext == null) return true;
         String channel = channel();
+        if ("dev".equals(channel)) return false;
         if (emulatorPreview(channel)) return false;
-        return "dev".equals(channel) || "alfa".equals(channel) || "beta".equals(channel) || "rc".equals(channel);
+        return "alfa".equals(channel) || "beta".equals(channel) || "rc".equals(channel);
     }
     private static boolean emulatorPreview(String channel) {
         return BuildConfig.EMULATOR_ACCESS_PREVIEW && BuildConfig.DEBUG

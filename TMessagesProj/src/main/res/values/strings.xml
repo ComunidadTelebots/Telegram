@@ -11525,4 +11525,10 @@
     <string name="TelebotsBackupNo">No</string>
     <string name="TelebotsBackupDone">Operation completed</string>
     <string name="TelebotsBackupError">The operation could not be completed. The file may be invalid, unsupported or unavailable.</string>
+    <string name="CommunityThemesTitle">Community Themes Store</string>
+    <string name="CommunityThemesInfo">Explore and download official themes across Android, Desktop and iOS from Todosobrealltech hub.</string>
+    <string name="CommunityThemesMore">Load More Themes</string>
+    <string name="CommunityThemesPreview">Preview &amp; Apply</string>
+    <string name="CommunityThemesEmpty">No themes found in the community hub.</string>
+    <string name="CommunityThemesFailed">Failed to load community themes from hub.</string>
 </resources>

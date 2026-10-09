@@ -343,6 +343,9 @@ public class SharedConfig {
     public static boolean drawDialogIcons;
     public static boolean useThreeLinesLayout;
     public static boolean archiveHidden;
+    public static int uiVersionYear = 2026;
+    public static String uiThemeProfile = "telegram_modern";
+    public static boolean allowFutureFeatures = true;
 
     private static int chatSwipeAction;
 
@@ -470,6 +473,9 @@ public class SharedConfig {
                 editor.putString("storageCacheDir", !TextUtils.isEmpty(storageCacheDir) ? storageCacheDir : "");
                 editor.putBoolean("proxyRotationEnabled", proxyRotationEnabled);
                 editor.putInt("proxyRotationTimeout", proxyRotationTimeout);
+                editor.putInt("uiVersionYear", uiVersionYear);
+                editor.putString("uiThemeProfile", uiThemeProfile != null ? uiThemeProfile : "telegram_modern");
+                editor.putBoolean("allowFutureFeatures", allowFutureFeatures);
 
                 if (pendingAppUpdate != null) {
                     try {
@@ -537,6 +543,9 @@ public class SharedConfig {
             storageCacheDir = preferences.getString("storageCacheDir", null);
             proxyRotationEnabled = preferences.getBoolean("proxyRotationEnabled", false);
             proxyRotationTimeout = preferences.getInt("proxyRotationTimeout", ProxyRotationController.DEFAULT_TIMEOUT_INDEX);
+            uiVersionYear = preferences.getInt("uiVersionYear", 2026);
+            uiThemeProfile = preferences.getString("uiThemeProfile", "telegram_modern");
+            allowFutureFeatures = preferences.getBoolean("allowFutureFeatures", true);
             String authKeyString = preferences.getString("pushAuthKey", null);
             if (!TextUtils.isEmpty(authKeyString)) {
                 pushAuthKey = Base64.decode(authKeyString, Base64.DEFAULT);

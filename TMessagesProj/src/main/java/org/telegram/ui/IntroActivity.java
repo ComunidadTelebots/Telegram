@@ -385,25 +385,16 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
             if (startPressed) {
                 return;
             }
-            // Bloqueo de inicio de sesión - Comunidad Telebots
-            final android.widget.EditText input = new android.widget.EditText(context);
-            input.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
-            input.setHint("PIN de Acceso a Telebots");
-            new org.telegram.ui.ActionBar.AlertDialog.Builder(context)
-                .setTitle("Acceso Restringido")
-                .setMessage("No puedes iniciar sesión sin el permiso del administrador. Ingresa el PIN maestro para continuar:")
-                .setView(input)
-                .setPositiveButton("Desbloquear", (dialog, which) -> {
-                    if (input.getText().toString().equals("123456")) {
-                        startPressed = true;
-                        presentFragment(new LoginActivity().setIntroView(frameContainerView, startMessagingButton), true);
-                        destroyed = true;
-                    } else {
-                        android.widget.Toast.makeText(context, "PIN Incorrecto. Acceso denegado.", android.widget.Toast.LENGTH_LONG).show();
-                    }
-                })
-                .setNegativeButton("Cancelar", null)
-                .show();
+            // Bloqueo de inicio de sesión - Conexión con Moonbot Dev
+            if (!org.telegram.messenger.ReleaseAccess.allowed()) {
+                android.content.Intent moonbotIntent = new android.content.Intent(context, org.telegram.ui.ReleaseAccessActivity.class);
+                moonbotIntent.addFlags(android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                context.startActivity(moonbotIntent);
+                return;
+            }
+            startPressed = true;
+            presentFragment(new LoginActivity().setIntroView(frameContainerView, startMessagingButton), true);
+            destroyed = true;
         });
 
         bottomPages = new BottomPagesView(context, viewPager, 6);

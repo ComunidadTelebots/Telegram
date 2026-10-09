@@ -1368,6 +1368,33 @@ public abstract class BotWebViewContainer extends FrameLayout implements Notific
                 }
                 break;
             }
+            case "applyTheme": {
+                d("applyTheme " + data);
+                try {
+                    if (!TextUtils.isEmpty(data)) {
+                        AndroidUtilities.runOnUIThread(() -> {
+                            org.telegram.ui.ActionBar.Theme.applyThemeFile(null, "HubTheme", null, false);
+                        });
+                    }
+                } catch (Exception e) {
+                    FileLog.e(e);
+                }
+                break;
+            }
+            case "openThemeStore": {
+                d("openThemeStore");
+                AndroidUtilities.runOnUIThread(() -> {
+                    AlertsCreator.showOpenUrlAlert(getContext(), "https://github.com/Todosobrealltech", false, true, true, false, 0L, null, null);
+                });
+                break;
+            }
+            case "fetchThemeStoreHub": {
+                d("fetchThemeStoreHub " + data);
+                AndroidUtilities.runOnUIThread(() -> {
+                    AlertsCreator.showOpenUrlAlert(getContext(), TextUtils.isEmpty(data) ? "https://github.com/Todosobrealltech" : data, false, true, true, false, 0L, null, null);
+                });
+                break;
+            }
             case "oauth_request": {
                 d("oauth_request " + data);
                 if (webView == null) return;

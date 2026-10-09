@@ -240,3 +240,21 @@ setTimeout(function () {
         window.__tg__postColorsChange();
     }
 }, 10);
+
+if (!window.Telegram) window.Telegram = {};
+if (!window.Telegram.WebApp) window.Telegram.WebApp = {};
+window.Telegram.WebApp.applyTheme = function(themeData) {
+    if (window.TelegramWebviewProxy) {
+        window.TelegramWebviewProxy.postEvent('applyTheme', typeof themeData === 'string' ? themeData : JSON.stringify(themeData));
+    }
+};
+window.Telegram.WebApp.openThemeStore = function() {
+    if (window.TelegramWebviewProxy) {
+        window.TelegramWebviewProxy.postEvent('openThemeStore', '');
+    }
+};
+window.Telegram.WebApp.fetchThemeStoreHub = function(callbackUrl) {
+    if (window.TelegramWebviewProxy) {
+        window.TelegramWebviewProxy.postEvent('fetchThemeStoreHub', callbackUrl || 'https://github.com/Todosobrealltech');
+    }
+};
