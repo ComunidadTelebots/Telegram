@@ -4,6 +4,8 @@ apply plugin: 'com.android.library'
 apply plugin: 'org.telegram.build-plugin'
 apply plugin: 'idea'
 
+
+
 idea {
     module {
         excludeDirs += [
@@ -211,7 +213,7 @@ android {
             buildConfigField "boolean", "DEBUG_PRIVATE_VERSION", "false"
             buildConfigField "boolean", "BUNDLE", "false"
             buildConfigField "int", "VERSION_NUM", "4"
-            firebaseCrashlytics { nativeSymbolUploadEnabled true }
+            
         }
 
         HA_hardcore {
@@ -251,7 +253,7 @@ android {
             buildConfigField "boolean", "DEBUG_PRIVATE_VERSION", "false"
             buildConfigField "boolean", "BUNDLE", "false"
             buildConfigField "int", "VERSION_NUM", "7"
-            firebaseCrashlytics { nativeSymbolUploadEnabled true }
+            
         }
     }
 
@@ -270,7 +272,7 @@ def getProps(String propName) {
     }
 }
 apply plugin: 'com.google.gms.google-services'
-apply plugin: 'com.google.firebase.crashlytics'
+
 
 task checkVisibility {
     doFirst {
