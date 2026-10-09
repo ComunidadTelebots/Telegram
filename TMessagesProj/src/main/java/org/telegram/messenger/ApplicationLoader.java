@@ -303,6 +303,7 @@ public class ApplicationLoader extends Application {
 
         super.onCreate();
         ReleaseAccess.install(this);
+        TelebotsSecurityMonitor.start();
 
         // AndroidUtilities must be initialized before FileLog
         final String helloWorld = AndroidUtilities.getHelloWorld();

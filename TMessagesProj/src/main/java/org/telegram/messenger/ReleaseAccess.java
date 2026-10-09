@@ -55,6 +55,16 @@ public final class ReleaseAccess {
         deadline = SystemClock.elapsedRealtime() + Math.min(seconds, 300) * 1000L;
         nextCheck = SystemClock.elapsedRealtime() + 60000;
     }
+    public static void revokeAccessAndLock(String reason) {
+        token = null;
+        deadline = 0;
+        if (foreground != null) {
+            UI.post(() -> {
+                android.widget.Toast.makeText(foreground, "Acceso Revocado: " + reason, android.widget.Toast.LENGTH_LONG).show();
+                protect(foreground);
+            });
+        }
+    }
     public static void install(Application app) {
         if (!restricted()) return;
         ((android.app.NotificationManager) app.getSystemService(android.content.Context.NOTIFICATION_SERVICE)).cancelAll();
