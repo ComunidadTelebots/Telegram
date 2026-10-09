@@ -17,7 +17,7 @@ import org.telegram.utils.proxy.*;
 
 /** Settings owned by Comunidad Telebots. Official Telegram settings stay in their screens. */
 public class CommunitySettingsActivity extends BaseFragment {
-    public static final int HOME=0, DESIGN=1, READING=2, CONNECTIONS=3, PRIVACY=4, TOR=5, ACCESSIBILITY=6;
+    public static final int HOME=0, DESIGN=1, READING=2, CONNECTIONS=3, PRIVACY=4, TOR=5, ACCESSIBILITY=6, P2P_MESH=7;
     private final int page;
     private TextCheckCell tor;
     private TextView torStatus;
@@ -26,9 +26,9 @@ public class CommunitySettingsActivity extends BaseFragment {
     public CommunitySettingsActivity(int page){this.page=page;}
     private String text(int id){return LocaleController.getString(id);}
     private final Runnable refreshTor=new Runnable(){@Override public void run(){if(!active || tor==null)return;updateTor();AndroidUtilities.runOnUIThread(this,5000);}};
-    private int title(){switch(page){case DESIGN:return R.string.TelebotsDesign;case READING:return R.string.TelebotsReading;case CONNECTIONS:return R.string.TelebotsConnections;case PRIVACY:return R.string.TelebotsPrivacy;case TOR:return R.string.TorTitle;case ACCESSIBILITY:return R.string.TelebotsAccessibility;default:return R.string.TelebotsSettings;}}
+    private String titleStr(){switch(page){case DESIGN:return text(R.string.TelebotsDesign);case READING:return text(R.string.TelebotsReading);case CONNECTIONS:return text(R.string.TelebotsConnections);case PRIVACY:return text(R.string.TelebotsPrivacy);case TOR:return text(R.string.TorTitle);case ACCESSIBILITY:return text(R.string.TelebotsAccessibility);case P2P_MESH:return "Malla P2P (100 Funciones)";default:return text(R.string.TelebotsSettings);}}
     @Override public View createView(Context context){
-        actionBar.setBackButtonImage(R.drawable.ic_ab_back);actionBar.setTitle(text(title()));
+        actionBar.setBackButtonImage(R.drawable.ic_ab_back);actionBar.setTitle(titleStr());
         actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick(){@Override public void onItemClick(int id){if(id==-1)finishFragment();}});
         ScrollView scroll=new ScrollView(context);scroll.setFillViewport(true);scroll.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
         LinearLayout body=new LinearLayout(context);body.setOrientation(LinearLayout.VERTICAL);scroll.addView(body);fragmentView=scroll;
@@ -40,6 +40,7 @@ public class CommunitySettingsActivity extends BaseFragment {
                 entry(body,R.string.TelebotsConnections,()->open(CONNECTIONS));
                 entry(body,R.string.TelebotsPhrases,()->presentFragment(new CommunityQuickPhrasesActivity()));
                 entry(body,R.string.TelebotsDownloads,()->presentFragment(new CommunityDownloadsActivity()));
+                entry(body,"Malla P2P (100 Funciones)",()->open(P2P_MESH));
                 entry(body,R.string.TelebotsPerformance,()->presentFragment(new CommunityPerformanceActivity()));
                 entry(body,R.string.TelebotsAccessibility,()->open(ACCESSIBILITY));
                 entry(body,R.string.TelebotsUpdates,()->presentFragment(new AppUpdatesActivity()));
@@ -48,7 +49,45 @@ public class CommunitySettingsActivity extends BaseFragment {
                 entry(body,R.string.TelebotsOfficialChannel,()->getMessagesController().openByUserName("comunidadtelebots",this,0));
                 break;
             case DESIGN:
+                label(body, "Diseños Históricos y Perfiles Avanzados");
+                entry(body, "Cambiar Año Histórico (Actual: " + SharedConfig.uiVersionYear + ")", () -> {
+                    SharedConfig.uiVersionYear = SharedConfig.uiVersionYear >= 2026 ? 2013 : SharedConfig.uiVersionYear + 1;
+                    SharedConfig.saveConfig();
+                    if(parentLayout!=null)parentLayout.rebuildAllFragmentViews(true,true);
+                });
+                entry(body, "Cambiar Perfil de Interfaz (Actual: " + SharedConfig.uiThemeProfile + ")", () -> {
+                    String[] profiles = {"telegram_modern", "ios", "telegram_x", "unigram", "macos", "cyberpunk", "oled_black", "holo_2013", "metro_fluent", "material_you"};
+                    int idx = 0;
+                    for (int i=0; i<profiles.length; i++) if (profiles[i].equals(SharedConfig.uiThemeProfile)) idx = i;
+                    SharedConfig.uiThemeProfile = profiles[(idx + 1) % profiles.length];
+                    SharedConfig.saveConfig();
+                    org.telegram.ui.Components.UIProfileManager.applyActiveProfileTheme();
+                    NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.needSetDayNightTheme, Theme.getActiveTheme(), false, null, -1, null);
+                    if(parentLayout!=null)parentLayout.rebuildAllFragmentViews(true,true);
+                });
+                entry(body, "Permitir Funciones Futuras: " + (SharedConfig.allowFutureFeatures ? "SÍ" : "NO"), () -> {
+                    SharedConfig.allowFutureFeatures = !SharedConfig.allowFutureFeatures;
+                    SharedConfig.saveConfig();
+                    if(parentLayout!=null)parentLayout.rebuildAllFragmentViews(true,true);
+                });
                 body.addView(new SkinSelectorCell(context,skin->{if(parentLayout!=null)parentLayout.rebuildAllFragmentViews(true,true);}),LayoutHelper.createLinear(-1,-2));
+                break;
+            case P2P_MESH:
+                label(body, "Estado del Nodo Local (Global)");
+                TelebotsP2pHubController p2p = TelebotsP2pHubController.getInstance(currentAccount);
+                entry(body, "Puntos de Karma: " + p2p.getKarmaPoints(), () -> {
+                    android.widget.Toast.makeText(context, "El Karma se gana compartiendo caché de páginas AMP/InstantView.", android.widget.Toast.LENGTH_LONG).show();
+                });
+                entry(body, "Ancho de banda cedido: " + (p2p.getBandwidthServedBytes() / 1024 / 1024) + " MB", () -> {});
+                entry(body, "Nodo P2P Principal: " + (p2p.isP2pEnabled() ? "ACTIVO" : "APAGADO"), () -> {
+                    p2p.setP2pEnabled(!p2p.isP2pEnabled());
+                    open(P2P_MESH);
+                });
+
+                label(body, "100 Funciones P2P, ZeroNet, Anti-Censura y Storage.");
+                entry(body, "Abrir Panel de Control Avanzado (Dashboard)", () -> {
+                    presentFragment(new TelebotsMeshDashboardActivity());
+                });
                 break;
             case READING:
                 entry(body,R.string.TelebotsReadingLibrary,()->presentFragment(new CommunityReadingActivity()));
@@ -94,7 +133,8 @@ public class CommunitySettingsActivity extends BaseFragment {
     }
     private void open(int value){presentFragment(new CommunitySettingsActivity(value));}
     private TextView label(LinearLayout body,String value){TextView v=new TextView(body.getContext());v.setText(value);v.setTextSize(15);v.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));v.setPadding(AndroidUtilities.dp(20),AndroidUtilities.dp(14),AndroidUtilities.dp(20),AndroidUtilities.dp(14));body.addView(v,LayoutHelper.createLinear(-1,-2));return v;}
-    private void entry(LinearLayout body,int title,Runnable click){TextView v=label(body,text(title));v.setMinHeight(AndroidUtilities.dp(52));v.setGravity(Gravity.CENTER_VERTICAL);v.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueText));v.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_listSelector),2));v.setOnClickListener(w->click.run());org.telegram.ui.Components.CommunitySettingsUi.button(v);}
+    private void entry(LinearLayout body,int title,Runnable click){entry(body, text(title), click);}
+    private void entry(LinearLayout body,String title,Runnable click){TextView v=label(body,title);v.setMinHeight(AndroidUtilities.dp(52));v.setGravity(Gravity.CENTER_VERTICAL);v.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueText));v.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_listSelector),2));v.setOnClickListener(w->click.run());org.telegram.ui.Components.CommunitySettingsUi.button(v);}
     private void updateTor(){if(tor==null || torStatus==null)return;tor.setChecked(TorProxyController.isEnabled());String state=text(TorProxyController.isSupported()?TorProxyController.getStatus():R.string.TorUnsupported);if(TorProxyController.isEnabled() && TorProxyController.getStatus()==R.string.TorStarting)state+=" "+TorProxyController.getProgress()+"%";torStatus.setText(android.text.TextUtils.concat(state,"\n",text(R.string.TorServerLatency)," ",org.telegram.ui.Components.ConnectionLatency.badge(currentAccount)));}
     @Override public void onActivityResultFragment(int code,int result,Intent data){super.onActivityResultFragment(code,result,data);if(page==TOR && code==8392 && result==android.app.Activity.RESULT_OK && org.telegram.messenger.voip.VoIPService.getSharedInstance()==null){TorProxyController.setEnabled(true);updateTor();}}
     @Override public void onResume(){super.onResume();active=true;if(page==TOR){TorProxyController.ensureRunning();AndroidUtilities.cancelRunOnUIThread(refreshTor);refreshTor.run();}}

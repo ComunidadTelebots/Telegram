@@ -121,6 +121,8 @@ import org.telegram.ui.Components.ShareAlert;
 import org.telegram.ui.Components.SizeNotifierFrameLayout;
 import org.telegram.ui.Components.TextHelper;
 import org.telegram.ui.Components.UItem;
+import org.telegram.ui.Components.UIProfileManager;
+import org.telegram.messenger.TelebotsP2pHubController;
 import org.telegram.ui.Components.UniversalAdapter;
 import org.telegram.ui.Components.UniversalRecyclerView;
 import org.telegram.ui.Components.blur3.DownscaleScrollableNoiseSuppressor;
@@ -903,6 +905,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
                 presentFragment(new RoundVideoSettingsActivity());
                 break;
             }
+
         }
     }
 
