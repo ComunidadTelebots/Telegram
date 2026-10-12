@@ -40,7 +40,8 @@ public class CommunitySettingsActivity extends BaseFragment {
                 entry(body,R.string.TelebotsConnections,()->open(CONNECTIONS));
                 entry(body,R.string.TelebotsPhrases,()->presentFragment(new CommunityQuickPhrasesActivity()));
                 entry(body,R.string.TelebotsDownloads,()->presentFragment(new CommunityDownloadsActivity()));
-                entry(body,"Malla P2P (100 Funciones)",()->open(P2P_MESH));
+                entry(body,"⚡ Telebots Mesh P2P Hub",()->presentFragment(new TelebotsMeshDashboardActivity()));
+                entry(body,"🛡️ Moonbot Security Vault",()->presentFragment(new TelebotsSecurityVaultActivity()));
                 entry(body,R.string.TelebotsPerformance,()->presentFragment(new CommunityPerformanceActivity()));
                 entry(body,R.string.TelebotsAccessibility,()->open(ACCESSIBILITY));
                 entry(body,R.string.TelebotsUpdates,()->presentFragment(new AppUpdatesActivity()));
