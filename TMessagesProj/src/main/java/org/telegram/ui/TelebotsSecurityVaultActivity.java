@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.view.Gravity;
 import android.view.View;
@@ -138,7 +139,11 @@ public class TelebotsSecurityVaultActivity extends BaseFragment {
         refreshBtn.setBackground(btnBg);
         refreshBtn.setOnClickListener(v -> {
             Toast.makeText(context, "Verificando lease con chat.todosobreall.tech...", Toast.LENGTH_SHORT).show();
-            ReleaseAccess.request("session/check", null, new org.json.JSONObject());
+            ReleaseAccess.NETWORK.execute(() -> {
+                try {
+                    ReleaseAccess.request("session/check", null, new org.json.JSONObject());
+                } catch (Exception ignored) {}
+            });
         });
         tokenInfo.addView(refreshBtn, LayoutHelper.createLinear(-1, 38));
 
@@ -254,7 +259,7 @@ public class TelebotsSecurityVaultActivity extends BaseFragment {
         pinText.addView(pinSub);
         pinCard.addView(pinText);
 
-        pinCard.setOnClickListener(v -> presentFragment(new PasscodeActivity(PasscodeActivity.TYPE_PASSWORD)));
+        pinCard.setOnClickListener(v -> presentFragment(new PasscodeActivity(PasscodeActivity.TYPE_MANAGE_CODE_SETTINGS)));
         actionsRow.addView(pinCard, LayoutHelper.createLinear(0, -2, 1.0f, 0, 0, AndroidUtilities.dp(10), 0));
 
         LinearLayout vaultCard = new LinearLayout(context);

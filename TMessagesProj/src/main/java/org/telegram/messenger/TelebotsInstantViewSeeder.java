@@ -212,7 +212,7 @@ public class TelebotsInstantViewSeeder extends BaseController {
     }
 
     public int getActivePeersCount() {
-        int peers = TelebotsP2pHubController.getInstance(currentAccount).getConnectedNodesCount();
+        int peers = TelebotsP2pRoutingMesh.getInstance().getActivePeers().size();
         return peers > 0 ? peers : 24;
     }
 

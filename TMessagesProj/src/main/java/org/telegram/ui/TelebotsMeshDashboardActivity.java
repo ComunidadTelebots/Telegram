@@ -310,7 +310,7 @@ public class TelebotsMeshDashboardActivity extends BaseFragment {
         mainLayout.addView(catalogLabel, LayoutHelper.createLinear(-1, -2));
 
         HorizontalScrollView tabScroll = new HorizontalScrollView(context);
-        tabScroll.setShowsHorizontalScrollIndicator(false);
+        tabScroll.setHorizontalScrollBarEnabled(false);
 
         LinearLayout tabsLayout = new LinearLayout(context);
         tabsLayout.setOrientation(LinearLayout.HORIZONTAL);
