@@ -118,6 +118,48 @@ public class TelebotsMeshDashboardActivity extends BaseFragment {
 
         mainLayout.addView(heroCard, LayoutHelper.createLinear(-1, -2, 0, 0, 0, AndroidUtilities.dp(14)));
 
+        // --- CARD: OFFLINE P2P CHAT BANNER ---
+        LinearLayout chatCard = new LinearLayout(context);
+        chatCard.setOrientation(LinearLayout.HORIZONTAL);
+        chatCard.setGravity(Gravity.CENTER_VERTICAL);
+        chatCard.setBackground(createCardBackground());
+        chatCard.setPadding(AndroidUtilities.dp(20), AndroidUtilities.dp(16), AndroidUtilities.dp(20), AndroidUtilities.dp(16));
+
+        LinearLayout chatTextLayout = new LinearLayout(context);
+        chatTextLayout.setOrientation(LinearLayout.VERTICAL);
+
+        TextView chatTitle = new TextView(context);
+        chatTitle.setText("💬 Chat P2P Off-Grid (Sin Servidor)");
+        chatTitle.setTextSize(16);
+        chatTitle.setTextColor(0xFFFFFFFF);
+        chatTitle.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+        chatTextLayout.addView(chatTitle);
+
+        TextView chatSub = new TextView(context);
+        chatSub.setText("Mensajería directa entre dispositivos por Wi-Fi y malla");
+        chatSub.setTextSize(12);
+        chatSub.setTextColor(0xFF8E9EB5);
+        chatSub.setPadding(0, AndroidUtilities.dp(4), 0, 0);
+        chatTextLayout.addView(chatSub);
+
+        chatCard.addView(chatTextLayout, LayoutHelper.createLinear(0, -2, 1.0f));
+
+        TextView openChatBtn = new TextView(context);
+        openChatBtn.setText("ABRIR SALA");
+        openChatBtn.setTextSize(12);
+        openChatBtn.setTextColor(0xFF0D1421);
+        openChatBtn.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+        GradientDrawable openChatBg = new GradientDrawable();
+        openChatBg.setColor(0xFF71D6C2);
+        openChatBg.setCornerRadius(AndroidUtilities.dp(12));
+        openChatBtn.setBackground(openChatBg);
+        openChatBtn.setPadding(AndroidUtilities.dp(14), AndroidUtilities.dp(8), AndroidUtilities.dp(14), AndroidUtilities.dp(8));
+        openChatBtn.setOnClickListener(v -> presentFragment(new TelebotsP2pChatActivity()));
+        chatCard.addView(openChatBtn, LayoutHelper.createLinear(-2, -2));
+
+        chatCard.setOnClickListener(v -> presentFragment(new TelebotsP2pChatActivity()));
+        mainLayout.addView(chatCard, LayoutHelper.createLinear(-1, -2, 0, 0, 0, AndroidUtilities.dp(14)));
+
         // --- CARD 2: AMP MESH CACHE ---
         LinearLayout cacheCard = new LinearLayout(context);
         cacheCard.setOrientation(LinearLayout.VERTICAL);
