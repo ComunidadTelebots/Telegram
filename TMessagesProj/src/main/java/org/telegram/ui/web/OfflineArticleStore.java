@@ -161,7 +161,7 @@ public final class OfflineArticleStore {
                 AndroidUtilities.runOnUIThread(()->{
                     final WebInstantView parser=new WebInstantView();
                     parser.readHTML(url,new ByteArrayInputStream(AmpArticleReader.normalizeHtml(html).getBytes(StandardCharsets.UTF_8)),json->{
-                        if(json==null){parser.recycle();done.run(false);return;}
+                        if(json==null){org.telegram.messenger.FileLog.e("Offline reader: parser unavailable");parser.recycle();done.run(false);return;}
                         try {
                             AmpArticleReader.normalizeLinks(json,url,0,new int[]{20000});
                             TLRPC.TL_webPage page=parser.parseJSON(url,json);
@@ -173,10 +173,10 @@ public final class OfflineArticleStore {
                             if(document.length>MAX_DOCUMENT)throw new IOException("Document limit");
                             parser.recycle();
                             DOWNLOAD.execute(()->persist(a,owner,generation,url,title,document,images,done));
-                        }catch(Exception e){parser.recycle();done.run(false);}
+                        }catch(Exception e){org.telegram.messenger.FileLog.e("Offline reader: document rejected ("+e.getClass().getSimpleName()+")");parser.recycle();done.run(false);}
                     });
                 });
-            }catch(Exception e){AndroidUtilities.runOnUIThread(()->done.run(false));}
+            }catch(Exception e){org.telegram.messenger.FileLog.e("Offline reader: fetch failed ("+e.getClass().getSimpleName()+")");AndroidUtilities.runOnUIThread(()->done.run(false));}
         });
     }
     private static void persist(int a,String owner,long generation,String url,String title,byte[] document,ArrayList<String> images,Utilities.Callback<Boolean> done) {

@@ -440,7 +440,7 @@ public class WebInstantView {
                     String mime = "text/html";
                     if (firstLoad) {
                         firstLoad = false;
-                        final String script = readRes(R.raw.instant).replace("$DEBUG$", "false");
+                        final String script = readRes(Build.VERSION.SDK_INT < 23 ? R.raw.instant_legacy : R.raw.instant).replace("$DEBUG$", "false");
                         final String html = "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'unsafe-inline'; connect-src 'self'; style-src 'self' 'unsafe-inline'\"><script>\n" + script + "\n</script>";
                         return new WebResourceResponse("text/html", "UTF-8", new ByteArrayInputStream(html.getBytes(StandardCharsets.UTF_8)));
                     } else if (url != null && url.endsWith("/index.html")) {
@@ -653,7 +653,15 @@ public class WebInstantView {
                             blocks.add(img);
                         }
                         break;
+                    case "amp-interactive":
+                        if (AmpEmbedPolicy.allows(o.optString("src"))) {
+                            blocks.add(new AmpInteractiveBlock(o.optString("src"), o.optString("title")));
+                        }
+                        break;
                     case "figure":
+                        // Preserve tables, multiple images and interactive graphics in figures.
+                        if (content != null) blocks.addAll(parsePageBlocks(url, content, page));
+                        break;
                     case "picture":
                         TL_iv.pageBlockPhoto figure = parseFigure(o, page);
                         if (figure != null) {
@@ -726,7 +734,7 @@ public class WebInstantView {
             if (o instanceof JSONObject) {
                 JSONObject element = (JSONObject) o;
                 final String tag = element.optString("tag");
-                if ("figurecaption".equalsIgnoreCase(tag) || "caption".equalsIgnoreCase(tag)) {
+                if (("figcaption".equalsIgnoreCase(tag) || "figurecaption".equalsIgnoreCase(tag)) || "caption".equalsIgnoreCase(tag)) {
                     caption = trim(parseRichText(element, page));
                 } else if ("img".equalsIgnoreCase(tag)) {
                     block = parseImage(element, page);

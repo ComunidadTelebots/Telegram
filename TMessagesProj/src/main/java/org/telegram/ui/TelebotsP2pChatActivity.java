@@ -37,6 +37,7 @@ public class TelebotsP2pChatActivity extends BaseFragment implements TelebotsP2p
 
     @Override
     public View createView(Context context) {
+        final boolean identitySupported = org.telegram.messenger.CommunityCompatibility.supportsPeerIdentity(android.os.Build.VERSION.SDK_INT);
         actionBar.setBackButtonImage(org.telegram.messenger.R.drawable.ic_ab_back);
         actionBar.setTitle("P2P local cifrado");
         actionBar.setSubtitle("TLS · Pares autorizados manualmente");
@@ -87,6 +88,7 @@ public class TelebotsP2pChatActivity extends BaseFragment implements TelebotsP2p
         contentLayout.addView(banner, LayoutHelper.createLinear(-1, -2, 12, 12, 12, 8));
         android.widget.Button identityButton = new android.widget.Button(context);
         identityButton.setText("Mi huella de identidad");
+        identityButton.setEnabled(identitySupported);
         identityButton.setOnClickListener(v -> showDialog(new org.telegram.ui.ActionBar.AlertDialog.Builder(getParentActivity())
                 .setTitle("Huella SHA-256 del certificado")
                 .setMessage(TelebotsP2pIndependentMessaging.getInstance().getLocalNodeId()
@@ -95,6 +97,7 @@ public class TelebotsP2pChatActivity extends BaseFragment implements TelebotsP2p
         contentLayout.addView(identityButton, LayoutHelper.createLinear(-1, -2));
         android.widget.Button pairButton = new android.widget.Button(context);
         pairButton.setText("Autorizar un dispositivo");
+        pairButton.setEnabled(identitySupported);
         pairButton.setOnClickListener(v -> {
             LinearLayout form = new LinearLayout(context); form.setOrientation(LinearLayout.VERTICAL);
             EditText address = new EditText(context); address.setHint("IP local del dispositivo"); address.setSingleLine(true);
@@ -126,6 +129,8 @@ public class TelebotsP2pChatActivity extends BaseFragment implements TelebotsP2p
         contentLayout.addView(revoke, LayoutHelper.createLinear(-1, -2));
         connection = new android.widget.Button(context);
         connection.setText("Activar P2P cifrado");
+        connection.setEnabled(identitySupported);
+        if (!identitySupported) connection.setText("P2P cifrado requiere Android 6.0");
         connection.setOnClickListener(v -> {
             TelebotsP2pIndependentMessaging mesh = TelebotsP2pIndependentMessaging.getInstance();
             if (mesh.isRunning()) { mesh.stop(); connection.setText("Activar P2P cifrado"); return; }
@@ -287,7 +292,9 @@ public class TelebotsP2pChatActivity extends BaseFragment implements TelebotsP2p
     public void onResume() {
         super.onResume();
         TelebotsP2pIndependentMessaging.getInstance().addListener(this);
-        if (connection != null) connection.setText(TelebotsP2pIndependentMessaging.getInstance().isRunning() ? "Detener P2P local" : "Activar P2P cifrado");
+        if (connection != null) connection.setText(!org.telegram.messenger.CommunityCompatibility.supportsPeerIdentity(android.os.Build.VERSION.SDK_INT)
+                ? "P2P cifrado requiere Android 6.0"
+                : TelebotsP2pIndependentMessaging.getInstance().isRunning() ? "Detener P2P local" : "Activar P2P cifrado");
     }
 
     @Override

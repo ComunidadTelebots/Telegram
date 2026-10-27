@@ -615,6 +615,9 @@ public class GramWalletStorage {
     }
 
     private static boolean needsAuthentication(Throwable error) {
+        // The exception class does not exist on Android 5, including error paths
+        // from legacy RSA-wrapped storage. Never resolve it on those devices.
+        if (Build.VERSION.SDK_INT < 23) return false;
         for (Throwable e = error; e != null; e = e.getCause()) {
             if (e instanceof UserNotAuthenticatedException) return true;
         }

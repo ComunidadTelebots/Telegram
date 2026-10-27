@@ -23,6 +23,9 @@ public final class TelebotsPeerIdentity {
     private final PrivateKey key;
     private final X509Certificate certificate;
     public TelebotsPeerIdentity() throws Exception {
+        if (android.os.Build.VERSION.SDK_INT < 23) {
+            throw new java.security.GeneralSecurityException("Peer identity requires Android 6.0");
+        }
         KeyStore store = KeyStore.getInstance("AndroidKeyStore"); store.load(null);
         if (!store.containsAlias(ALIAS)) {
             KeyPairGenerator generator = KeyPairGenerator.getInstance("EC", "AndroidKeyStore");

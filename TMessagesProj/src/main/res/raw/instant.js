@@ -42,7 +42,7 @@ function Readability(e,t){if(t&&t.documentElement)e=t,t=arguments[2];else if(!e|
             return
         }
 
-        const readability = new Readability(document)
+        const readability = new Readability(document, {allowedVideoRegex: /https:\/\/(?:datawrapper\.dwcdn\.net|static\.dwcdn\.net|flo\.uri\.sh|public\.flourish\.studio)\/|\/\/(www\.)?((dailymotion|youtube|youtube-nocookie|player\.vimeo|v\.qq)\.com|(archive|upload\.wikimedia)\.org|player\.twitch\.tv)/i})
         const result = readability.parse()
         const doc = new DOMParser().parseFromString(result.content, 'text/html').body
 

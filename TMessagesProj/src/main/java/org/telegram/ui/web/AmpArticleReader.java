@@ -157,9 +157,10 @@ public final class AmpArticleReader {
     }
 
     static String normalizeHtml(String html) {
-        // Only rename AMP's image element; the bundled DOMPurify sanitizes all attributes/scripts later.
+        // Normalize AMP image and iframe elements; the trusted parser filters content and links are validated before rendering.
         // Do not strip paywall/login nodes or fetch additional content.
         return html.replaceAll("(?i)<(/?)amp-img(?=[\\s/>])", "<$1img")
+            .replaceAll("(?i)<(/?)amp-iframe(?=[\\s/>])", "<$1iframe")
             .replaceAll("(?is)<meta\\b[^>]*charset[^>]*>", "")
             .replaceAll("(?is)<meta\\b[^>]*http-equiv\\s*=\\s*(['\\\"]?)content-type\\1[^>]*>", "");
     }
@@ -179,6 +180,11 @@ public final class AmpArticleReader {
                 if (child instanceof JSONObject) {
                     JSONObject node = (JSONObject) child;
                     String tag = node.optString("tag");
+                    if ("iframe".equals(tag) && AmpEmbedPolicy.allows(node.optString("src"))) {
+                        node.put("tag", "amp-interactive");
+                        node.put("content", new JSONArray());
+                        continue;
+                    }
                     if ("iframe".equals(tag) || "script".equals(tag) || "object".equals(tag) || "embed".equals(tag)
                             || ("img".equals(tag) && node.optString("src").isEmpty())) array.remove(i);
                 }

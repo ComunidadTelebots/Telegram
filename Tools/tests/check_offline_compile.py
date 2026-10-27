@@ -3,6 +3,7 @@ import pathlib, subprocess, tempfile, sys
 root = pathlib.Path(__file__).resolve().parents[2]
 sdk = pathlib.Path(sys.argv[1])
 stubs = {
+ 'org/telegram/messenger/FileLog.java': 'package org.telegram.messenger; public class FileLog { public static void e(String s) {} }',
  'org/telegram/messenger/ApplicationLoader.java': 'package org.telegram.messenger; public class ApplicationLoader { public static android.content.Context applicationContext; }',
  'org/telegram/messenger/AndroidUtilities.java': 'package org.telegram.messenger; public class AndroidUtilities { public static void runOnUIThread(Runnable r) {} }',
  'org/telegram/messenger/UserConfig.java': 'package org.telegram.messenger; public class UserConfig { public static UserConfig getInstance(int a){return null;} public long getClientUserId(){return 1;} }',

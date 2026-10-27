@@ -7363,6 +7363,10 @@ public class ArticleViewer extends IArticleViewer implements NotificationCenter.
                     view = new ReportCell(context, true);
                     break;
                 }
+                case 93: {
+                    view = new org.telegram.ui.web.AmpInteractiveCell(context);
+                    break;
+                }
                 case 92: {
                     view = new BlockMathCell(context, ArticleViewer.this, this);
                     break;
@@ -7560,6 +7564,10 @@ public class ArticleViewer extends IArticleViewer implements NotificationCenter.
                     BlockDetailsBottomCell cell = (BlockDetailsBottomCell) holder.itemView;
                     break;
                 }
+                case 93: {
+                    ((org.telegram.ui.web.AmpInteractiveCell) holder.itemView).bind((org.telegram.ui.web.AmpInteractiveBlock) block);
+                    break;
+                }
                 case 92: {
                     BlockMathCell cell = (BlockMathCell) holder.itemView;
                     cell.setBlock((TL_iv.pageBlockMath) block);
@@ -7580,6 +7588,8 @@ public class ArticleViewer extends IArticleViewer implements NotificationCenter.
                 return 1;
             } else if (block instanceof TL_iv.pageBlockDivider) {
                 return 2;
+            } else if (block instanceof org.telegram.ui.web.AmpInteractiveBlock) {
+                return 93;
             } else if (block instanceof TL_iv.pageBlockEmbed) {
                 return 3;
             } else if (block instanceof TL_iv.pageBlockSubtitle) {

@@ -11926,4 +11926,9 @@
     <string name="NoPaidMessagesTokenUsed">un1 used your QR code and can message you for free</string>
     <string name="NoPaidMessagesTokenUsedOut">You used the QR code of un1 and can message them for free</string>
     <string name="NoPaidMessagesTokenImported">You can now message **%1$s** for free.</string>
+    <string name="AmpInteractiveNotice">Interactive content from this provider loads only when you tap. Internet required.</string>
+    <string name="AmpInteractiveLoad">Load interactive graphic</string>
+    <string name="AmpInteractiveClose">Close graphic</string>
+    <string name="AmpInteractiveRoute">Interactive graphics are unavailable with Tor, a proxy or custom DNS enabled because this viewer cannot use that connection.</string>
+    <string name="AmpInteractiveError">This graphic could not load. Its provider may require a newer Android System WebView.</string>
 </resources>

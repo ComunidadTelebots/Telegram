@@ -1605,4 +1605,9 @@
     <string name="TelebotsBackupNo">No</string>
     <string name="TelebotsBackupDone">Operación completada</string>
     <string name="TelebotsBackupError">No se pudo completar la operación. El archivo puede ser inválido, incompatible o no estar disponible.</string>
+    <string name="AmpInteractiveNotice">El contenido interactivo de este proveedor solo se carga al tocar. Requiere Internet.</string>
+    <string name="AmpInteractiveLoad">Cargar gráfico interactivo</string>
+    <string name="AmpInteractiveClose">Cerrar gráfico</string>
+    <string name="AmpInteractiveRoute">Los gráficos interactivos no están disponibles con Tor, proxy o DNS personalizado porque este visor no puede utilizar esa conexión.</string>
+    <string name="AmpInteractiveError">No se pudo cargar el gráfico. Su proveedor puede requerir un Android System WebView más reciente.</string>
 </resources>
