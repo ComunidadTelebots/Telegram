@@ -13,6 +13,11 @@ if (mode == 'auto' && configFile.exists()) {
 }
 if (mode == 'true' || (mode == 'auto' && matchesPackage)) {
     apply plugin: 'com.google.gms.google-services'
+    // Crashlytics is inherited from TMessagesProj, but its build ID must be
+    // generated in the APK module. Applying this plugin to a library is invalid.
+    if (pluginManager.hasPlugin('com.android.application')) {
+        apply plugin: 'com.google.firebase.crashlytics'
+    }
 } else if (mode == 'auto') {
     logger.lifecycle("${project.path}: Firebase disabled; no configuration for ${rootProject.ext.forkApplicationId}")
 }
