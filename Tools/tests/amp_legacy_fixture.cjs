@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const {JSDOM} = require('jsdom');
 let html = fs.readFileSync('Tools/tests/fixtures/amp/full-article.html', 'utf8')
+  .replace(/(<amp-iframe\b[^>]*>)[\s\S]*?<\/amp-iframe\s*>/gi, '$1</amp-iframe>')
   .replace(/<(\/?)amp-img(?=[\s/>])/gi, '<$1img')
   .replace(/<(\/?)amp-iframe(?=[\s/>])/gi, '<$1iframe');
 const dom = new JSDOM('', {url: 'https://example.org/', runScripts: 'outside-only'});
@@ -13,7 +14,7 @@ dom.window.XMLHttpRequest = class {
 dom.window.Instant = {done(raw) {
   const doc = JSON.parse(raw);
   const content = JSON.stringify(doc.content);
-  for (const token of ['FINAL_DEL_ARTICULO', 'DATOS_DEL_GRAFICO', 'GRAFICO_INTERACTIVO', 'foto.jpg', 'table']) assert.ok(content.includes(token), token);
+  for (const token of ['FINAL_DEL_ARTICULO', 'DATOS_DEL_GRAFICO', 'GRAFICO_INTERACTIVO', 'foto.jpg', 'table', 'visualisation/12345/embed?auto=1']) assert.ok(content.includes(token), token);
   assert.ok(!content.includes('javascript:'));
   assert.equal(dom.window.REMOTE_SCRIPT_EXECUTED, undefined);
   completed = true;

@@ -7,6 +7,7 @@ const { JSDOM } = require('jsdom');
 const root = path.resolve(__dirname, '../..');
 let html = fs.readFileSync(path.join(__dirname, 'fixtures/amp/full-article.html'), 'utf8');
 // Match the amp-img normalization performed before the existing parser is invoked.
+html = html.replace(/(<amp-iframe\b[^>]*>)[\s\S]*?<\/amp-iframe\s*>/gi, '$1</amp-iframe>');
 html = html.replace(/<(\/?)amp-iframe(?=[\s/>])/gi, '<$1iframe');
 html = html.replace(/<(\/?)amp-img(?=[\s/>])/gi, '<$1img');
 const dom = new JSDOM('', { url: 'https://example.org/article', runScripts: 'outside-only' });
@@ -28,6 +29,7 @@ window.Instant = { done(raw) {
   assert.ok(serialized.includes('DATOS_DEL_GRAFICO'));
   assert.ok(serialized.includes('datawrapper.dwcdn.net/WpAbK/2/'));
   assert.ok(serialized.includes('GRAFICO_INTERACTIVO'));
+  assert.ok(serialized.includes('visualisation/12345/embed?auto=1'));
   assert.ok(serialized.includes('table'));
   assert.ok(!serialized.includes('javascript:'));
   assert.equal(window.REMOTE_SCRIPT_EXECUTED, undefined);

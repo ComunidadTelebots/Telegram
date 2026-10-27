@@ -5,9 +5,10 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.List;
 
-/** First data adapter: public Datawrapper datasets. Unsupported providers remain static. */
+/** Public data adapters. Publisher JavaScript is never executed. */
 final class AmpChartLoader {
     static AmpChartData load(String source) throws Exception {
+        if(source.matches("https://(?:flo\\.uri\\.sh|public\\.flourish\\.studio)/visualisation/[0-9]+/embed/?(?:\\?auto=1)?")) return AmpFlourishData.parse(AmpResolver.fetchPublicText(source.split("\\?")[0]));
         if(!source.matches("https://datawrapper\\.dwcdn\\.net/[A-Za-z0-9]{5}/[0-9]+/"))throw new IOException("No supported public dataset");
         String html=AmpResolver.fetchPublicText(source);
         int marker=html.indexOf("window.__DW_SVELTE_PROPS__");

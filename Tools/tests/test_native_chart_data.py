@@ -25,10 +25,16 @@ public class ChartTest {
   reject(()->new AmpChartData(AmpChartData.Kind.LINE,"",AmpChartData.csv("x,y\nA,1e99")));
   reject(()->new AmpChartData(AmpChartData.Kind.PIE,"",AmpChartData.csv("x,y\nA,-1")));
   reject(()->new AmpChartData(AmpChartData.Kind.PIE,"",AmpChartData.csv("x,y\nA,0")));
-  reject(()->new AmpChartData(AmpChartData.Kind.BAR,"",AmpChartData.csv("x,y,z\nA,1,2")));
+  AmpChartData grouped=new AmpChartData(AmpChartData.Kind.BAR,"",AmpChartData.csv("x,y,z\nA,1,2"));
+  if(grouped.series.length!=2)throw new AssertionError("grouped bars");
+  reject(()->new AmpChartData(AmpChartData.Kind.STACKED,"",AmpChartData.csv("x,y,z\nA,1,-2")));
+  AmpChartData weighted=new AmpChartData(AmpChartData.Kind.MARIMEKKO,"",AmpChartData.csv("x,y\nA,2\nB,4")).weighted(new double[]{1,3},"weight");
+  if(weighted.widths[1]!=3)throw new AssertionError("weights");
+  reject(()->weighted.weighted(new double[]{0,3},"weight"));
+  reject(()->weighted.weighted(new double[]{Double.NaN,3},"weight"));
   reject(()->new AmpChartData(AmpChartData.Kind.LINE,"",AmpChartData.csv("x,y\nA")));
   StringBuilder huge=new StringBuilder("x,y\n");for(int i=0;i<1501;i++)huge.append("A,1\n");reject(()->AmpChartData.csv(huge.toString()));
-  System.out.println("Native charts: 14 model and input boundary cases passed.");
+  System.out.println("Native charts: 18 model and input boundary cases passed.");
  }
 }''', encoding='utf-8')
     subprocess.run(['javac', '-encoding', 'UTF-8', '-d', directory, str(root / 'TMessagesProj/src/main/java/org/telegram/ui/web/AmpChartData.java'), str(source)], check=True)

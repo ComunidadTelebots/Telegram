@@ -159,7 +159,8 @@ public final class AmpArticleReader {
     static String normalizeHtml(String html) {
         // Normalize AMP image and iframe elements; the trusted parser filters content and links are validated before rendering.
         // Do not strip paywall/login nodes or fetch additional content.
-        return html.replaceAll("(?i)<(/?)amp-img(?=[\\s/>])", "<$1img")
+        return html.replaceAll("(?is)(<amp-iframe\\b[^>]*>).*?</amp-iframe\\s*>", "$1</amp-iframe>")
+            .replaceAll("(?i)<(/?)amp-img(?=[\\s/>])", "<$1img")
             .replaceAll("(?i)<(/?)amp-iframe(?=[\\s/>])", "<$1iframe")
             .replaceAll("(?is)<meta\\b[^>]*charset[^>]*>", "")
             .replaceAll("(?is)<meta\\b[^>]*http-equiv\\s*=\\s*(['\\\"]?)content-type\\1[^>]*>", "");

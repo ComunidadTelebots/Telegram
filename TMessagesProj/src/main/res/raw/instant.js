@@ -36,6 +36,20 @@ function Readability(e,t){if(t&&t.documentElement)e=t,t=arguments[2];else if(!e|
             document = new DOMParser().parseFromString(html, 'text/html')
         }
 
+        // Preserve only approved public chart markers through Readability's empty-div cleanup.
+        // Detached DOM only: no publisher script or frame is executed.
+        const chartMarkers = new Map()
+        document.querySelectorAll('iframe').forEach(frame => {
+            const source = frame.getAttribute('src') || ''
+            if (!/^https:\/\/(?:datawrapper\.dwcdn\.net|static\.dwcdn\.net|flo\.uri\.sh|public\.flourish\.studio)\//i.test(source)) return
+            const marker = document.createElement('p')
+            const key = 'amp-chart-' + chartMarkers.size
+            marker.setAttribute('data-local-chart', key)
+            marker.textContent = 'Gráfico interactivo: ' + (frame.getAttribute('title') || 'datos de la noticia')
+            chartMarkers.set(key, {tag: 'iframe', src: source, title: frame.getAttribute('title') || '', content: []})
+            frame.replaceWith(marker)
+        })
+
         if (!isProbablyReaderable(document)) {
             console.error('isProbablyReaderable = false')
             window.Instant.done('null')
@@ -51,6 +65,8 @@ function Readability(e,t){if(t&&t.documentElement)e=t,t=arguments[2];else if(!e|
             if (!node.tagName || node.nodeType === Node.TEXT_NODE) {
                 return node.textContent.trim() ? [ node.textContent ] : []
             }
+            const chart = chartMarkers.get(node.getAttribute("data-local-chart"))
+            if (chart) return [chart]
             const tag = node.tagName.toLowerCase()
             const content = parse(node)
             const attr = [...(node.attributes || [])]

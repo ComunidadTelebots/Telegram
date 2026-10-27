@@ -27,19 +27,29 @@ public final class AmpNativeChartView extends View {
         super(context);data=value;selection=callback;setFocusable(true);setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         min=Double.POSITIVE_INFINITY;max=Double.NEGATIVE_INFINITY;
         for(double[] values:data.values)for(double v:values)if(!Double.isNaN(v)){min=Math.min(min,v);max=Math.max(max,v);}
-        if(data.kind==AmpChartData.Kind.BAR){min=Math.min(0,min);max=Math.max(0,max);}if(min==max){min-=1;max+=1;}
+        if(data.kind==AmpChartData.Kind.STACKED){max=0;for(double[] values:data.values){double sum=0;for(double v:values)sum+=v;max=Math.max(max,data.proportional?100:sum);}}
+        if(data.kind!=AmpChartData.Kind.LINE && data.kind!=AmpChartData.Kind.PIE){min=Math.min(0,min);max=Math.max(0,max);}if(min==max){min-=1;max+=1;}
         select(0,0);
     }
     private float dp(float v){return AndroidUtilities.dp(v);}
+    private boolean bars(){return data.kind==AmpChartData.Kind.BAR||data.kind==AmpChartData.Kind.STACKED||data.kind==AmpChartData.Kind.MARIMEKKO;}
+    private float edge(int r){
+        if(data.widths==null)return plot.left+plot.width()*r/data.labels.length;
+        double total=0,before=0;for(int i=0;i<data.widths.length;i++){total+=data.widths[i];if(i<r)before+=data.widths[i];}
+        return plot.left+(float)(before/total)*plot.width();
+    }
+    private double plotted(int r,int s){if(!data.proportional)return data.values[r][s];double sum=0;for(double v:data.values[r])sum+=v;return data.values[r][s]*100/sum;}
+    private double top(int r,int s){double value=plotted(r,s);if(data.kind==AmpChartData.Kind.STACKED)for(int i=0;i<s;i++)value+=plotted(r,i);return value;}
     private float x(int r){return data.labels.length<2?plot.centerX():plot.left+(float)data.positions[r]*plot.width();}
     private float y(double v){return plot.bottom-(float)((v-min)/(max-min))*plot.height();}
-    public void step(int direction){select(Math.max(0,Math.min(data.labels.length-1,row+direction)),series);}
+    public void step(int direction){int index=Math.max(0,Math.min(data.labels.length*data.series.length-1,row*data.series.length+series+direction));select(index/data.series.length,index%data.series.length);}
     private void select(int r,int s){
         row=r;series=s;
         if(Double.isNaN(data.values[row][series]))for(int i=0;i<data.series.length;i++)if(!Double.isNaN(data.values[row][i])){series=i;break;}
         double value=data.values[row][series];
         String text=data.labels[row]+" · "+data.series[series]+": "+(Double.isNaN(value)?"—":number.format(value));
         if(data.kind==AmpChartData.Kind.PIE)text+=" ("+number.format(value/data.total()*100)+"%)";
+        if(data.widths!=null)text+=" · "+data.widthLabel+": "+number.format(data.widths[row]);
         selection.changed(text);setContentDescription(text);invalidate();
     }
     @Override protected void onDraw(Canvas canvas){
@@ -60,16 +70,22 @@ public final class AmpNativeChartView extends View {
         paint.setTextSize(dp(10));paint.setColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));
         canvas.drawText(shortLabel(data.labels[0]),plot.left,getHeight()-dp(12),paint);
         String last=shortLabel(data.labels[data.labels.length-1]);canvas.drawText(last,plot.right-paint.measureText(last),getHeight()-dp(12),paint);
-        if(data.kind==AmpChartData.Kind.BAR){
-            float width=plot.width()/data.labels.length;
-            for(int r=0;r<data.labels.length;r++){double v=data.values[r][0];if(Double.isNaN(v))continue;paint.setColor(colors[r%colors.length]);float xx=plot.left+r*width;canvas.drawRect(xx+dp(1),Math.min(y(v),y(0)),xx+width-dp(1),Math.max(y(v),y(0)),paint);}
+        if(bars()){
+            for(int r=0;r<data.labels.length;r++)for(int s=0;s<data.series.length;s++){
+                double v=data.values[r][s];if(Double.isNaN(v))continue;
+                float left=edge(r),right=edge(r+1);
+                if(data.kind==AmpChartData.Kind.BAR){float w=(right-left)/data.series.length;left+=s*w;right=left+w;}
+                double high=top(r,s),low=data.kind==AmpChartData.Kind.STACKED?high-plotted(r,s):0;
+                paint.setColor(colors[(data.series.length>1?s:r)%colors.length]);
+                canvas.drawRect(left+dp(.5f),Math.min(y(high),y(low)),Math.max(left+dp(.5f),right-dp(.5f)),Math.max(y(high),y(low)),paint);
+            }
         }else{
             paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(dp(2));
             for(int s=0;s<data.series.length;s++){paint.setColor(colors[s%colors.length]);path.reset();boolean start=true;
                 for(int r=0;r<data.labels.length;r++){double v=data.values[r][s];if(Double.isNaN(v)){start=true;continue;}if(start)path.moveTo(x(r),y(v));else path.lineTo(x(r),y(v));start=false;}canvas.drawPath(path,paint);
             }paint.setStyle(Paint.Style.FILL);
         }
-        double v=data.values[row][series];if(!Double.isNaN(v)){paint.setColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));float xx=data.kind==AmpChartData.Kind.BAR?plot.left+(row+.5f)*plot.width()/data.labels.length:x(row);canvas.drawLine(xx,plot.top,xx,plot.bottom,paint);paint.setColor(colors[series%colors.length]);canvas.drawCircle(xx,y(v),dp(5),paint);}
+        double v=data.values[row][series];if(!Double.isNaN(v)){paint.setColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));float xx=bars()?(edge(row)+edge(row+1))/2:x(row);if(data.kind==AmpChartData.Kind.BAR)xx=edge(row)+(edge(row+1)-edge(row))*(series+.5f)/data.series.length;canvas.drawLine(xx,plot.top,xx,plot.bottom,paint);paint.setColor(colors[series%colors.length]);canvas.drawCircle(xx,y(top(row,series)),dp(5),paint);}
     }
     private String shortLabel(String s){return s.length()>12?s.substring(0,11)+"…":s;}
     @Override public boolean onTouchEvent(MotionEvent event){
@@ -77,7 +93,7 @@ public final class AmpNativeChartView extends View {
             getParent().requestDisallowInterceptTouchEvent(true);
             int r,s=series;
             if(data.kind==AmpChartData.Kind.PIE){double angle=(Math.toDegrees(Math.atan2(event.getY()-plot.centerY(),event.getX()-plot.centerX()))+450)%360,sum=0; r=data.labels.length-1;for(int i=0;i<data.labels.length;i++){sum+=data.values[i][0]/data.total()*360;if(angle<=sum){r=i;break;}}s=0;}
-            else {r=0;if(data.kind==AmpChartData.Kind.BAR){r=Math.max(0,Math.min(data.labels.length-1,(int)((event.getX()-plot.left)/Math.max(1,plot.width())*data.labels.length)));}else{float dx=Float.MAX_VALUE;for(int i=0;i<data.labels.length;i++){float candidate=Math.abs(x(i)-event.getX());if(candidate<dx){dx=candidate;r=i;}}}float distance=Float.MAX_VALUE;for(int i=0;i<data.series.length;i++)if(!Double.isNaN(data.values[r][i])){float d=Math.abs(y(data.values[r][i])-event.getY());if(d<distance){distance=d;s=i;}}}
+            else {r=0;if(bars()){r=data.labels.length-1;for(int i=0;i<data.labels.length;i++)if(event.getX()<edge(i+1)){r=i;break;}}else{float dx=Float.MAX_VALUE;for(int i=0;i<data.labels.length;i++){float candidate=Math.abs(x(i)-event.getX());if(candidate<dx){dx=candidate;r=i;}}}float distance=Float.MAX_VALUE;for(int i=0;i<data.series.length;i++)if(!Double.isNaN(data.values[r][i])){float target=y(top(r,i));if(data.kind==AmpChartData.Kind.STACKED)target=(target+y(top(r,i)-plotted(r,i)))/2;float d=data.kind==AmpChartData.Kind.BAR?Math.abs(edge(r)+(edge(r+1)-edge(r))*(i+.5f)/data.series.length-event.getX()):Math.abs(target-event.getY());if(d<distance){distance=d;s=i;}}}
             select(r,s);return true;
         }
         if(event.getActionMasked()==MotionEvent.ACTION_UP||event.getActionMasked()==MotionEvent.ACTION_CANCEL){getParent().requestDisallowInterceptTouchEvent(false);if(event.getActionMasked()==MotionEvent.ACTION_UP)performClick();return true;}return true;

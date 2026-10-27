@@ -5,19 +5,22 @@ import java.util.List;
 
 /** Bounded numeric data for our Canvas renderer; never interprets publisher code. */
 public final class AmpChartData {
-    public enum Kind { LINE, BAR, PIE }
+    public enum Kind { LINE, BAR, PIE, STACKED, MARIMEKKO }
     public final Kind kind;
     public final String title, credit;
     public final double[] positions;
+    public double[] widths;
+    public boolean proportional;
+    public String widthLabel = "";
     public final String[] labels, series;
     public final double[][] values;
     public AmpChartData(Kind kind, String title, List<List<String>> rows) { this(kind,title,rows,""); }
     public AmpChartData(Kind kind, String title, List<List<String>> rows, String credit) {
         if (rows.size() < 2 || rows.size() > 1501 || rows.get(0).size() < 2 || rows.get(0).size() > 13) throw new IllegalArgumentException("Chart dimensions");
-        if ((kind == Kind.PIE && rows.size() > 25) || (kind == Kind.BAR && rows.size() > 81)) throw new IllegalArgumentException("Too many categories");
+        if ((kind == Kind.PIE && rows.size() > 25) || ((kind == Kind.BAR || kind == Kind.STACKED || kind == Kind.MARIMEKKO) && rows.size() > 81)) throw new IllegalArgumentException("Too many categories");
         this.kind = kind; this.title = title.length()>300?title.substring(0,300):title;this.credit=credit.length()>300?credit.substring(0,300):credit;
         int columns = rows.get(0).size();
-        if (kind != Kind.LINE && columns != 2) throw new IllegalArgumentException("Only simple bars and sectors supported");
+        if ((kind == Kind.PIE || kind == Kind.MARIMEKKO) && columns != 2) throw new IllegalArgumentException("Only simple bars and sectors supported");
         labels = new String[rows.size()-1]; series = new String[columns-1]; values = new double[labels.length][series.length];
         for (int c=1;c<columns;c++) series[c-1]=rows.get(0).get(c);
         int valid=0;
@@ -28,7 +31,7 @@ public final class AmpChartData {
                 String value=rows.get(r).get(c).trim();
                 double number=value.isEmpty()?Double.NaN:Double.parseDouble(value);
                 if (Math.abs(number)>1e12 || Double.isInfinite(number) || (!value.isEmpty() && Double.isNaN(number))) throw new IllegalArgumentException("Nonfinite number");
-                if (kind==Kind.PIE && (Double.isNaN(number)||number<0)) throw new IllegalArgumentException("Invalid sector");
+                if ((kind==Kind.PIE || kind==Kind.STACKED) && (Double.isNaN(number)||number<0)) throw new IllegalArgumentException("Invalid sector");
                 if (!Double.isNaN(number)) valid++;
                 values[r-1][c-1]=number;
             }
@@ -47,6 +50,12 @@ public final class AmpChartData {
         }catch(Exception e){continuous=false;break;}
         if(continuous&&result.length>1){for(int i=1;i<result.length;i++)if(result[i]<result[i-1])throw new IllegalArgumentException("Unsorted continuous axis");double first=result[0],range=result[result.length-1]-first;if(range>0&&!Double.isInfinite(range)){for(int i=0;i<result.length;i++)result[i]=(result[i]-first)/range;return result;}}
         for(int i=0;i<result.length;i++)result[i]=result.length<2?.5:(double)i/(result.length-1);return result;
+    }
+    public AmpChartData weighted(double[] weights, String label) {
+        if (kind != Kind.MARIMEKKO || weights.length != labels.length) throw new IllegalArgumentException("Invalid widths");
+        double total=0;
+        for(double w:weights){if(!(w>0)||Double.isInfinite(w)||w>1e12)throw new IllegalArgumentException("Invalid weight");total+=w;}
+        widths=weights.clone();widthLabel=label;return this;
     }
     public double total(){double total=0;for(double[] row:values)if(!Double.isNaN(row[0]))total+=row[0];return total;}
     public static List<List<String>> csv(String input) {
