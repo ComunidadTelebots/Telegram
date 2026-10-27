@@ -83,6 +83,7 @@ import org.telegram.ui.Stories.recorder.HintView2;
 import org.telegram.ui.skins.ClientLayout;
 import org.telegram.ui.skins.ClientNavigationView;
 import org.telegram.ui.skins.SkinManager;
+import org.telegram.ui.Wallet.WalletActivity;
 
 import java.util.ArrayList;
 import java.util.Collections;

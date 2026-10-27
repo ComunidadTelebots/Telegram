@@ -14,10 +14,12 @@ with tempfile.TemporaryDirectory(prefix='amp-tests-') as tmp:
  paths=[]
  for name, text in stubs.items():
   p=pathlib.Path(tmp,name); p.parent.mkdir(parents=True,exist_ok=True); p.write_text(text); paths.append(str(p))
- for name in ('AmpUrls.java','AmpResolver.java'):
+ # Compile the real catalog URL validator used by AmpResolver; do not bypass its checks with a stub.
+ for name in ('AmpUrls.java','AmpResolver.java','CommunityThemePalette.java'):
   paths.append(str(root/'TMessagesProj/src/main/java/org/telegram/ui/web'/name))
- for name in ('AmpUrlsTest.java','AmpResolverTest.java'):
+ for name in ('AmpUrlsTest.java','AmpResolverTest.java','CommunityThemePaletteTest.java'):
   paths.append(str(root/'Tools/tests'/name))
  subprocess.run(['javac','-encoding','UTF-8','-d',tmp,*paths], check=True)
  subprocess.run(['java','-cp',tmp,'AmpUrlsTest'],check=True)
+ subprocess.run(['java','-cp',tmp,'CommunityThemePaletteTest'],check=True)
  subprocess.run(['java','-cp',tmp,'org.telegram.ui.web.AmpResolverTest',*sys.argv[1:]],check=True)
