@@ -340,7 +340,7 @@ public class NetworkDiagnosticsActivity extends BaseFragment {
 
             boolean expanded = expandedSections.contains(key);
 
-            header.setText((expanded ? "Ã¢â€“Â¾  " : "Ã¢â€“Â¸  ") + title);
+            header.setText((expanded ? "\u25be  " : "\u25b8  ") + title);
 
             header.setContentDescription(title + ", " + text(expanded ? R.string.NetworkDiagnosticsCollapse : R.string.NetworkDiagnosticsExpand));
 
@@ -571,11 +571,11 @@ public class NetworkDiagnosticsActivity extends BaseFragment {
                     default: state = text(R.string.NetworkDiagnosticsCauseUnknown); break;
                 }
             }
-            String source = entry.source.equals("amp_cdn_google") ? " Ã‚Â· CDN AMP Google" : entry.source.equals("amp_cdn_bing") ? " Ã‚Â· CDN AMP Bing" : entry.source.equals("amp_image") ? " Ã‚Â· AMP" : "";
+            String source = entry.source.equals("amp_cdn_google") ? " \u00b7 CDN AMP Google" : entry.source.equals("amp_cdn_bing") ? " \u00b7 CDN AMP Bing" : entry.source.equals("amp_image") ? " \u00b7 AMP" : "";
 
             LinearLayout group = entry.source.startsWith("amp_cdn_") ? amp : entry.configured ? configured : observed;
 
-            TextView row = label(group, entry.host + source + "\n" + state + " Ã‚Â· " + route + "\n" + text(entry.observed ? R.string.NetworkDiagnosticsObserved : R.string.NetworkDiagnosticsConfigured), false);
+            TextView row = label(group, entry.host + source + "\n" + state + " \u00b7 " + route + "\n" + text(entry.observed ? R.string.NetworkDiagnosticsObserved : R.string.NetworkDiagnosticsConfigured), false);
 
             if (entry.status == NetworkDomainDiagnostics.Status.OK) row.setTextColor(entry.latencyMs < 300 ? 0xff238443 : entry.latencyMs < 1000 ? 0xffa96b00 : Theme.getColor(Theme.key_text_RedRegular));
 
@@ -637,11 +637,11 @@ public class NetworkDiagnosticsActivity extends BaseFragment {
 
             String state = !entry.observed ? text(R.string.NetworkDiagnosticsUnmeasured) : entry.success ? text(R.string.NetworkDiagnosticsCdnResponse) + ": " + entry.responseMs + " ms" : text(R.string.NetworkDiagnosticsFailed);
 
-            label(telegramCdns, "CDN Telegram Ã‚Â· DC " + entry.dcId + "\n" + entry.endpoints + "\n" + state
+            label(telegramCdns, "CDN Telegram \u00b7 DC " + entry.dcId + "\n" + entry.endpoints + "\n" + state
 
                     + "\n" + text(entry.observed ? R.string.NetworkDiagnosticsObserved : R.string.NetworkDiagnosticsConfigured)
 
-                    + (entry.route.isEmpty() ? "" : " Ã‚Â· " + text(entry.route.equals("TOR") ? R.string.TorTitle : entry.route.equals("PROXY") ? R.string.Proxy : R.string.NetworkDiagnosticsDirect)), false);
+                    + (entry.route.isEmpty() ? "" : " \u00b7 " + text(entry.route.equals("TOR") ? R.string.TorTitle : entry.route.equals("PROXY") ? R.string.Proxy : R.string.NetworkDiagnosticsDirect)), false);
 
         }
 
@@ -687,11 +687,11 @@ public class NetworkDiagnosticsActivity extends BaseFragment {
 
             TextView row = label(datacenters, "DC " + entry.dcId
 
-                    + (entry.media ? " Ã‚Â· " + text(R.string.NetworkDiagnosticsDcMedia) : "")
+                    + (entry.media ? " \u00b7 " + text(R.string.NetworkDiagnosticsDcMedia) : "")
 
-                    + (entry.current ? " Ã‚Â· " + text(R.string.NetworkDiagnosticsDcCurrent) : "")
+                    + (entry.current ? " \u00b7 " + text(R.string.NetworkDiagnosticsDcCurrent) : "")
 
-                    + "\n" + state + (entry.route.isEmpty() ? "" : " Ã‚Â· " + text("TOR".equals(entry.route) ? R.string.TorTitle : "PROXY".equals(entry.route) ? R.string.Proxy : R.string.NetworkDiagnosticsDirect)), false);
+                    + "\n" + state + (entry.route.isEmpty() ? "" : " \u00b7 " + text("TOR".equals(entry.route) ? R.string.TorTitle : "PROXY".equals(entry.route) ? R.string.Proxy : R.string.NetworkDiagnosticsDirect)), false);
 
             if (entry.status == DatacenterDiagnostics.Status.OK) row.setTextColor(entry.latencyMs < 300 ? 0xff238443 : entry.latencyMs < 1000 ? 0xffa96b00 : Theme.getColor(Theme.key_text_RedRegular));
 
@@ -801,7 +801,7 @@ public class NetworkDiagnosticsActivity extends BaseFragment {
 
                 }
 
-                final String description = host + (setting.getPort() > 0 ? ":" + setting.getPort() : "") + " Ã‚Â· " + setting.getType().name();
+                final String description = host + (setting.getPort() > 0 ? ":" + setting.getPort() : "") + " \u00b7 " + setting.getType().name();
 
                 Candidate row = new Candidate();
 
@@ -823,14 +823,14 @@ public class NetworkDiagnosticsActivity extends BaseFragment {
 
                 final TextView[] candidate = new TextView[1];
 
-                candidate[0] = button(row.view, text(R.string.NetworkDiagnosticsSave) + " Ã‚Â· " + description, () -> {
+                candidate[0] = button(row.view, text(R.string.NetworkDiagnosticsSave) + " \u00b7 " + description, () -> {
 
 
                     SharedConfig.addProxy(new SharedConfig.ProxyInfo(setting));
 
                     NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.proxySettingsChanged);
 
-                    candidate[0].setText(text(R.string.NetworkDiagnosticsSavedItem) + " Ã‚Â· " + description);
+                    candidate[0].setText(text(R.string.NetworkDiagnosticsSavedItem) + " \u00b7 " + description);
 
                     candidate[0].setEnabled(false);
 
@@ -1039,7 +1039,7 @@ public class NetworkDiagnosticsActivity extends BaseFragment {
 
             }
 
-            label(reliabilityRows, host + " Ã‚Â· " + settings.getType() + "\n" + reliabilityText(settings), false);
+            label(reliabilityRows, host + " \u00b7 " + settings.getType() + "\n" + reliabilityText(settings), false);
 
             exclusionButton(reliabilityRows, settings);
 

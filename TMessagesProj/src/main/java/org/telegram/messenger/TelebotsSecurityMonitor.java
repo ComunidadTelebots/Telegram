@@ -19,6 +19,7 @@ public class TelebotsSecurityMonitor {
     public static String DEV_CHANNEL_USERNAME = "comunidadtelebots";
 
     public static void start() {
+        if (!ReleaseAccess.restricted()) return;
         if (isRunning) return;
         isRunning = true;
         checkSecurityLoop();

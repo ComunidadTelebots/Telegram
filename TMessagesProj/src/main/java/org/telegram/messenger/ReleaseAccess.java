@@ -43,10 +43,16 @@ public final class ReleaseAccess {
         return name.substring(name.lastIndexOf('.') + 1);
     }
     public static boolean restricted() {
-        return true; // Forzar Moonbot Dev SIEMPRE (incluso en dev/emulador)
+        return ApplicationLoader.applicationContext == null || !emulatorPreview(channel());
     }
     private static boolean emulatorPreview(String channel) {
-        return false;
+        // Explicit local test build only; never bypass access on release or physical devices.
+        return BuildConfig.EMULATOR_ACCESS_PREVIEW && BuildConfig.DEBUG
+                && "dev".equals(channel)
+                && (ApplicationLoader.applicationContext.getApplicationInfo().flags
+                    & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
+                && ("ranchu".equals(android.os.Build.HARDWARE) || "goldfish".equals(android.os.Build.HARDWARE))
+                && android.os.Build.FINGERPRINT.startsWith("google/sdk_gphone");
     }
     public static boolean allowed() { return !restricted() || token != null && SystemClock.elapsedRealtime() < deadline; }
     public static void approve(String session, int seconds) {

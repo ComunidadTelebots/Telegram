@@ -53,3 +53,19 @@ Compilación completa `:TMessagesProj_App:assembleAfatDebug` ARM64 superada en 7
 - Tras la corrección, el proceso permanece activo y UIAutomator confirma el panel nativo «Tu acceso empieza aquí» con «Continuar con Moonbot». Los errores anteriores de Firebase permanecen en el búfer histórico, no se han reproducido en el nuevo proceso.
 - El código actual fuerza Moonbot incluso en el emulador (commit da51d7243). Pendiente resolver el acceso con el usuario antes de probar navegación y funciones dentro de la cuenta. No se han borrado datos ni enviado mensajes.
 - Reejecutadas y superadas pruebas locales de frases, comparación y versiones de artículos, selección DNS, verificador APK, AMP, paletas, perfiles aplicar/deshacer y diagnóstico de dominios. Estas pruebas no sustituyen la comprobación visual y funcional en el emulador.
+
+## Prueba DEV con excepción de emulador autorizada
+
+El usuario autorizó restaurar la excepción exclusivamente para DEV de pruebas. `ReleaseAccess` exige simultáneamente `EMULATOR_ACCESS_PREVIEW`, `BuildConfig.DEBUG`, rama dev, APK debuggable, hardware ranchu/goldfish y fingerprint google/sdk_gphone. Sin contexto la protección permanece activa. El monitor no se inicia en esa variante. Se mantiene el bloqueo existente para las demás instalaciones. La prueba `Tools/tests/test_emulator_access.py` compila el predicado real y supera 240 combinaciones.
+
+La APK final se compiló e instaló con reemplazo, sin borrar datos. Se corrigieron además caracteres corruptos de flechas y separadores en NetworkDiagnosticsActivity; prueba de diagnóstico superada y desplegable expandido en pantalla con símbolos correctos.
+
+Resultados en Pixel_6, Android 37, traducción ARM64:
+- Con 2 GB: ANR de la app y del controlador de permisos durante el primer arranque/sincronización. El informe muestra alta presión de memoria. No se atribuye exclusivamente a la RAM ni se considera resuelta la compatibilidad con dispositivos de poca memoria.
+- Repetición con 4 GB, mediante opción temporal del emulador y sin borrar su disco: arranque final en 4267 ms según am start (una observación, no benchmark), navegación correcta, búfer de crash vacío y ningún ANR desde el reinicio al finalizar la prueba.
+- Comprobados: acceso al hub, Lectura/AMP, biblioteca existente, apertura local de Example Domains de IANA y comparación de dos versiones guardadas; pantalla de diseños y sus avisos; centro de descargas; DNS; Tor sin activarlo; categorías de diagnóstico y expansión; pantalla de actualizaciones con versión 13.1.1 (72379) / dev.
+- Frases: crear categoría PruebaDEV y frase temporal, guardar, abrir acciones, eliminar con confirmación y comprobar lista vacía. No se enviaron mensajes.
+- Rendimiento: abrir Ahorro, revisar explicación de cambios y cancelar. No se cambiaron los perfiles ni DNS/proxy/Tor.
+- Pendientes: prueba integral de P2P con otro dispositivo, actualización real descargada e instalada, autenticación Moonbot real, rendimiento con 2 GB, descargas y descubrimiento AMP en vivo, paridad visual de diseños históricos y pruebas completas de todas las funciones. Apertura de una pantalla no demuestra sus operaciones de extremo a extremo.
+
+Captura local del hub: `.gradle/dev-hub-verified.png` (artefacto de prueba ignorado por Git). No se ha publicado el APK ni enviado estos commits a GitHub.
