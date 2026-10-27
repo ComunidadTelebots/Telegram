@@ -24,6 +24,14 @@ if (!forkChannels.contains(forkChannel)) {
     throw new GradleException("APP_CHANNEL must be one of ${forkChannels}; got '${forkChannel}'")
 }
 ext.forkApplicationId = "${APP_PACKAGE}.${forkChannel}"
+// Opt-in backport validation. Do not advertise API 21 support before device tests pass.
+ext.forkMinSdk = providers.gradleProperty('COMMUNITY_MIN_SDK').getOrElse('23').toInteger()
+if (!(ext.forkMinSdk in [21, 23])) {
+    throw new GradleException('COMMUNITY_MIN_SDK must be 21 (experimental) or 23')
+}
+if (ext.forkMinSdk == 21 && forkChannel != 'dev') {
+    throw new GradleException('Android 5 compatibility is experimental and restricted to DEV')
+}
 ext.forkFirebaseMode = providers.gradleProperty('ENABLE_FIREBASE').get()
 if (!['auto', 'true', 'false'].contains(forkFirebaseMode)) {
     throw new GradleException('ENABLE_FIREBASE must be auto, true or false')
@@ -48,6 +56,9 @@ subprojects {
 
     if (project.projectDir.absolutePath.replace('\\', '/').contains('/TMessagesProj_Modules/media/')) {
         project.plugins.withId('com.android.library') {
+            project.androidComponents.finalizeDsl { dsl ->
+                dsl.defaultConfig.minSdk = rootProject.ext.forkMinSdk
+            }
             project.android {
                 if (namespace == null) {
                     def manifestFile = file("${project.projectDir}/src/main/AndroidManifest.xml")

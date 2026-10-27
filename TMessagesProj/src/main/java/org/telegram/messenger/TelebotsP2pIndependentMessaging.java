@@ -115,6 +115,10 @@ public class TelebotsP2pIndependentMessaging {
             }
         } catch (Exception ignored) { }
         networkPool.execute(() -> {
+            if (!CommunityCompatibility.supportsPeerIdentity(android.os.Build.VERSION.SDK_INT)) {
+                localNodeId = "P2P cifrado requiere Android 6.0";
+                return;
+            }
             try { TelebotsPeerIdentity ready = new TelebotsPeerIdentity(); localNodeId = ready.fingerprint(); identity = ready; }
             catch (Exception ignored) { localNodeId = "Identidad no disponible"; }
         });

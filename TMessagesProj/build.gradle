@@ -153,7 +153,7 @@ android {
         resValue "string", "fork_contact_profile_mime", "vnd.android.cursor.item/vnd.${rootProject.ext.forkApplicationId}.android.profile"
         resValue "string", "fork_contact_call_mime", "vnd.android.cursor.item/vnd.${rootProject.ext.forkApplicationId}.android.call"
         resValue "string", "fork_contact_video_mime", "vnd.android.cursor.item/vnd.${rootProject.ext.forkApplicationId}.android.call.video"
-        minSdkVersion 23
+        minSdkVersion rootProject.ext.forkMinSdk
         targetSdkVersion 36
 
         vectorDrawables.generatedDensities = ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi']
@@ -163,7 +163,7 @@ android {
         externalNativeBuild {
             cmake {
                 version '3.22.1'
-                arguments '-DANDROID_STL=c++_static', '-DANDROID_PLATFORM=android-23' //, '-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON'
+                arguments '-DANDROID_STL=c++_static', "-DANDROID_PLATFORM=android-${rootProject.ext.forkMinSdk}" //, '-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON'
                 targets 'tmessages.49'
             }
         }

@@ -25,7 +25,7 @@ public final class TorProxyController {
         return ApplicationLoader.applicationContext.getSharedPreferences("embedded_tor", Context.MODE_PRIVATE);
     }
 
-    public static boolean isSupported() { return Build.VERSION.SDK_INT >= 24; }
+    public static boolean isSupported() { return org.telegram.messenger.CommunityCompatibility.supportsBundledTor(Build.VERSION.SDK_INT); }
     public static boolean isEnabled() {
         return isSupported() && ApplicationLoader.applicationContext != null && preferences().getBoolean("enabled", false);
     }

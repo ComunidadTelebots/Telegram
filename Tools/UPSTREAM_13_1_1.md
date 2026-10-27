@@ -126,3 +126,15 @@ La build local todavía usa APP_ID=4 de BuildVars.java; la automatización de re
 3. No confundir api_hash, API key cliente de google-services.json ni Sender ID con una credencial de servidor. Firebase HTTP v1 utiliza autorización de servidor; una clave privada de cuenta de servicio no debe incluirse en el APK: https://firebase.google.com/docs/cloud-messaging/send/v1-api.
 4. No se ha inspeccionado el formulario privado actual de Telegram. Si solo ofrece una clave GCM antigua, falta confirmar un mecanismo compatible con HTTP v1; no se afirma que acepte JSON de cuenta de servicio. Se necesitan los nombres de campos, sin valores secretos, para concretar ese paso.
 5. Tras alinear credenciales y configuración, recompilar, repetir el registro del dispositivo y probar una notificación con la app en segundo plano y permiso concedido. La entrega push aún no está verificada.
+
+## Inicio de adaptación a Android 5.0 y panel de compatibilidad
+
+Se añade `-PCOMMUNITY_MIN_SDK=21` para compilaciones experimentales DEV. El valor predeterminado continúa en 23 y el modo 21 se rechaza en otras ramas. El mínimo Java/manifest y ANDROID_PLATFORM del código nativo se configuran conjuntamente. Los módulos Media3 reciben el mínimo mediante finalizeDsl, sin modificar el submódulo. No se han añadido excepciones de fusión de manifiestos para ocultar dependencias incompatibles; se conservan las excepciones previas de Tor/segmentación.
+
+La APK x86_64 para API 21 compila (primera compilación nativa: 6 min 11 s; repetición final: 19 s) y se instala en un AVD independiente Telebots_API21, imagen oficial google_apis/x86_64 Android 5.0.2, 2 GB. El arranque llega a ReleaseAccessActivity y muestra el acceso Moonbot, sin excepción AndroidRuntime observada. El AVD no tiene cuenta Telegram; el usuario ha aceptado iniciar sesión posteriormente. Chats, llamadas, reproducción, almacenamiento, actualizaciones y notificaciones en Android 5 siguen pendientes. No se declara soporte completo ni se publica esta build como estable.
+
+Se añade Ajustes Comunidad Telebots > Compatibilidad del dispositivo: versión de Android, RAM y política de poca memoria, requisitos de P2P/Tor, permiso global de notificaciones y acceso a ajustes del sistema. Distingue disponibilidad de APIs de funcionamiento real del servicio. Los datos se consultan localmente. Los requisitos se centralizan en CommunityCompatibility y se prueban en 68 casos de frontera API 21-37.
+
+La identidad P2P actual requiere API 23: en API 21/22 no se intenta generar con KeyGenParameterSpec y se informa de la limitación, sin fallback a texto plano. Tor integrado mantiene su mínimo API 24; el panel lo explica y permite acudir a proxies externos. Estas restricciones no son implementaciones alternativas completas para Android 5.
+
+La prueba de notificaciones con ahorro durante diez minutos quedó pendiente por decisión del usuario de pasar a otras tareas. Se restauraron low_power=0 y bloqueo desactivado, como estaban antes de la prueba. El push con pantalla bloqueada y fuera de recientes sí se había verificado; no confundirlo con Doze prolongado.

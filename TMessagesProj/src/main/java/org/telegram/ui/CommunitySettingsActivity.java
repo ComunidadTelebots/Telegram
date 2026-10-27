@@ -35,6 +35,7 @@ public class CommunitySettingsActivity extends BaseFragment {
         switch(page){
             case HOME:
                 label(body,text(R.string.TelebotsSettingsInfo));
+                entry(body,"Compatibilidad del dispositivo",()->presentFragment(new CommunityCompatibilityActivity()));
                 entry(body,R.string.TelebotsDesign,()->open(DESIGN));
                 entry(body,R.string.TelebotsReading,()->open(READING));
                 entry(body,R.string.TelebotsConnections,()->open(CONNECTIONS));
