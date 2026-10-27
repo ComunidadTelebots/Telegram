@@ -48,6 +48,7 @@ configurations.all {
 }
 
 dependencies {
+    implementation 'org.conscrypt:conscrypt-android:2.7.0'
     implementation project(':TMessagesProj_Tor')
     implementation 'androidx.core:core:1.16.0'
     implementation 'androidx.palette:palette:1.0.0'

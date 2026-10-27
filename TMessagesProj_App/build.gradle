@@ -182,6 +182,9 @@ android {
     }
 
     defaultConfig {
+        if (project.hasProperty("AMP_READER_DEVICE_TEST")) {
+            testInstrumentationRunner "org.telegram.ui.web.AmpReaderDeviceTest"
+        }
         minSdkVersion rootProject.ext.forkMinSdk
         targetSdkVersion 36
         versionName APP_VERSION_NAME

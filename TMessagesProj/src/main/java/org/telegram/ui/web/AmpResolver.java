@@ -196,7 +196,7 @@ public final class AmpResolver {
         diagnosticRoute(route);
         try (Socket plain = connect(address, route)) {
             ScheduledFuture<?> timeout = TIMER.schedule(() -> close(plain), TIMEOUT, TimeUnit.MILLISECONDS);
-            try (SSLSocket tls = (SSLSocket) ((SSLSocketFactory) SSLSocketFactory.getDefault()).createSocket(plain, host, 443, true)) {
+            try (SSLSocket tls = (SSLSocket) tlsSocket(plain, host, 443)) {
                 tls.setSoTimeout(TIMEOUT);
                 if (Build.VERSION.SDK_INT >= 24) {
                     SSLParameters parameters = tls.getSSLParameters();
@@ -241,7 +241,7 @@ public final class AmpResolver {
         NetworkDomainDiagnostics.observe(safe, "dns_tls_probe");
         try (Socket plain = connect(address, route, 853)) {
             ScheduledFuture<?> timeout = TIMER.schedule(() -> close(plain), TIMEOUT, TimeUnit.MILLISECONDS);
-            try (SSLSocket tls = (SSLSocket) ((SSLSocketFactory) SSLSocketFactory.getDefault()).createSocket(plain, host, 853, true)) {
+            try (SSLSocket tls = (SSLSocket) tlsSocket(plain, host, 853)) {
                 tls.setSoTimeout(TIMEOUT);
                 if (Build.VERSION.SDK_INT >= 24) {
                     SSLParameters parameters = tls.getSSLParameters();
@@ -294,6 +294,13 @@ public final class AmpResolver {
         return fetch(initial, route, image, publicText, dns, false);
     }
     private static Page fetch(String initial, Route route, boolean image, boolean publicText, boolean dns, boolean communityTheme) throws IOException {
+        return fetch(initial, route, image, publicText, dns, communityTheme, false);
+    }
+    static String fetchChartData(String url) throws IOException {
+        if (!url.matches("https://datawrapper\\.dwcdn\\.net/[A-Za-z0-9]{5}/[0-9]+/dataset\\.csv")) throw new IOException("Unsupported data source");
+        return fetch(url, new Route(true), false, true, false, false, true).html;
+    }
+    private static Page fetch(String initial, Route route, boolean image, boolean publicText, boolean dns, boolean communityTheme, boolean chartData) throws IOException {
         String url = initial;
         for (int redirects = 0; redirects <= 4; redirects++) {
             route.check();
@@ -306,7 +313,7 @@ public final class AmpResolver {
             route.check();
             try (Socket plain = connect(address, route)) {
                 ScheduledFuture<?> timeout = TIMER.schedule(() -> close(plain), Math.min(TIMEOUT, route.deadline - now()), TimeUnit.MILLISECONDS);
-                try (SSLSocket tls = (SSLSocket) ((SSLSocketFactory) SSLSocketFactory.getDefault()).createSocket(plain, uri.getHost(), 443, true)) {
+                try (SSLSocket tls = (SSLSocket) tlsSocket(plain, uri.getHost(), 443)) {
                     tls.setSoTimeout(TIMEOUT);
                     if (Build.VERSION.SDK_INT >= 24) {
                         SSLParameters parameters = tls.getSSLParameters();
@@ -325,7 +332,7 @@ public final class AmpResolver {
                     int code = Integer.parseInt(status.substring(9, 12));
                     Map<String, String> headers = headers(in);
                     if (code == 301 || code == 302 || code == 303 || code == 307 || code == 308) {
-                        if (dns || communityTheme) throw new IOException("Redirect rejected");
+                        if (dns || communityTheme || chartData) throw new IOException("Redirect rejected");
                         String location = headers.get("location");
                         if (location == null) throw new IOException("Redirect location");
                         try { url = uri.resolve(location).toString(); } catch (Exception e) { throw new IOException("Redirect URL"); }
@@ -333,7 +340,7 @@ public final class AmpResolver {
                     }
                     String mime = headers.getOrDefault("content-type", "").toLowerCase(Locale.ROOT).split(";", 2)[0].trim();
                     if (communityTheme && !"application/json".equals(mime)) throw new IOException("Theme catalog content type");
-                    if (code != 200 || (dns ? !"application/dns-message".equals(mime) : image ? !Arrays.asList("image/png", "image/jpeg", "image/webp", "image/gif").contains(mime) : publicText ? !Arrays.asList("application/json", "text/plain", "text/html").contains(mime) : !"text/html".equals(mime))) throw new IOException("Content type");
+                    if (code != 200 || (dns ? !"application/dns-message".equals(mime) : image ? !Arrays.asList("image/png", "image/jpeg", "image/webp", "image/gif").contains(mime) : chartData ? !Arrays.asList("text/csv", "text/tab-separated-values", "text/plain", "application/octet-stream").contains(mime) : publicText ? !Arrays.asList("application/json", "text/plain", "text/html").contains(mime) : !"text/html".equals(mime))) throw new IOException("Content type");
                     if (headers.containsKey("content-encoding") && !"identity".equalsIgnoreCase(headers.get("content-encoding"))) throw new IOException("Encoding");
                     byte[] bytes = body(in, headers);
                     route.check();
@@ -342,6 +349,24 @@ public final class AmpResolver {
             }
         }
         throw new IOException("Redirect limit");
+    }
+    private static volatile SSLSocketFactory legacyTls;
+    private static SSLSocket tlsSocket(Socket plain, String host, int port) throws IOException {
+        if (Build.VERSION.SDK_INT < 24) {
+            SSLSocketFactory factory=legacyTls;
+            if(factory==null)synchronized(AmpResolver.class){
+                factory=legacyTls;
+                if(factory==null)try {
+                    SSLContext context=SSLContext.getInstance("TLS",org.conscrypt.Conscrypt.newProvider());
+                    context.init(null,null,null);legacyTls=factory=context.getSocketFactory();
+                }catch(java.security.GeneralSecurityException e){throw new IOException("TLS provider unavailable",e);}
+            }
+            SSLSocket socket=(SSLSocket)factory.createSocket(plain,host,port,true);
+            // The host-bearing factory overload configures SNI, including Android 5 platform adapters.
+            socket.setEnabledProtocols(new String[]{"TLSv1.2","TLSv1.3"});
+            return socket;
+        }
+        return (SSLSocket) ((SSLSocketFactory) SSLSocketFactory.getDefault()).createSocket(plain, host, port, true);
     }
     private static void close(Socket socket) { try { socket.close(); } catch (IOException ignored) {} }
     private static InetAddress resolveAddress(String host, Route route) throws IOException {

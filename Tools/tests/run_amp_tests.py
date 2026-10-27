@@ -2,6 +2,9 @@
 import pathlib, subprocess, tempfile, sys
 root = pathlib.Path(__file__).resolve().parents[2]
 stubs = {
+ 'org/conscrypt/Conscrypt.java': 'package org.conscrypt;public class Conscrypt{public static java.security.Provider newProvider(){throw new AssertionError("Legacy TLS requires device test");}public static void setHostname(javax.net.ssl.SSLSocket s,String h){throw new AssertionError("Legacy TLS requires device test");}}',
+
+
  'org/telegram/utils/proxy/DnsConfig.java': 'package org.telegram.utils.proxy;public class DnsConfig {public static String policy(){return "";}public static String selected(){return "";}public static java.net.InetAddress[] resolve(String h)throws java.io.IOException{return java.net.InetAddress.getAllByName(h);}}',
  'org/telegram/messenger/MessagesController.java': 'package org.telegram.messenger; public class MessagesController { public static boolean proxy; public static Settings getGlobalMainSettings() { return new Settings(); } public static class Settings { public boolean getBoolean(String key,boolean value) { return proxy; } } }',
  'org/telegram/utils/proxy/NetworkDomainDiagnostics.java': 'package org.telegram.utils.proxy; public class NetworkDomainDiagnostics { public static void observe(String url,String source) {} }', 
