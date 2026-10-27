@@ -69,3 +69,32 @@ Resultados en Pixel_6, Android 37, traducción ARM64:
 - Pendientes: prueba integral de P2P con otro dispositivo, actualización real descargada e instalada, autenticación Moonbot real, rendimiento con 2 GB, descargas y descubrimiento AMP en vivo, paridad visual de diseños históricos y pruebas completas de todas las funciones. Apertura de una pantalla no demuestra sus operaciones de extremo a extremo.
 
 Captura local del hub: `.gradle/dev-hub-verified.png` (artefacto de prueba ignorado por Git). No se ha publicado el APK ni enviado estos commits a GitHub.
+
+## Correcciones y repetición con 2 GB (27 de octubre)
+
+Cambios:
+- SharedConfig considera de poca memoria los equipos con RAM física positiva de hasta 2 GiB, aunque Android no marque isLowRamDevice. Activa las protecciones ya existentes de caché, efectos y rendimiento sin reescribir las preferencias del usuario.
+- Primer bloque de diálogos: 30 en poca memoria, 100 en otros equipos; el resto sigue paginado. Se evita precargar los stickers de dados al arrancar en poca memoria.
+- Eliminado el arranque P2P desde ApplicationLoader. La pantalla requiere activación explícita, informa de que el transporte LAN experimental no cifra ni autentica y lo detiene al salir. No se activa con Tor/proxy o sin acceso autorizado.
+- P2P: pool de 4 trabajadores y cola de 16, timeout de cliente 3 s, tramas TCP/UDP limitadas, historial en memoria hasta 200, mensajes hasta 2000 caracteres, deduplicación sincronizada y conexiones de salida con timeout. Pares limitados y con caducidad; registrar un par no inicializa el hub ni otros radios. La UI muestra 0 pares cuando no hay ninguno. No se contabiliza recepción como tráfico servido.
+
+Evidencia de 2 GB:
+- AVD Pixel_6 Android 37, MemTotal 2013496 kB, mismo disco y cuenta.
+- La build ARM64 traducida siguió siendo terminada por Android con reason=LOW_MEMORY, incluso tras activar las protecciones; no se declara resuelto ese caso.
+- Compilada una APK x86_64 nativa (6 min 11 s, 324 tareas), instalada sin borrar datos. Dos arranques: 5247 ms y 3693 ms, observaciones individuales y no benchmark. Navegación por hub, biblioteca, P2P y actualizaciones sin ANR ni nuevas terminaciones por memoria durante la prueba. La primera sesión permaneció activa hasta el force-stop explícito usado para la segunda.
+- PSS observado: aproximadamente 284 MiB durante P2P y 282 MiB en biblioteca tras el segundo arranque. No comparar estas instantáneas como un ahorro universal: cambian carga y arquitectura.
+- La build que queda instalada es x86_64 para el emulador. No es un APK ARM64 para teléfonos. Falta validar un móvil físico de 2 GB y uso prolongado.
+
+P2P verificado en la app:
+- Emisor controlado en localhost mediante adb forward, no mensajes a contactos ni otros usuarios.
+- Recepción visible de PRUEBA LOCAL P2P 2GB, repetida con el mismo ID: una sola burbuja. Se conserva ese registro local de prueba.
+- Trama de 9000 bytes cerrada; conexión sin datos cerrada a los 3 s; una trama válida posterior funciona. Puerto 8989 cerrado al salir y ausente tras reiniciar. Túnel ADB retirado.
+- Esto verifica recepción TCP local, límites y ciclo de vida. No verifica descubrimiento entre dos móviles, entrega saliente/confirmada, cifrado, autenticación ni retransmisión multisalto. Las funciones conceptuales del hub no equivalen a implementaciones completas de ZeroNet/DHT/BGP.
+
+Actualizaciones:
+- 19 pruebas locales del servicio de acceso y actualizaciones superadas: manifiestos, ramas, permisos, sesiones revocadas/caducadas y metadatos. Test del verificador Android superado; usa stubs de PackageManager, no sustituye al motor real de firmas de Android.
+- Consulta HTTPS real: stable responde 200/status=unavailable; dev sin token responde 403. Botón de la app muestra error de conexión/permiso sin ofrecer instalación. La excepción de emulador no da acceso al servidor privado.
+- Pendiente actualización real: hace falta release publicada y sesión Moonbot real para DEV. No se ha publicado ni instalado una versión ficticia para aparentar éxito.
+- En los logs aparecen APP_PUSH_APIKEY_MISSING y COMMUNITY_ID_INVALID/COMMUNITY_FILTER_INVALID de llamadas al servidor. No provocaron cierre durante esta prueba; notificaciones push y esas funciones requieren revisión separada de configuración/compatibilidad de API.
+
+Pruebas añadidas: test_low_memory_policy.py (10 fronteras y contexto nulo) y test_p2p_frame.py (TCP local real, longitud máxima, trama incompleta y timeout). También superadas las de excepción de emulador, perfiles y herramientas propias. Sin push a GitHub ni publicación.

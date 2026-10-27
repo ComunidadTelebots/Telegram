@@ -136,10 +136,11 @@ public class TelebotsP2pRoutingMesh {
         });
     }
 
-    private void registerPeer(String identifier, String transportType) {
+    public void registerPeer(String identifier, String transportType) {
+        if (!activePeers.containsKey(identifier) && activePeers.size() >= 64) return;
         activePeers.put(identifier, transportType);
         peerLastSeen.put(identifier, System.currentTimeMillis());
-        TelebotsP2pHubController.getInstance(UserConfig.selectedAccount).logP2pEvent("Registered new peer via " + transportType + ": " + identifier);
+        // Discovery must not initialize the hub and recursively start other radios.
     }
 
     public ConcurrentHashMap<String, String> getActivePeers() {

@@ -304,7 +304,7 @@ public class ApplicationLoader extends Application {
         super.onCreate();
         ReleaseAccess.install(this);
         TelebotsSecurityMonitor.start();
-        TelebotsP2pIndependentMessaging.getInstance();
+        // Local P2P is started explicitly from its screen, never during app startup.
 
         // AndroidUtilities must be initialized before FileLog
         final String helloWorld = AndroidUtilities.getHelloWorld();

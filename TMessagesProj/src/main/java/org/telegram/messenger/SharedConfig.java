@@ -1713,7 +1713,12 @@ public class SharedConfig {
             Context context = ApplicationLoader.applicationContext;
             if (context == null) return false;
             ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-            lowRamDevice = manager != null && manager.isLowRamDevice();
+            if (manager == null) return false;
+            ActivityManager.MemoryInfo memory = new ActivityManager.MemoryInfo();
+            manager.getMemoryInfo(memory);
+            // Some 2 GB devices (including AVDs) omit Android's low-RAM flag.
+            lowRamDevice = manager.isLowRamDevice()
+                    || memory.totalMem > 0 && memory.totalMem <= 2L * 1024 * 1024 * 1024;
         }
         return lowRamDevice;
     }

@@ -93,11 +93,13 @@ public class TelebotsP2pIndependentMessaging {
     private final String localNodeId;
     private final CopyOnWriteArrayList<P2pMessage> messageHistory = new CopyOnWriteArrayList<>();
     private final CopyOnWriteArrayList<MessageListener> listeners = new CopyOnWriteArrayList<>();
-    private final ExecutorService networkPool = Executors.newCachedThreadPool();
+    private final java.util.concurrent.ThreadPoolExecutor networkPool = new java.util.concurrent.ThreadPoolExecutor(4, 4, 30, TimeUnit.SECONDS, new java.util.concurrent.ArrayBlockingQueue<>(16));
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     private ServerSocket serverSocket;
-    private boolean isRunning;
+    private volatile boolean isRunning;
+    private DatagramSocket receiver;
+    private java.util.concurrent.ScheduledFuture<?> beaconTask;
 
     public static TelebotsP2pIndependentMessaging getInstance() {
         if (instance == null) {
@@ -120,8 +122,7 @@ public class TelebotsP2pIndependentMessaging {
         localNodeId = savedNodeId;
 
         loadSavedMessages();
-        startReceiverServer();
-        startBeaconLoop();
+        networkPool.allowCoreThreadTimeOut(true);
     }
 
     public String getLocalNodeId() {
@@ -142,8 +143,8 @@ public class TelebotsP2pIndependentMessaging {
         return new ArrayList<>(messageHistory);
     }
 
-    public void sendMessage(String recipient, String text) {
-        if (text == null || text.trim().isEmpty()) return;
+    public synchronized void sendMessage(String recipient, String text) {
+        if (!isRunning || text == null || text.trim().isEmpty() || text.length() > 2000) return;
 
         P2pMessage msg = new P2pMessage(
             UUID.randomUUID().toString(),
@@ -156,14 +157,18 @@ public class TelebotsP2pIndependentMessaging {
         );
 
         messageHistory.add(msg);
+        while (messageHistory.size() > 200) messageHistory.remove(0);
         saveMessages();
         notifyMessage(msg);
 
         // Disperse message to discovered peers via TCP and UDP Mesh
-        networkPool.execute(() -> broadcastMessageToPeers(msg));
+        try { networkPool.execute(() -> broadcastMessageToPeers(msg)); }
+        catch (java.util.concurrent.RejectedExecutionException full) { FileLog.e("P2P send queue full"); }
     }
 
     private void broadcastMessageToPeers(P2pMessage msg) {
+        if (!isRunning || !ReleaseAccess.allowed() || org.telegram.utils.proxy.TorProxyController.isEnabled()
+                || SharedConfig.isProxyEnabled()) return;
         try {
             JSONObject payload = msg.toJson();
             byte[] bytes = payload.toString().getBytes(StandardCharsets.UTF_8);
@@ -178,7 +183,8 @@ public class TelebotsP2pIndependentMessaging {
             // 2. Transmit to registered active peers in Routing Mesh
             for (String peerAddress : TelebotsP2pRoutingMesh.getInstance().getActivePeers().keySet()) {
                 if (!peerAddress.contains(".") && !peerAddress.contains(":")) continue; // skip non-IPs
-                try (Socket socket = new Socket(peerAddress, P2P_TCP_PORT)) {
+                try (Socket socket = new Socket()) {
+                    socket.connect(new java.net.InetSocketAddress(peerAddress, P2P_TCP_PORT), 3000);
                     socket.setSoTimeout(3000);
                     OutputStream os = socket.getOutputStream();
                     os.write((payload.toString() + "\n").getBytes(StandardCharsets.UTF_8));
@@ -192,42 +198,55 @@ public class TelebotsP2pIndependentMessaging {
         }
     }
 
-    private void startReceiverServer() {
-        if (isRunning) return;
-        isRunning = true;
+    public boolean isRunning() { return isRunning; }
 
-        // TCP Server
-        networkPool.execute(() -> {
-            try {
-                serverSocket = new ServerSocket(P2P_TCP_PORT);
-                while (isRunning && !serverSocket.isClosed()) {
-                    Socket client = serverSocket.accept();
-                    networkPool.execute(() -> handleClientSocket(client));
-                }
-            } catch (Exception e) {
-                FileLog.e(e);
-            }
-        });
+    public synchronized boolean start() {
+        if (isRunning) return true;
+        // Direct LAN transport cannot be used while the user requires Tor/proxy routing.
+        if (org.telegram.utils.proxy.TorProxyController.isEnabled() || SharedConfig.isProxyEnabled()
+                || !ReleaseAccess.allowed()) return false;
+        try {
+            serverSocket = new ServerSocket(P2P_TCP_PORT, 4);
+            receiver = new DatagramSocket(P2P_UDP_BEACON_PORT);
+            isRunning = true;
+            final ServerSocket tcp = serverSocket;
+            final DatagramSocket udp = receiver;
+            networkPool.execute(() -> {
+                try {
+                    while (!tcp.isClosed()) {
+                        Socket client = tcp.accept();
+                        try { networkPool.execute(() -> handleClientSocket(client)); }
+                        catch (java.util.concurrent.RejectedExecutionException full) { client.close(); }
+                    }
+                } catch (Exception ignored) { }
+            });
+            networkPool.execute(() -> {
+                byte[] buffer = new byte[8193];
+                try {
+                    while (!udp.isClosed()) {
+                        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                        udp.receive(packet);
+                        if (packet.getLength() > 8192) continue;
+                        handleIncomingPacket(new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8), packet.getAddress().getHostAddress());
+                    }
+                } catch (Exception ignored) { }
+            });
+            startBeaconLoop();
+            return true;
+        } catch (Exception e) { stop(); return false; }
+    }
 
-        // UDP Beacon & Broadcast Listener
-        networkPool.execute(() -> {
-            try (DatagramSocket udp = new DatagramSocket(P2P_UDP_BEACON_PORT)) {
-                byte[] buffer = new byte[8192];
-                while (isRunning) {
-                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                    udp.receive(packet);
-                    String raw = new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8);
-                    handleIncomingPacket(raw, packet.getAddress().getHostAddress());
-                }
-            } catch (Exception e) {
-                FileLog.e(e);
-            }
-        });
+    public synchronized void stop() {
+        isRunning = false;
+        if (beaconTask != null) { beaconTask.cancel(false); beaconTask = null; }
+        try { if (serverSocket != null) serverSocket.close(); } catch (Exception ignored) { }
+        if (receiver != null) receiver.close();
     }
 
     private void handleClientSocket(Socket socket) {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8))) {
-            String line = reader.readLine();
+        try (Socket client = socket) {
+            client.setSoTimeout(3000);
+            String line = TelebotsP2pFrame.read(client.getInputStream());
             if (line != null) {
                 handleIncomingPacket(line, socket.getInetAddress().getHostAddress());
             }
@@ -236,22 +255,28 @@ public class TelebotsP2pIndependentMessaging {
         }
     }
 
-    private void handleIncomingPacket(String payload, String sourceIp) {
+    private synchronized void handleIncomingPacket(String payload, String sourceIp) {
         try {
-            if (payload == null || payload.trim().isEmpty()) return;
+            if (!isRunning || !ReleaseAccess.allowed() || org.telegram.utils.proxy.TorProxyController.isEnabled() || SharedConfig.isProxyEnabled()) { stop(); return; }
+            if (payload == null || payload.length() > 8192 || payload.trim().isEmpty()) return;
 
             JSONObject json = new JSONObject(payload);
             if (json.has("beacon_node")) {
                 // Presence beacon
                 String peerId = json.optString("beacon_node");
-                if (!peerId.equals(localNodeId)) {
-                    TelebotsP2pRoutingMesh.getInstance().getActivePeers().put(sourceIp, "WiFi-Mesh");
+                if (peerId.length() <= 64 && !peerId.isEmpty() && !peerId.equals(localNodeId)
+                        && TelebotsP2pRoutingMesh.getInstance().getActivePeers().size() < 64) {
+                    TelebotsP2pRoutingMesh.getInstance().registerPeer(sourceIp, "WiFi-Mesh");
                     notifyPeer(peerId, sourceIp);
                 }
                 return;
             }
 
             P2pMessage msg = P2pMessage.fromJson(json, false);
+            if (msg.text.isEmpty() || msg.text.length() > 2000 || msg.id.length() > 64
+                    || msg.senderId.length() > 64 || msg.recipientId.length() > 64
+                    || msg.hops < 1 || msg.hops > 8
+                    || (!BROADCAST_CHANNEL.equals(msg.recipientId) && !localNodeId.equals(msg.recipientId))) return;
             if (msg.senderId.equals(localNodeId)) return; // ignore echo
 
             // Check if already in history
@@ -261,17 +286,19 @@ public class TelebotsP2pIndependentMessaging {
 
             msg.hops++;
             messageHistory.add(msg);
+            while (messageHistory.size() > 200) messageHistory.remove(0);
             saveMessages();
             notifyMessage(msg);
 
-            TelebotsP2pHubController.getInstance(UserConfig.selectedAccount).addBandwidthServed(payload.length());
+            // Receiving a packet is not evidence of bytes served to another peer.
         } catch (Exception e) {
             FileLog.e(e);
         }
     }
 
     private void startBeaconLoop() {
-        scheduler.scheduleAtFixedRate(() -> {
+        beaconTask = scheduler.scheduleAtFixedRate(() -> {
+            if (!isRunning || !ReleaseAccess.allowed() || org.telegram.utils.proxy.TorProxyController.isEnabled() || SharedConfig.isProxyEnabled()) { stop(); return; }
             try {
                 JSONObject beacon = new JSONObject();
                 beacon.put("beacon_node", localNodeId);
@@ -307,8 +334,9 @@ public class TelebotsP2pIndependentMessaging {
         try {
             SharedPreferences prefs = ApplicationLoader.applicationContext.getSharedPreferences("telebots_p2p_messaging", Context.MODE_PRIVATE);
             String raw = prefs.getString("messages_json", "[]");
+            if (raw.length() > 2 * 1024 * 1024) return;
             JSONArray arr = new JSONArray(raw);
-            for (int i = 0; i < arr.length(); i++) {
+            for (int i = Math.max(0, arr.length() - 200); i < arr.length(); i++) {
                 JSONObject o = arr.getJSONObject(i);
                 messageHistory.add(P2pMessage.fromJson(o, o.optBoolean("is_outgoing", false)));
             }

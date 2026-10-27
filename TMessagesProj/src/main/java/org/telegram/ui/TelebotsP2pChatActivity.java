@@ -76,7 +76,7 @@ public class TelebotsP2pChatActivity extends BaseFragment implements TelebotsP2p
         banner.addView(bannerText, LayoutHelper.createLinear(0, -2, 1.0f));
 
         peersIndicator = new TextView(context);
-        peersIndicator.setText("👥 " + Math.max(TelebotsP2pRoutingMesh.getInstance().getActivePeers().size(), 1) + " pares");
+        peersIndicator.setText("👥 " + TelebotsP2pRoutingMesh.getInstance().getActivePeers().size() + " pares");
         peersIndicator.setTextSize(12);
         peersIndicator.setTextColor(0xFF71D6C2);
         peersIndicator.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
@@ -84,6 +84,20 @@ public class TelebotsP2pChatActivity extends BaseFragment implements TelebotsP2p
         banner.addView(peersIndicator, LayoutHelper.createLinear(-2, -2));
 
         contentLayout.addView(banner, LayoutHelper.createLinear(-1, -2, 12, 12, 12, 8));
+        android.widget.Button connection = new android.widget.Button(context);
+        connection.setText("Activar P2P local de prueba");
+        connection.setOnClickListener(v -> {
+            TelebotsP2pIndependentMessaging mesh = TelebotsP2pIndependentMessaging.getInstance();
+            if (mesh.isRunning()) { mesh.stop(); connection.setText("Activar P2P local de prueba"); return; }
+            showDialog(new org.telegram.ui.ActionBar.AlertDialog.Builder(getParentActivity())
+                    .setTitle("P2P local experimental")
+                    .setMessage("Solo para pruebas en una red de confianza. Los mensajes no están cifrados ni autentican al remitente. Se anuncia tu presencia en la red local. No funciona con Tor o proxy activos. Se detiene al salir de esta pantalla.")
+                    .setPositiveButton("Activar", (d, which) -> {
+                        boolean started = mesh.start();
+                        connection.setText(started ? "Detener P2P local" : "No disponible: revisa acceso, Tor y proxy");
+                    }).setNegativeButton("Cancelar", null).create());
+        });
+        contentLayout.addView(connection, LayoutHelper.createLinear(-1, -2));
 
         // --- MENSAJES SCROLL AREA ---
         scrollView = new ScrollView(context);
@@ -131,7 +145,7 @@ public class TelebotsP2pChatActivity extends BaseFragment implements TelebotsP2p
         sendButton.setPadding(AndroidUtilities.dp(14), AndroidUtilities.dp(8), AndroidUtilities.dp(14), AndroidUtilities.dp(8));
         sendButton.setOnClickListener(v -> {
             String text = inputField.getText().toString();
-            if (!text.trim().isEmpty()) {
+            if (TelebotsP2pIndependentMessaging.getInstance().isRunning() && !text.trim().isEmpty() && text.length() <= 2000) {
                 TelebotsP2pIndependentMessaging.getInstance().sendMessage(TelebotsP2pIndependentMessaging.BROADCAST_CHANNEL, text);
                 inputField.setText("");
             }
@@ -239,18 +253,18 @@ public class TelebotsP2pChatActivity extends BaseFragment implements TelebotsP2p
     public void onPause() {
         super.onPause();
         TelebotsP2pIndependentMessaging.getInstance().removeListener(this);
+        TelebotsP2pIndependentMessaging.getInstance().stop();
     }
 
     @Override
     public void onMessageReceived(TelebotsP2pIndependentMessaging.P2pMessage message) {
-        addMessageView(message);
-        scrollDown();
+        renderMessages();
     }
 
     @Override
     public void onPeerDiscovered(String peerId, String address) {
         if (peersIndicator != null) {
-            int count = Math.max(TelebotsP2pRoutingMesh.getInstance().getActivePeers().size(), 1);
+            int count = TelebotsP2pRoutingMesh.getInstance().getActivePeers().size();
             peersIndicator.setText("👥 " + count + " pares");
         }
     }

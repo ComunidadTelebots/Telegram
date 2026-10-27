@@ -2997,14 +2997,16 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         if (!dialogsLoaded[currentAccount]) {
             MessagesController messagesController = accountInstance.getMessagesController();
             messagesController.loadGlobalNotificationsSettings();
-            messagesController.loadDialogs(0, 0, 100, true);
+            messagesController.loadDialogs(0, 0, SharedConfig.isLowRamDevice() ? 30 : 100, true);
             messagesController.loadHintDialogs();
             messagesController.loadUserInfo(accountInstance.getUserConfig().getCurrentUser(), false, 0);
             accountInstance.getContactsController().checkInviteText();
             accountInstance.getMediaDataController().checkAllMedia(false);
             AndroidUtilities.runOnUIThread(() -> accountInstance.getDownloadController().loadDownloadingFiles(), 200);
-            for (String emoji : messagesController.diceEmojies) {
-                accountInstance.getMediaDataController().loadStickersByEmojiOrName(emoji, true, true);
+            if (!SharedConfig.isLowRamDevice()) {
+                for (String emoji : messagesController.diceEmojies) {
+                    accountInstance.getMediaDataController().loadStickersByEmojiOrName(emoji, true, true);
+                }
             }
             dialogsLoaded[currentAccount] = true;
         }
