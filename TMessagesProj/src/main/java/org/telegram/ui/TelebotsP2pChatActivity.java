@@ -32,13 +32,14 @@ public class TelebotsP2pChatActivity extends BaseFragment implements TelebotsP2p
     private ScrollView scrollView;
     private EditText inputField;
     private TextView peersIndicator;
+    private android.widget.Button connection;
     private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.ROOT);
 
     @Override
     public View createView(Context context) {
         actionBar.setBackButtonImage(org.telegram.messenger.R.drawable.ic_ab_back);
-        actionBar.setTitle("Malla P2P · Off-Grid Chat");
-        actionBar.setSubtitle("● 0 Servidores · ID: " + TelebotsP2pIndependentMessaging.getInstance().getLocalNodeId());
+        actionBar.setTitle("P2P local cifrado");
+        actionBar.setSubtitle("TLS · Pares autorizados manualmente");
         actionBar.setBackgroundColor(0xFF0D1421);
         actionBar.setItemsColor(0xFFFFFFFF, false);
         actionBar.setItemsBackgroundColor(0x1AFFFFFF, false);
@@ -70,13 +71,13 @@ public class TelebotsP2pChatActivity extends BaseFragment implements TelebotsP2p
         banner.setPadding(AndroidUtilities.dp(16), AndroidUtilities.dp(12), AndroidUtilities.dp(16), AndroidUtilities.dp(12));
 
         TextView bannerText = new TextView(context);
-        bannerText.setText("⚡ Mensajería directa entre pares. Los mensajes viajan por Wi-Fi y malla sin tocar servidores centrales.");
+        bannerText.setText("TLS con autenticación mutua. Verifica las huellas por un canal de confianza en ambos dispositivos. Sin difusión pública ni reenvío multisalto. El historial se conserva localmente.");
         bannerText.setTextSize(12);
         bannerText.setTextColor(0xFF8E9EB5);
         banner.addView(bannerText, LayoutHelper.createLinear(0, -2, 1.0f));
 
         peersIndicator = new TextView(context);
-        peersIndicator.setText("👥 " + TelebotsP2pRoutingMesh.getInstance().getActivePeers().size() + " pares");
+        peersIndicator.setText(TelebotsP2pIndependentMessaging.getInstance().trustedPeerCount() + " autorizados");
         peersIndicator.setTextSize(12);
         peersIndicator.setTextColor(0xFF71D6C2);
         peersIndicator.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
@@ -84,17 +85,56 @@ public class TelebotsP2pChatActivity extends BaseFragment implements TelebotsP2p
         banner.addView(peersIndicator, LayoutHelper.createLinear(-2, -2));
 
         contentLayout.addView(banner, LayoutHelper.createLinear(-1, -2, 12, 12, 12, 8));
-        android.widget.Button connection = new android.widget.Button(context);
-        connection.setText("Activar P2P local de prueba");
+        android.widget.Button identityButton = new android.widget.Button(context);
+        identityButton.setText("Mi huella de identidad");
+        identityButton.setOnClickListener(v -> showDialog(new org.telegram.ui.ActionBar.AlertDialog.Builder(getParentActivity())
+                .setTitle("Huella SHA-256 del certificado")
+                .setMessage(TelebotsP2pIndependentMessaging.getInstance().getLocalNodeId()
+                        + "\nComprueba esta huella completa en el otro dispositivo. La clave privada permanece en Android Keystore.")
+                .setPositiveButton("Cerrar", null).create()));
+        contentLayout.addView(identityButton, LayoutHelper.createLinear(-1, -2));
+        android.widget.Button pairButton = new android.widget.Button(context);
+        pairButton.setText("Autorizar un dispositivo");
+        pairButton.setOnClickListener(v -> {
+            LinearLayout form = new LinearLayout(context); form.setOrientation(LinearLayout.VERTICAL);
+            EditText address = new EditText(context); address.setHint("IP local del dispositivo"); address.setSingleLine(true);
+            EditText fingerprint = new EditText(context); fingerprint.setHint("Huella SHA-256 verificada"); fingerprint.setSingleLine(true);
+            form.addView(address); form.addView(fingerprint);
+            org.telegram.ui.ActionBar.AlertDialog dialog = new org.telegram.ui.ActionBar.AlertDialog.Builder(getParentActivity())
+                    .setTitle("Autorizar identidad e IP local")
+                    .setMessage("Compara los 64 caracteres con la pantalla del otro dispositivo. No aceptes huellas recibidas de una persona no verificada. Este cambio detiene la conexión actual.")
+                    .setView(form).setPositiveButton("Autorizar", (d, which) -> {})
+                    .setNegativeButton("Cancelar", null).create();
+            showDialog(dialog);
+            dialog.getButton(org.telegram.ui.ActionBar.AlertDialog.BUTTON_POSITIVE).setOnClickListener(w -> {
+                if (!TelebotsP2pIndependentMessaging.getInstance().trustPeer(address.getText().toString().trim(), fingerprint.getText().toString().trim())) {
+                    fingerprint.setError("IP privada y huella de 64 caracteres requeridas"); return;
+                }
+                peersIndicator.setText(TelebotsP2pIndependentMessaging.getInstance().trustedPeerCount() + " autorizados");
+                connection.setText("Activar P2P cifrado");
+                dialog.dismiss();
+            });
+        });
+        contentLayout.addView(pairButton, LayoutHelper.createLinear(-1, -2));
+        android.widget.Button revoke = new android.widget.Button(context);
+        revoke.setText("Revocar dispositivos autorizados");
+        revoke.setOnClickListener(v -> showDialog(new org.telegram.ui.ActionBar.AlertDialog.Builder(getParentActivity())
+                .setTitle("Revocar todos los dispositivos")
+                .setMessage("Se detendrá P2P y tendrás que verificar de nuevo sus huellas.")
+                .setPositiveButton("Revocar", (d, which) -> { TelebotsP2pIndependentMessaging.getInstance().clearTrustedPeers(); peersIndicator.setText("0 autorizados"); connection.setText("Activar P2P cifrado"); })
+                .setNegativeButton("Cancelar", null).create()));
+        contentLayout.addView(revoke, LayoutHelper.createLinear(-1, -2));
+        connection = new android.widget.Button(context);
+        connection.setText("Activar P2P cifrado");
         connection.setOnClickListener(v -> {
             TelebotsP2pIndependentMessaging mesh = TelebotsP2pIndependentMessaging.getInstance();
-            if (mesh.isRunning()) { mesh.stop(); connection.setText("Activar P2P local de prueba"); return; }
+            if (mesh.isRunning()) { mesh.stop(); connection.setText("Activar P2P cifrado"); return; }
             showDialog(new org.telegram.ui.ActionBar.AlertDialog.Builder(getParentActivity())
-                    .setTitle("P2P local experimental")
-                    .setMessage("Solo para pruebas en una red de confianza. Los mensajes no están cifrados ni autentican al remitente. Se anuncia tu presencia en la red local. No funciona con Tor o proxy activos. Se detiene al salir de esta pantalla.")
+                    .setTitle("Conectar con dispositivos autorizados")
+                    .setMessage("Solo se conectará con las huellas autorizadas mediante TLS mutuo. Requiere IP local y autorización recíproca. No funciona con Tor o proxy activos. Se detiene al salir.")
                     .setPositiveButton("Activar", (d, which) -> {
                         boolean started = mesh.start();
-                        connection.setText(started ? "Detener P2P local" : "No disponible: revisa acceso, Tor y proxy");
+                        connection.setText(started ? "Detener P2P local" : "No disponible: revisa identidad, pares, acceso, Tor y proxy");
                     }).setNegativeButton("Cancelar", null).create());
         });
         contentLayout.addView(connection, LayoutHelper.createLinear(-1, -2));
@@ -126,7 +166,7 @@ public class TelebotsP2pChatActivity extends BaseFragment implements TelebotsP2p
         inputContainer.setPadding(AndroidUtilities.dp(16), AndroidUtilities.dp(4), AndroidUtilities.dp(8), AndroidUtilities.dp(4));
 
         inputField = new EditText(context);
-        inputField.setHint("Mensaje en Malla P2P...");
+        inputField.setHint("Mensaje P2P local...");
         inputField.setHintTextColor(0xFF6B7D96);
         inputField.setTextColor(0xFFFFFFFF);
         inputField.setBackground(null);
@@ -219,7 +259,7 @@ public class TelebotsP2pChatActivity extends BaseFragment implements TelebotsP2p
         metaRow.setGravity(Gravity.CENTER_VERTICAL);
 
         TextView hopView = new TextView(context);
-        hopView.setText(msg.isOutgoing ? "⚡ Malla P2P Directa" : "⚡ Saltos: " + msg.hops);
+        hopView.setText(msg.isOutgoing ? "Guardado local · entrega no confirmada" : msg.authenticated ? "Identidad verificada por TLS" : "Historial anterior sin verificar");
         hopView.setTextSize(10);
         hopView.setTextColor(0xFF71D6C2);
         metaRow.addView(hopView, LayoutHelper.createLinear(0, -2, 1.0f));
@@ -247,6 +287,7 @@ public class TelebotsP2pChatActivity extends BaseFragment implements TelebotsP2p
     public void onResume() {
         super.onResume();
         TelebotsP2pIndependentMessaging.getInstance().addListener(this);
+        if (connection != null) connection.setText(TelebotsP2pIndependentMessaging.getInstance().isRunning() ? "Detener P2P local" : "Activar P2P cifrado");
     }
 
     @Override
@@ -265,7 +306,7 @@ public class TelebotsP2pChatActivity extends BaseFragment implements TelebotsP2p
     public void onPeerDiscovered(String peerId, String address) {
         if (peersIndicator != null) {
             int count = TelebotsP2pRoutingMesh.getInstance().getActivePeers().size();
-            peersIndicator.setText("👥 " + count + " pares");
+            peersIndicator.setText(count + " autorizados");
         }
     }
 }

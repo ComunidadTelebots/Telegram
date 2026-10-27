@@ -98,3 +98,31 @@ Actualizaciones:
 - En los logs aparecen APP_PUSH_APIKEY_MISSING y COMMUNITY_ID_INVALID/COMMUNITY_FILTER_INVALID de llamadas al servidor. No provocaron cierre durante esta prueba; notificaciones push y esas funciones requieren revisión separada de configuración/compatibilidad de API.
 
 Pruebas añadidas: test_low_memory_policy.py (10 fronteras y contexto nulo) y test_p2p_frame.py (TCP local real, longitud máxima, trama incompleta y timeout). También superadas las de excepción de emulador, perfiles y herramientas propias. Sin push a GitHub ni publicación.
+
+## P2P con autenticación y cifrado de transporte (27 de octubre)
+
+El chat P2P local sustituye TCP plano y descubrimiento UDP por TLS 1.2 con ECDHE/ECDSA y AES-128-GCM. Cada instalación crea una identidad EC P-256 en Android Keystore; su clave privada no se exporta. Ambos dispositivos deben autorizar previamente la huella SHA-256 completa del certificado del otro y su IP privada. No hay confianza automática, fallback a texto plano ni retransmisión multisalto. Se admite un máximo de 16 pares y se conservan los límites anteriores de conexiones, colas y mensajes. El contador muestra autorizaciones, no presencia en línea.
+
+La recepción liga el remitente del JSON al certificado autenticado, comprueba destinatario, fecha y límites, y deduplica contra el historial reciente. Revocar detiene el listener e invalida tareas de sesiones anteriores. El historial previo se etiqueta como no verificado. La salida se muestra como guardada localmente, sin afirmar entrega confirmada. El historial local no tiene cifrado adicional en reposo; esta implementación protege el transporte. La deduplicación del historial no equivale a protección persistente ilimitada contra replay. No se presenta esto como auditoría de seguridad externa ni como cifrado de todos los subsistemas experimentales del hub.
+
+Pruebas en el mismo AVD de 2 GB, APK x86_64 DEV con excepción de acceso exclusiva del emulador:
+- Detectado y corregido un fallo real de handshake: Conscrypt usa NONEwithECDSA para firmar un digest ya calculado. La identidad v2 autoriza ese uso en Keystore, manteniendo la clave no exportable y TLS con SHA-256.
+- Cliente de prueba local con certificado autorizado: handshake mutuo y recepción visible de TLS_AUTENTICADO_PRUEBA con etiqueta de identidad verificada.
+- Cliente anónimo rechazado (handshake failure); certificado ajeno rechazado (certificate unknown).
+- Repetir el ID válido deja una sola burbuja; los textos con remitente falsificado y fecha caducada no aparecen.
+- Alterar un byte de un registro TLS real provoca BAD_RECORD_MAC; no aparece el texto manipulado. El texto no está presente en el registro cifrado capturado por la fixture.
+- Salida desde el emulador a un servidor TLS de prueba: el servidor exige certificado cliente, verifica la huella de la app y recibe el mensaje de prueba. Sustituir el certificado servidor por otro no autorizado hace fallar el handshake antes de recibir datos de aplicación.
+- Revocadas las autorizaciones de prueba: contador 0, listener cerrado y activación rechazada sin pares. Retirado el túnel adb. No se han enviado mensajes a usuarios reales ni borrado datos del emulador.
+- Test automatizado test_p2p_trust.py compila la clase real y comprueba ambos roles, certificados ajenos/caducados, cadenas nulas/vacías/múltiples, copia inmutable de pins y ausencia de confianza tras revocación. test_p2p_frame.py también superado.
+
+Pendiente: dos móviles físicos, distintas versiones de Conscrypt/Android, cambios de red y pruebas prolongadas. Esta prueba usa una fixture TLS local, no dos teléfonos. No acredita resistencia a todo ataque de denegación de servicio.
+
+### Notificaciones: configuración pendiente del propietario
+
+La build local todavía usa APP_ID=4 de BuildVars.java; la automatización de releases tiene su propia inyección de credenciales. Por tanto, configurar la aplicación propia en my.telegram.org no basta hasta compilar localmente con su api_id/api_hash mediante secretos, sin incorporarlos al repositorio. El módulo TMessagesProj_App usa el proyecto Firebase comunidad-telebots y contiene los cinco paquetes; esto no verifica los otros módulos de distribución.
+
+1. En Firebase Console, abrir comunidad-telebots, configuración del proyecto: comprobar que la aplicación Android DEV corresponde a org.comunidadtelebots.dev. En Cloud Messaging, comprobar que la API HTTP v1 está habilitada.
+2. En https://my.telegram.org/apps, abrir la aplicación propia y revisar su configuración de push. Telegram exige configurar las credenciales del servicio emisor: https://core.telegram.org/api/push-updates. El error observado APP_PUSH_APIKEY_MISSING no es un permiso de notificaciones de Android.
+3. No confundir api_hash, API key cliente de google-services.json ni Sender ID con una credencial de servidor. Firebase HTTP v1 utiliza autorización de servidor; una clave privada de cuenta de servicio no debe incluirse en el APK: https://firebase.google.com/docs/cloud-messaging/send/v1-api.
+4. No se ha inspeccionado el formulario privado actual de Telegram. Si solo ofrece una clave GCM antigua, falta confirmar un mecanismo compatible con HTTP v1; no se afirma que acepte JSON de cuenta de servicio. Se necesitan los nombres de campos, sin valores secretos, para concretar ese paso.
+5. Tras alinear credenciales y configuración, recompilar, repetir el registro del dispositivo y probar una notificación con la app en segundo plano y permiso concedido. La entrega push aún no está verificada.
