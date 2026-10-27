@@ -11,7 +11,7 @@ class Check {
  static class BuildConfig { static boolean EMULATOR_ACCESS_PREVIEW, DEBUG; }
  static class android {
   static class content { static class pm { static class ApplicationInfo { static final int FLAG_DEBUGGABLE=2; int flags; } } }
-  static class os { static class Build { static String HARDWARE, FINGERPRINT; } }
+  static class os { static class Build { static String HARDWARE, FINGERPRINT; static class VERSION { static int SDK_INT; } } }
  }
  static class Context { android.content.pm.ApplicationInfo info=new android.content.pm.ApplicationInfo(); android.content.pm.ApplicationInfo getApplicationInfo(){return info;} }
  static class ApplicationLoader { static Context applicationContext=new Context(); }
@@ -25,11 +25,14 @@ class Check {
     for(int flags : new int[]{0,2})
      for(String channel : new String[]{"dev","alfa","beta","rc","stable"})
       for(String hardware : new String[]{"ranchu","goldfish","physical"})
-       for(String fingerprint : new String[]{"google/sdk_gphone16k_x86_64/emu:17", "google/pixel/physical"}) {
+       for(int sdk : new int[]{21,22,37})
+       for(String fingerprint : new String[]{"google/sdk_gphone16k_x86_64/emu:17", "google/pixel/physical", "generic_x86_64/sdk_google_phone_x86_64/generic_x86_64:5.0.2/LSY66K/6695550:eng/test-keys", "generic_x86_64/unknown"}) {
         BuildConfig.EMULATOR_ACCESS_PREVIEW=opt; BuildConfig.DEBUG=debug;
         ApplicationLoader.applicationContext.info.flags=flags;
         android.os.Build.HARDWARE=hardware; android.os.Build.FINGERPRINT=fingerprint;
-        boolean expected=opt && debug && flags==2 && channel.equals("dev") && !hardware.equals("physical") && fingerprint.contains("sdk_gphone");
+        android.os.Build.VERSION.SDK_INT=sdk;
+        boolean image=fingerprint.contains("sdk_gphone") || (sdk==21 && fingerprint.equals("generic_x86_64/sdk_google_phone_x86_64/generic_x86_64:5.0.2/LSY66K/6695550:eng/test-keys"));
+        boolean expected=opt && debug && flags==2 && channel.equals("dev") && !hardware.equals("physical") && image;
         if(emulatorPreview(channel)!=expected) throw new AssertionError("Access boundary failed");
         cases++;
        }
