@@ -1,0 +1,41 @@
+name: Device performance policy tests
+
+on:
+  push:
+    branches:
+      - feature/adaptive-device-performance
+    paths:
+      - TMessagesProj/src/main/java/org/telegram/messenger/DevicePerformancePolicy.java
+      - TMessagesProj/src/main/java/org/telegram/messenger/DevicePerformanceProfiles.java
+      - TMessagesProj/src/main/java/org/telegram/ui/DevicePerformanceSettingsActivity.java
+      - TMessagesProj/src/main/java/org/telegram/ui/LiteModeSettingsActivity.java
+      - Tools/tests/DevicePerformancePolicyTest.java
+      - .github/workflows/device-performance-tests.yml
+  pull_request:
+    paths:
+      - TMessagesProj/src/main/java/org/telegram/messenger/DevicePerformancePolicy.java
+      - Tools/tests/DevicePerformancePolicyTest.java
+
+permissions:
+  contents: read
+
+jobs:
+  pure-policy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Verify performance policy without Android dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/telebots-policy
+          javac -d /tmp/telebots-policy \
+            TMessagesProj/src/main/java/org/telegram/messenger/DevicePerformancePolicy.java \
+            Tools/tests/DevicePerformancePolicyTest.java
+          java -cp /tmp/telebots-policy org.telegram.messenger.DevicePerformancePolicyTest
