@@ -56,7 +56,7 @@ jobs:
           grep -Fq "defaultConfig.applicationId = rootProject.ext.forkApplicationId" TMessagesProj_App/build.gradle
           echo "Perfil release y paquete de Comunidad Telebots confirmados"
 
-      - name: Preparar firma y credenciales sin mostrarlas
+      - name: Preparar credenciales Telegram y firma DEV temporal
         env:
           TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
           TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
@@ -70,41 +70,72 @@ jobs:
           set -euo pipefail
           umask 077
           python3 - <<'PY'
-          import base64, os, pathlib, re
-          required = ('TELEGRAM_API_ID','TELEGRAM_API_HASH','KEYSTORE_BASE64','STORE_PASSWORD','KEY_ALIAS','KEY_PASSWORD','CERT_SHA256')
-          missing = [key for key in required if not os.environ.get(key)]
-          if missing:
-              raise SystemExit('Faltan secretos del entorno GitHub: ' + ', '.join(missing))
-          if not re.fullmatch(r'[1-9][0-9]{0,9}', os.environ['TELEGRAM_API_ID']) or int(os.environ['TELEGRAM_API_ID']) > 2147483647:
-              raise SystemExit('TELEGRAM_API_ID no tiene formato válido')
-          if not re.fullmatch(r'[a-fA-F0-9]{32}', os.environ['TELEGRAM_API_HASH']):
-              raise SystemExit('TELEGRAM_API_HASH no tiene formato válido')
-          cert = re.sub(r'[:\s]', '', os.environ['CERT_SHA256']).lower()
-          if not re.fullmatch(r'[a-f0-9]{64}', cert):
-              raise SystemExit('CERT_SHA256 no tiene formato válido')
-          try:
-              keystore = base64.b64decode(''.join(os.environ['KEYSTORE_BASE64'].split()), validate=True)
-          except ValueError:
-              raise SystemExit('KEYSTORE_BASE64 no tiene formato válido') from None
-          if not keystore:
-              raise SystemExit('El keystore está vacío')
-          pathlib.Path('TMessagesProj/config').mkdir(parents=True, exist_ok=True)
-          pathlib.Path('TMessagesProj/config/release.keystore').write_bytes(keystore)
+          import os, pathlib, re
+          api_id = os.environ.get('TELEGRAM_API_ID', '')
+          api_hash = os.environ.get('TELEGRAM_API_HASH', '')
+          if not re.fullmatch(r'[1-9][0-9]{0,9}', api_id) or int(api_id) > 2147483647:
+              raise SystemExit('Falta TELEGRAM_API_ID o no tiene formato válido')
+          if not re.fullmatch(r'[a-fA-F0-9]{32}', api_hash):
+              raise SystemExit('Falta TELEGRAM_API_HASH o no tiene formato válido')
           source = pathlib.Path('Tools/release/BuildVars.java.template').read_text(encoding='utf-8')
-          source, count = re.subn(r'public static int APP_ID = 0;', 'public static int APP_ID = ' + os.environ['TELEGRAM_API_ID'] + ';', source)
+          source, count = re.subn(r'public static int APP_ID = 0;', 'public static int APP_ID = ' + api_id + ';', source)
           assert count == 1, 'Plantilla APP_ID inválida'
-          source, count = re.subn(r'public static String APP_HASH = "";', 'public static String APP_HASH = "' + os.environ['TELEGRAM_API_HASH'] + '";', source)
+          source, count = re.subn(r'public static String APP_HASH = "";', 'public static String APP_HASH = "' + api_hash + '";', source)
           assert count == 1, 'Plantilla APP_HASH inválida'
-          pathlib.Path('TMessagesProj/src/main/java/org/telegram/messenger/BuildVars.java').write_text(source, encoding='utf-8')
-          def escape(value):
-              encoded = value.encode('utf-16-be').hex()
-              return ''.join('\\u' + encoded[i:i+4] for i in range(0, len(encoded), 4))
-          home = pathlib.Path(os.environ['GRADLE_USER_HOME'])
-          home.mkdir(parents=True, exist_ok=True)
-          home.joinpath('gradle.properties').write_text('\n'.join(key + '=' + escape(os.environ[name]) for key, name in (
-              ('RELEASE_STORE_PASSWORD','STORE_PASSWORD'),('RELEASE_KEY_ALIAS','KEY_ALIAS'),('RELEASE_KEY_PASSWORD','KEY_PASSWORD'))), encoding='ascii')
-          pathlib.Path(os.environ['RUNNER_TEMP'],'expected-certificate.sha256').write_text(cert,encoding='ascii')
+          destination = pathlib.Path('TMessagesProj/src/main/java/org/telegram/messenger/BuildVars.java')
+          destination.parent.mkdir(parents=True, exist_ok=True)
+          destination.write_text(source, encoding='utf-8')
           PY
+          mkdir -p TMessagesProj/config "$GRADLE_USER_HOME"
+          if [[ -n "$KEYSTORE_BASE64" || -n "$STORE_PASSWORD" || -n "$KEY_ALIAS" || -n "$KEY_PASSWORD" || -n "$CERT_SHA256" ]]; then
+            # Never mix permanent and disposable credentials.
+            for key in KEYSTORE_BASE64 STORE_PASSWORD KEY_ALIAS KEY_PASSWORD CERT_SHA256; do
+              if [[ -z "${!key}" ]]; then echo "Incomplete permanent signing configuration: $key"; exit 1; fi
+            done
+            python3 - <<'PY'
+          import base64, os, pathlib
+          pathlib.Path('TMessagesProj/config/release.keystore').write_bytes(
+              base64.b64decode(''.join(os.environ['KEYSTORE_BASE64'].split()), validate=True)
+          )
+          PY
+            export SIGN_STORE_PASSWORD="$STORE_PASSWORD"
+            export SIGN_KEY_ALIAS="$KEY_ALIAS"
+            export SIGN_KEY_PASSWORD="$KEY_PASSWORD"
+            export EXPECTED_CERT="$(printf '%s' "$CERT_SHA256" | tr -d ':[:space:]' | tr '[:upper:]' '[:lower:]')"
+            echo "SIGNING_MODE=permanent" >> "$GITHUB_ENV"
+          else
+            # Disposable private key never leaves this GitHub runner.
+            export SIGN_STORE_PASSWORD="$(openssl rand -hex 24)"
+            export SIGN_KEY_PASSWORD="$SIGN_STORE_PASSWORD"
+            export SIGN_KEY_ALIAS="telebotsdev"
+            keytool -genkeypair -noprompt -keystore TMessagesProj/config/release.keystore \
+              -alias "$SIGN_KEY_ALIAS" -storepass "$SIGN_STORE_PASSWORD" \
+              -keypass "$SIGN_KEY_PASSWORD" -keyalg RSA -keysize 3072 \
+              -validity 30 -dname "CN=Comunidad Telebots DEV, OU=Testing, O=Comunidad Telebots, C=ES" >/dev/null
+            echo "SIGNING_MODE=temporary" >> "$GITHUB_ENV"
+            echo "::warning::Temporary DEV signature: this APK cannot update previous builds signed with another key. Uninstall before replacing; local app data may be lost."
+          fi
+          # Commit neither the private keystore nor the password.
+          export SIGN_STORE_PASSWORD SIGN_KEY_PASSWORD SIGN_KEY_ALIAS
+          python3 - <<'PY'
+          import os, pathlib
+          def escape(value):
+              return ''.join('\\u' + chunk for chunk in
+                             (value.encode('utf-16-be').hex()[i:i+4] for i in range(0, len(value.encode('utf-16-be').hex()), 4)))
+          pathlib.Path(os.environ['GRADLE_USER_HOME'], 'gradle.properties').write_text(
+              '\n'.join(key + '=' + escape(os.environ[name]) for key, name in (
+                  ('RELEASE_STORE_PASSWORD', 'SIGN_STORE_PASSWORD'),
+                  ('RELEASE_KEY_ALIAS', 'SIGN_KEY_ALIAS'),
+                  ('RELEASE_KEY_PASSWORD', 'SIGN_KEY_PASSWORD'))), encoding='ascii')
+          PY
+          keytool -exportcert -alias "$SIGN_KEY_ALIAS" \
+            -keystore TMessagesProj/config/release.keystore \
+            -storepass "$SIGN_STORE_PASSWORD" -rfc 2>/dev/null |
+            openssl x509 -noout -fingerprint -sha256 |
+            sed 's/.*=//' | tr -d ':' | tr '[:upper:]' '[:lower:]' > "$RUNNER_TEMP/expected-certificate.sha256"
+          if [[ -n "${EXPECTED_CERT:-}" ]]; then
+            test "$EXPECTED_CERT" = "$(cat "$RUNNER_TEMP/expected-certificate.sha256")"
+          fi
 
       - name: Verificar credenciales y conectividad Telegram (test y producción)
         env:
