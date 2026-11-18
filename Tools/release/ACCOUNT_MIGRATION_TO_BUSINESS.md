@@ -1,7 +1,7 @@
 # Migración de titularidad operativa — Comunidad Telebots
 
-**Cuenta de destino indicada por el propietario:** `redes@todosobreall.tech`.
-**Cuenta de origen:** `adrian.gonzalez.vallejo@gmail.com`.
+**Cuenta de destino indicada por el propietario:** la cuenta empresarial de destino.
+**Cuenta de origen:** la cuenta personal de origen.
 **Firebase existente:** proyecto `comunidad-telebots` (Google Cloud project ID, mantenerlo intacto).
 **Paquete Play/Firebase DEV:** `org.comunidadtelebots.dev`.
 
@@ -17,9 +17,9 @@ En Google Cloud IAM: https://console.cloud.google.com/iam-admin/iam?project=comu
 
 ### 2. Google Play Console
 
-Si ambas direcciones pertenecen a la **misma cuenta desarrollador** (la cuenta origen es la titular), se puede invitar a `redes@todosobreall.tech` en Play Console → Usuarios y permisos, con los permisos apropiados para administrar la app y sus pistas de pruebas, sin transferir aplicaciones ni resetear la cuenta.
+Si ambas direcciones pertenecen a la **misma cuenta desarrollador** (la cuenta origen es la titular), se puede invitar a la cuenta empresarial de destino en Play Console → Usuarios y permisos, con los permisos apropiados para administrar la app y sus pistas de pruebas, sin transferir aplicaciones ni resetear la cuenta.
 
-Si la intención es que `redes@todosobreall.tech` sea **titular de otra cuenta de desarrollador distinta**, esa cuenta de destino debe estar verificada y activa. Iniciar la transferencia oficial de apps desde Play Console con ambas cuentas registradas; Google Play requiere aprobación de la cuenta de destino. La cuenta desarrollador de destino nueva puede exigir la tasa de registro. Las pistas/grupos de pruebas cerradas deben recrearse y las integraciones de Firebase/Cloud vincularse de nuevo cuando corresponda. Documentación: https://support.google.com/googleplay/android-developer/answer/6230247?hl=es
+Si la intención es que la cuenta empresarial de destino sea **titular de otra cuenta de desarrollador distinta**, esa cuenta de destino debe estar verificada y activa. Iniciar la transferencia oficial de apps desde Play Console con ambas cuentas registradas; Google Play requiere aprobación de la cuenta de destino. La cuenta desarrollador de destino nueva puede exigir la tasa de registro. Las pistas/grupos de pruebas cerradas deben recrearse y las integraciones de Firebase/Cloud vincularse de nuevo cuando corresponda. Documentación: https://support.google.com/googleplay/android-developer/answer/6230247?hl=es
 
 Antes de transferir: verificar el paquete `org.comunidadtelebots.dev` existente en Play Console. Si nunca se creó, hay que **crear la ficha en la cuenta definitiva**, en vez de transferir una app inexistente. No se puede subir una AAB a un paquete que no exista en la consola.
 
