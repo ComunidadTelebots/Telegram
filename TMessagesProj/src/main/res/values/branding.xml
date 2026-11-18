@@ -2,4 +2,28 @@
 <resources>
     <string name="ForkAppName" translatable="false">Comunidad Telebots</string>
     <string name="ForkIndependentClient">An independent client using the Telegram API. Not affiliated with or endorsed by Telegram.</string>
+    <string name="TelebotsPetsTitle">Virtual pets and AI</string>
+    <string name="TelebotsPetsEnabled">Enable virtual pet</string>
+    <string name="TelebotsPetsName">Pet name</string>
+    <string name="TelebotsPetsSpecies">Species</string>
+    <string name="TelebotsPetsCat">Cat</string>
+    <string name="TelebotsPetsDog">Dog</string>
+    <string name="TelebotsPetsFox">Fox</string>
+    <string name="TelebotsPetsSave">Save pet</string>
+    <string name="TelebotsPetsStats">Mood: %1$d/100  Energy: %2$d/100  Affection: %3$d/100  Activities: %4$d</string>
+    <string name="TelebotsPetsFeed">Feed</string>
+    <string name="TelebotsPetsPlay">Play</string>
+    <string name="TelebotsPetsRest">Rest</string>
+    <string name="TelebotsPetsEncourage">Cheer up</string>
+    <string name="TelebotsPetsScannerTitle">Create from an object</string>
+    <string name="TelebotsPetsScannerExplanation">Take a photo of an object or select a picture. On-device image recognition extracts a label and dominant color to generate a unique vector pet. This is not a generative image model.</string>
+    <string name="TelebotsPetsOrigin">Recognized object: %1$s</string>
+    <string name="TelebotsPetsNoOrigin">Not yet scanned</string>
+    <string name="TelebotsPetsChoosePhoto">Choose a photo</string>
+    <string name="TelebotsPetsCamera">Scan with camera</string>
+    <string name="TelebotsPetsCameraUnavailable">Camera is not available</string>
+    <string name="TelebotsPetsScanFailed">Unable to analyze this picture</string>
+    <string name="TelebotsPetsScanDone">Pet appearance created from your object</string>
+    <string name="TelebotsPetsPrivacy">Optional and private: image analysis runs locally. Photos are discarded; no chats or contacts are read. A generative AI conversation is not yet implemented.</string>
+    <string name="TelebotsPetsReset">Delete local pet data</string>
 </resources>
