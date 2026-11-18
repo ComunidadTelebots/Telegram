@@ -40,6 +40,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BuildVars;
+import org.telegram.messenger.DevicePerformanceProfiles;
 import org.telegram.messenger.LiteMode;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.MessagesController;
@@ -138,6 +139,8 @@ public class LiteModeSettingsActivity extends BaseFragment {
                 boolean value = LiteMode.isEnabledSetting(item.flags);
                 LiteMode.toggleFlag(item.flags, !value);
                 updateValues();
+            } else if (item.viewType == VIEW_TYPE_DEVICE_PROFILE) {
+                presentFragment(new DevicePerformanceSettingsActivity());
             } else if (item.viewType == VIEW_TYPE_SWITCH2) {
                 if (item.type == SWITCH_TYPE_SMOOTH_TRANSITIONS) {
                     SharedPreferences preferences = MessagesController.getGlobalMainSettings();
@@ -242,6 +245,8 @@ public class LiteModeSettingsActivity extends BaseFragment {
             ));
         }
 
+        items.add(Item.asDeviceProfile(LocaleController.getString(R.string.TelebotsPerformanceMenu)));
+        items.add(Item.asInfo(LocaleController.getString(R.string.TelebotsPerformanceNote)));
         items.add(Item.asHeader(LocaleController.getString(R.string.LiteOptionsTitle)));
         items.add(Item.asSwitch(R.drawable.msg2_sticker, LocaleController.getString(R.string.LiteOptionsStickers), LiteMode.FLAGS_ANIMATED_STICKERS));
         if (expanded[0]) {
@@ -336,6 +341,7 @@ public class LiteModeSettingsActivity extends BaseFragment {
     private static final int VIEW_TYPE_SWITCH = 3;
     private static final int VIEW_TYPE_CHECKBOX = 4;
     private static final int VIEW_TYPE_SWITCH2 = 5;
+    private static final int VIEW_TYPE_DEVICE_PROFILE = 6;
 
     public static final int SWITCH_TYPE_SMOOTH_TRANSITIONS = 1;
 
@@ -372,6 +378,8 @@ public class LiteModeSettingsActivity extends BaseFragment {
                 view = new SwitchCell(context);
             } else if (viewType == VIEW_TYPE_SWITCH2) {
                 view = new TextCell(context, 23, false, true, null);
+            } else if (viewType == VIEW_TYPE_DEVICE_PROFILE) {
+                view = new TextCell(context);
             }
             return new RecyclerListView.Holder(view);
         }
@@ -405,6 +413,8 @@ public class LiteModeSettingsActivity extends BaseFragment {
                 final boolean divider = position + 1 < items.size() && items.get(position + 1).viewType != VIEW_TYPE_INFO;
                 SwitchCell switchCell = (SwitchCell) holder.itemView;
                 switchCell.set(item, divider);
+            } else if (viewType == VIEW_TYPE_DEVICE_PROFILE) {
+                ((TextCell) holder.itemView).setText(item.text, true);
             } else if (viewType == VIEW_TYPE_SWITCH2) {
                 TextCell textCell = (TextCell) holder.itemView;
                 if (item.type == SWITCH_TYPE_SMOOTH_TRANSITIONS) {
@@ -430,7 +440,7 @@ public class LiteModeSettingsActivity extends BaseFragment {
 
         @Override
         public boolean isEnabled(RecyclerView.ViewHolder holder) {
-            return holder.getItemViewType() == VIEW_TYPE_CHECKBOX || holder.getItemViewType() == VIEW_TYPE_SWITCH || holder.getItemViewType() == VIEW_TYPE_SWITCH2;
+            return holder.getItemViewType() == VIEW_TYPE_CHECKBOX || holder.getItemViewType() == VIEW_TYPE_SWITCH || holder.getItemViewType() == VIEW_TYPE_SWITCH2 || holder.getItemViewType() == VIEW_TYPE_DEVICE_PROFILE;
         }
     }
 
@@ -999,6 +1009,9 @@ public class LiteModeSettingsActivity extends BaseFragment {
         public static Item asHeader(CharSequence text) {
             return new Item(VIEW_TYPE_HEADER, text, 0, 0, 0);
         }
+        public static Item asDeviceProfile(CharSequence text) {
+            return new Item(VIEW_TYPE_DEVICE_PROFILE, text, 0, 0, 0);
+        }
         public static Item asSlider() {
             return new Item(VIEW_TYPE_SLIDER, null, 0, 0, 0);
         }
@@ -1046,7 +1059,7 @@ public class LiteModeSettingsActivity extends BaseFragment {
                     return false;
                 }
             }
-            if (viewType == VIEW_TYPE_HEADER || viewType == VIEW_TYPE_INFO || viewType == VIEW_TYPE_SWITCH || viewType == VIEW_TYPE_CHECKBOX || viewType == VIEW_TYPE_SWITCH2) {
+            if (viewType == VIEW_TYPE_HEADER || viewType == VIEW_TYPE_INFO || viewType == VIEW_TYPE_SWITCH || viewType == VIEW_TYPE_CHECKBOX || viewType == VIEW_TYPE_SWITCH2 || viewType == VIEW_TYPE_DEVICE_PROFILE) {
                 if (!TextUtils.equals(item.text, text)) {
                     return false;
                 }

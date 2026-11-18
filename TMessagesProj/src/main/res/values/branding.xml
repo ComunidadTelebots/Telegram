@@ -2,4 +2,19 @@
 <resources>
     <string name="ForkAppName" translatable="false">Comunidad Telebots</string>
     <string name="ForkIndependentClient">An independent client using the Telegram API. Not affiliated with or endorsed by Telegram.</string>
+    <string name="TelebotsPerformanceTitle">Device performance</string>
+    <string name="TelebotsPerformanceDevice">Your device</string>
+    <string name="TelebotsPerformanceDetection">Detected capacity: %1$s</string>
+    <string name="TelebotsPerformanceChoose">Choose how the app adapts</string>
+    <string name="TelebotsPerformanceAuto">Automatic (recommended)</string>
+    <string name="TelebotsPerformanceAutoInfo">Use this device's measured capacity</string>
+    <string name="TelebotsPerformanceBasic">Basic</string>
+    <string name="TelebotsPerformanceBasicInfo">Fewer visual effects and animations</string>
+    <string name="TelebotsPerformanceBalanced">Balanced</string>
+    <string name="TelebotsPerformanceBalancedInfo">Moderate effects and battery usage</string>
+    <string name="TelebotsPerformancePowerful">Powerful</string>
+    <string name="TelebotsPerformancePowerfulInfo">More visual effects where hardware allows</string>
+    <string name="TelebotsPerformanceNote">Changes apply to visual effects only. Battery saving still takes priority. Your hardware does not become faster.</string>
+    <string name="TelebotsPerformanceApply">Apply profile</string>
+    <string name="TelebotsPerformanceMenu">Device performance</string>
 </resources>
