@@ -198,8 +198,12 @@ jobs:
           import hashlib, json, os, pathlib, re
           apk = next(pathlib.Path('artifacts').glob('*.apk'))
           line = next(line for line in pathlib.Path(os.environ['RUNNER_TEMP'],'apk-badging.txt').read_text().splitlines() if line.startswith('package: '))
-          fields = dict(re.findall(r"(name|versionCode|versionName)='([^']*)'", line))
-          assert fields['name'] == 'org.comunidadtelebots.' + os.environ['CHANNEL']
+          # Anchor attribute names to whitespace: 'compileSdkVersionCodename'
+          # also ends in 'name' and previously overwrote the real package field.
+          fields = dict(re.findall(r"(?:^|\\s)(name|versionCode|versionName)='([^']*)'", line))
+          expected = 'org.comunidadtelebots.' + os.environ['CHANNEL']
+          if fields.get('name') != expected:
+              raise SystemExit(f"Unexpected APK package: {fields.get('name')!r}, expected {expected!r}")
           assert 0 < int(fields['versionCode']) <= 2100000000
           sha = hashlib.file_digest(apk.open('rb'),'sha256').hexdigest()
           pathlib.Path('artifacts/SHA256SUMS.txt').write_text(sha + '  ' + apk.name + '\n')
