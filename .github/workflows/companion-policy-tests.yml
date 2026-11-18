@@ -1,0 +1,34 @@
+name: Telebots Companion — pruebas de privacidad
+
+on:
+  push:
+    branches: [feature/ai-pets-and-discovery]
+  pull_request:
+    paths:
+      - TMessagesProj/src/main/java/org/telegram/messenger/TelebotsCompanionPolicy.java
+      - TMessagesProj/src/main/java/org/telegram/messenger/TelebotsPetState.java
+      - Tools/tests/TelebotsCompanionPolicyTest.java
+
+permissions:
+  contents: read
+
+jobs:
+  companion-policy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Ejecutar pruebas de mascotas sin conexión ni Android
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/telebots-pet-policy
+          javac -d /tmp/telebots-pet-policy \
+            TMessagesProj/src/main/java/org/telegram/messenger/TelebotsCompanionPolicy.java \
+            TMessagesProj/src/main/java/org/telegram/messenger/TelebotsPetState.java \
+            Tools/tests/TelebotsCompanionPolicyTest.java
+          java -cp /tmp/telebots-pet-policy org.telegram.messenger.TelebotsCompanionPolicyTest
