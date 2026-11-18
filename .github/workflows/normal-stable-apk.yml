@@ -40,6 +40,22 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      - name: Probar el comprobador sin acceder a cuentas
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s Tools/release -p 'test_check_telegram_datacenters.py' -v
+
+      - name: Comprobar que la compilación no activa la depuración
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'buildConfigField "boolean", "DEBUG_VERSION", "false"' TMessagesProj/build.gradle
+          grep -Fq 'buildConfigField "boolean", "DEBUG_PRIVATE_VERSION", "false"' TMessagesProj/build.gradle
+          grep -Fq 'debuggable false' TMessagesProj_App/build.gradle
+          grep -Fq "defaultConfig.applicationId = rootProject.ext.forkApplicationId" TMessagesProj_App/build.gradle
+          echo "Perfil release y paquete de Comunidad Telebots confirmados"
+
       - name: Preparar firma y credenciales sin mostrarlas
         env:
           TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
@@ -90,12 +106,6 @@ jobs:
           pathlib.Path(os.environ['RUNNER_TEMP'],'expected-certificate.sha256').write_text(cert,encoding='ascii')
           PY
 
-      - name: Probar el comprobador sin acceder a cuentas
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 -m unittest discover -s Tools/release -p 'test_check_telegram_datacenters.py' -v
-
       - name: Verificar credenciales y conectividad Telegram (test y producción)
         env:
           TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
@@ -109,16 +119,6 @@ jobs:
             --output artifacts/telegram-dc-network.json
           # Un fallo de TCP es diagnóstico, no equivale a autenticación ni
           # debe bloquear una compilación por una interrupción temporal de red.
-
-      - name: Comprobar que la compilación no activa la depuración
-        shell: bash
-        run: |
-          set -euo pipefail
-          grep -Fq 'buildConfigField "boolean", "DEBUG_VERSION", "false"' TMessagesProj/build.gradle
-          grep -Fq 'buildConfigField "boolean", "DEBUG_PRIVATE_VERSION", "false"' TMessagesProj/build.gradle
-          grep -Fq 'debuggable false' TMessagesProj_App/build.gradle
-          grep -Fq "defaultConfig.applicationId = rootProject.ext.forkApplicationId" TMessagesProj_App/build.gradle
-          echo "Perfil release y paquete de Comunidad Telebots confirmados"
 
       - name: Instalar SDK Android exacto
         shell: bash
