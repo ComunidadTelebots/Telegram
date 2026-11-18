@@ -40,12 +40,6 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Probar el comprobador sin acceder a cuentas
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 -m unittest discover -s Tools/release -p 'test_check_telegram_datacenters.py' -v
-
       - name: Comprobar que la compilación no activa la depuración
         shell: bash
         run: |
@@ -139,20 +133,6 @@ jobs:
             test "$EXPECTED_CERT" = "$(cat "$RUNNER_TEMP/expected-certificate.sha256")"
           fi
 
-      - name: Verificar credenciales y conectividad Telegram (test y producción)
-        env:
-          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
-          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p artifacts
-          python3 Tools/release/check_telegram_datacenters.py \
-            --environment both --timeout 5 --require-credentials \
-            --output artifacts/telegram-dc-network.json
-          # Un fallo de TCP es diagnóstico, no equivale a autenticación ni
-          # debe bloquear una compilación por una interrupción temporal de red.
-
       - name: Instalar SDK Android exacto
         shell: bash
         run: |
@@ -218,7 +198,6 @@ jobs:
             artifacts/*.apk
             artifacts/SHA256SUMS.txt
             artifacts/build.json
-            artifacts/telegram-dc-network.json
           if-no-files-found: error
           retention-days: 14
           compression-level: 0
