@@ -30,4 +30,5 @@
     <string name="TelebotsCompanionReduceMotion">Reducir animaciones y consumo</string>
     <string name="TelebotsCompanionPrivacy">Desactivada por defecto. No lee ni envía mensajes. Excluye chats secretos, grupos y bots. Tócala para interactuar y usa × para ocultarla en un chat.</string>
     <string name="TelebotsCompanionPreview">Vista previa interactiva</string>
+    <string name="TelebotsPetsDuck">Pato</string>
 </resources>
