@@ -182,7 +182,15 @@ jobs:
             universal) ;;
             *) exit 1 ;;
           esac
+          # Every alpha upload requires a fresh Play versionCode.
+          # The module multiplies APP_VERSION_CODE by 10 and adds the ABI code.
+          play_base_code=$((7112 + GITHUB_RUN_NUMBER))
+          if ((play_base_code <= 0 || play_base_code > 210000000)); then
+            echo "::error::Play versionCode out of range"
+            exit 1
+          fi
           java -classpath gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain \
+            "-PAPP_VERSION_CODE=$play_base_code" \
             :TMessagesProj_App:assembleAfatRelease :TMessagesProj_App:bundleAfatRelease \
             :TMessagesProj_App:lintAfatRelease --no-daemon --max-workers=2 --console=plain \
             "-PAPP_CHANNEL=$CHANNEL" -PENABLE_FIREBASE=true -Pkotlin.incremental=false \
