@@ -89,7 +89,8 @@ public class DevicePerformanceSettingsActivity extends BaseFragment {
 
         RadioGroup group = new RadioGroup(context);
         group.setOrientation(RadioGroup.VERTICAL);
-        RadioButton auto = option(context, 100, context.getString(R.string.TelebotsPerformanceAuto),
+        RadioButton auto = option(context, 100,
+                context.getString(R.string.TelebotsPerformanceAuto) + " · " + DevicePerformanceProfiles.deviceLabel(),
                 context.getString(R.string.TelebotsPerformanceAutoInfo));
         RadioButton basic = option(context, 101, context.getString(R.string.TelebotsPerformanceBasic),
                 context.getString(R.string.TelebotsPerformanceBasicInfo));
