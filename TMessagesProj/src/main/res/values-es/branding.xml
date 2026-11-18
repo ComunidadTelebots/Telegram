@@ -31,4 +31,8 @@
     <string name="TelebotsCompanionPrivacy">Desactivada por defecto. No lee ni envía mensajes. Excluye chats secretos, grupos y bots. Tócala para interactuar y usa × para ocultarla en un chat.</string>
     <string name="TelebotsCompanionPreview">Vista previa interactiva</string>
     <string name="TelebotsPetsDuck">Pato</string>
+    <string name="TelebotsPetsBody">Silueta</string>
+    <string name="TelebotsPetsRound">Redondeada</string>
+    <string name="TelebotsPetsSlim">Esbelta</string>
+    <string name="TelebotsPetsTuft">Mechón de pelo</string>
 </resources>
