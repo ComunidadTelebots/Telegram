@@ -144,6 +144,20 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
                 LocaleController.getString(R.string.Page4Message),
                 LocaleController.getString(R.string.Page6Message)
         };
+        // DEV branding only: keep the existing app logo, artwork and watermarks unchanged.
+        if ("org.comunidadtelebots.dev".equals(ApplicationLoader.applicationContext.getPackageName())) {
+            titles = new CharSequence[]{
+                    "Comunidad Telebots", "Mensajería", "Comunidad", "Privacidad", "Funciones", "Sincronización"
+            };
+            messages = new String[]{
+                    "Cliente independiente que utiliza la API de Telegram.",
+                    "Comunícate con tus contactos a través de Telegram.",
+                    "Participa en grupos, canales y conversaciones.",
+                    "Controla tus ajustes de privacidad y seguridad.",
+                    "Disfruta de mensajes, llamadas y multimedia.",
+                    "Accede a tus chats desde tus dispositivos."
+            };
+        }
         return true;
     }
 
