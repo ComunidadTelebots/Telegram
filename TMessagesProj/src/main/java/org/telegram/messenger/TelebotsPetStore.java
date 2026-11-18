@@ -56,11 +56,11 @@ public final class TelebotsPetStore {
     }
 
     public static int species() {
-        return Math.max(0, Math.min(2, prefs().getInt(PREFIX + "species", 0)));
+        return Math.max(0, Math.min(3, prefs().getInt(PREFIX + "species", 0)));
     }
 
     public static void setSpecies(int species) {
-        if (species < 0 || species > 2) throw new IllegalArgumentException("Invalid pet species");
+        if (species < 0 || species > 3) throw new IllegalArgumentException("Invalid pet species");
         prefs().edit().putInt(PREFIX + "species", species).apply();
     }
 
