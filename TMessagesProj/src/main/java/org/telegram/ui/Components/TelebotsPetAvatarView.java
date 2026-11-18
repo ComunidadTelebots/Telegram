@@ -12,6 +12,8 @@ public final class TelebotsPetAvatarView extends View {
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private int species;
     private int color;
+    private int bodyStyle;
+    private boolean hairTuft;
 
     public TelebotsPetAvatarView(Context context) {
         super(context);
@@ -20,6 +22,12 @@ public final class TelebotsPetAvatarView extends View {
     public void setPet(int species, int color) {
         this.species = Math.max(0, Math.min(3, species));
         this.color = color;
+        invalidate();
+    }
+
+    public void setAppearance(int bodyStyle, boolean hairTuft) {
+        this.bodyStyle = bodyStyle == 1 ? 1 : 0;
+        this.hairTuft = hairTuft;
         invalidate();
     }
 
@@ -48,7 +56,15 @@ public final class TelebotsPetAvatarView extends View {
             earRight.lineTo(113, 60); earRight.close();
             canvas.drawPath(earRight, paint);
         }
-        canvas.drawCircle(100, 106, 71, paint);
+        canvas.drawOval(bodyStyle == 1 ? 43 : 29, bodyStyle == 1 ? 31 : 35,
+                bodyStyle == 1 ? 157 : 171, bodyStyle == 1 ? 177 : 177, paint);
+        if (hairTuft) {
+            Path tuft = new Path();
+            tuft.moveTo(78, 49); tuft.lineTo(83, 12);
+            tuft.lineTo(101, 40); tuft.lineTo(113, 8);
+            tuft.lineTo(120, 47); tuft.close();
+            canvas.drawPath(tuft, paint);
+        }
         paint.setColor(Color.WHITE);
         canvas.drawOval(58, 91, 90, 130, paint);
         canvas.drawOval(110, 91, 142, 130, paint);
