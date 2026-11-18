@@ -1,4 +1,4 @@
-name: Comunidad Telebots APK DEV (sin depuración)
+name: Comunidad Telebots APK DEV (sin depuración + DC check)
 run-name: Comunidad Telebots dev · arm64-v8a · ${{ github.ref_name }}
 
 # Release candidate: compile the non-debuggable dev package using protected secrets.
@@ -90,6 +90,26 @@ jobs:
           pathlib.Path(os.environ['RUNNER_TEMP'],'expected-certificate.sha256').write_text(cert,encoding='ascii')
           PY
 
+      - name: Probar el comprobador sin acceder a cuentas
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s Tools/release -p 'test_check_telegram_datacenters.py' -v
+
+      - name: Verificar credenciales y conectividad Telegram (test y producción)
+        env:
+          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
+          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          python3 Tools/release/check_telegram_datacenters.py \
+            --environment both --timeout 5 --require-credentials \
+            --output artifacts/telegram-dc-network.json
+          # Un fallo de TCP es diagnóstico, no equivale a autenticación ni
+          # debe bloquear una compilación por una interrupción temporal de red.
+
       - name: Comprobar que la compilación no activa la depuración
         shell: bash
         run: |
@@ -114,7 +134,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          case "$CHANNEL" in dev|alfa|beta|rc|dev) ;; *) exit 1 ;; esac
+          case "$CHANNEL" in dev) ;; *) exit 1 ;; esac
           abi_args=()
           case "$BUILD_ABI" in
             arm64-v8a) abi_args=(-Pandroid.injected.build.abi=arm64-v8a) ;;
@@ -161,6 +181,7 @@ jobs:
             artifacts/*.apk
             artifacts/SHA256SUMS.txt
             artifacts/build.json
+            artifacts/telegram-dc-network.json
           if-no-files-found: error
           retention-days: 14
           compression-level: 0
