@@ -385,13 +385,6 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
             if (startPressed) {
                 return;
             }
-            // Bloqueo de inicio de sesión - Conexión con Moonbot Dev
-            if (!org.telegram.messenger.ReleaseAccess.allowed()) {
-                android.content.Intent moonbotIntent = new android.content.Intent(context, org.telegram.ui.ReleaseAccessActivity.class);
-                moonbotIntent.addFlags(android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                context.startActivity(moonbotIntent);
-                return;
-            }
             startPressed = true;
             presentFragment(new LoginActivity().setIntroView(frameContainerView, startMessagingButton), true);
             destroyed = true;
