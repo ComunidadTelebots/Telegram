@@ -64,6 +64,23 @@ public final class TelebotsPetStore {
         prefs().edit().putInt(PREFIX + "species", species).apply();
     }
 
+    public static int bodyStyle() {
+        return Math.max(0, Math.min(1, prefs().getInt(PREFIX + "body_style", 0)));
+    }
+
+    public static void setBodyStyle(int value) {
+        if (value < 0 || value > 1) throw new IllegalArgumentException("Invalid body style");
+        prefs().edit().putInt(PREFIX + "body_style", value).apply();
+    }
+
+    public static boolean hairTuft() {
+        return prefs().getBoolean(PREFIX + "hair_tuft", false);
+    }
+
+    public static void setHairTuft(boolean enabled) {
+        prefs().edit().putBoolean(PREFIX + "hair_tuft", enabled).apply();
+    }
+
     public static int color() {
         return prefs().getInt(PREFIX + "color", 0xff58c7b1);
     }
