@@ -88,7 +88,8 @@ dependencies {
     implementation 'com.google.android.gms:play-services-safetynet:18.0.1'
 
     implementation 'com.google.android.gms:play-services-mlkit-subject-segmentation:16.0.0-beta1'
-    implementation 'com.google.android.gms:play-services-mlkit-image-labeling:16.0.8'
+    // Bundled on-device image labels: scan personal objects without uploading photos.
+    implementation 'com.google.mlkit:image-labeling:17.0.9'
 
     implementation "androidx.credentials:credentials:1.6.0-alpha04"
     implementation "androidx.credentials:credentials-play-services-auth:1.6.0-alpha04"
