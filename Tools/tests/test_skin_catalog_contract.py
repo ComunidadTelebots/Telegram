@@ -33,7 +33,7 @@ SKINS = [
 
 
 def java_return(source, method):
-    pattern = r"\\b" + re.escape(method) + r"\\s*\\(\\s*\\)\\s*\\{\\s*return\\s+([^;]+);"
+    pattern = r"\b" + re.escape(method) + r"\s*\(\s*\)\s*\{\s*return\s+([^;]+);"
     result = re.search(pattern, source)
     if result is None:
         raise AssertionError("Missing literal return for " + method)
@@ -47,7 +47,7 @@ class SkinCatalogContractTests(unittest.TestCase):
 
     def test_registered_order_and_identity(self):
         manager = (ROOT / "TMessagesProj/src/main/java/org/telegram/ui/skins/SkinManager.java").read_text(encoding="utf-8")
-        registered = re.findall(r"skins\\.add\\(new\\s+(\\w+)\\(\\)\\);", manager)
+        registered = re.findall(r"skins\.add\(new\s+(\w+)\(\)\);", manager)
         self.assertEqual([entry[1] for entry in SKINS], registered)
 
     def test_each_profile_matches_frozen_geometry_and_dividers(self):
@@ -71,7 +71,7 @@ class SkinCatalogContractTests(unittest.TestCase):
         ]
         for name, persisted_id, duration, distance in expected:
             with self.subTest(motion=name):
-                pattern = re.escape(name) + r'\\s*\\(\\s*"' + re.escape(persisted_id) + r'"\\s*,\\s*' + str(duration) + r'\\s*,\\s*' + str(distance) + r'\\s*\\)'
+                pattern = re.escape(name) + r'\s*\(\s*"' + re.escape(persisted_id) + r'"\s*,\s*' + str(duration) + r'\s*,\s*' + str(distance) + r'\s*\)'
                 self.assertRegex(source, pattern)
 
 
