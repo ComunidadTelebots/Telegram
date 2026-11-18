@@ -38,6 +38,7 @@ public class CommunitySettingsActivity extends BaseFragment {
                 entry(body,R.string.TelebotsDesign,()->open(DESIGN));
                 entry(body,R.string.TelebotsReading,()->open(READING));
                 entry(body,R.string.TelebotsConnections,()->open(CONNECTIONS));
+                entry(body,R.string.TelebotsPetsTitle,()->presentFragment(new CommunityPetsActivity()));
                 entry(body,R.string.TelebotsPhrases,()->presentFragment(new CommunityQuickPhrasesActivity()));
                 entry(body,R.string.TelebotsDownloads,()->presentFragment(new CommunityDownloadsActivity()));
                 entry(body,"⚡ Telebots Mesh P2P Hub",()->presentFragment(new TelebotsMeshDashboardActivity()));
