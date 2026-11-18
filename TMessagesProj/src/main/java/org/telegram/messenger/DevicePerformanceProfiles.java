@@ -22,7 +22,7 @@ public final class DevicePerformanceProfiles {
     }
 
     public static boolean valid(int value) {
-        return value >= AUTO && value <= POWERFUL;
+        return DevicePerformancePolicy.isValid(value);
     }
 
     public static int detectedClass() {
@@ -31,11 +31,7 @@ public final class DevicePerformanceProfiles {
 
     /** Never promote a device beyond its measured capability. */
     public static int effectiveClass(int selection, int detected) {
-        int safeDetected = Math.max(BASIC, Math.min(POWERFUL, detected));
-        if (selection == AUTO) {
-            return safeDetected;
-        }
-        return Math.min(Math.max(BASIC, Math.min(POWERFUL, selection)), safeDetected);
+        return DevicePerformancePolicy.effectiveClass(selection, detected);
     }
 
     public static String deviceLabel() {
