@@ -18,7 +18,7 @@ public final class TelebotsPetAvatarView extends View {
     }
 
     public void setPet(int species, int color) {
-        this.species = Math.max(0, Math.min(2, species));
+        this.species = Math.max(0, Math.min(3, species));
         this.color = color;
         invalidate();
     }
@@ -33,7 +33,9 @@ public final class TelebotsPetAvatarView extends View {
 
         // Ear shapes change with the selected species.
         paint.setColor(color);
-        if (species == 1) {
+        if (species == 3) {
+            // The duck keeps a rounded silhouette without external beta assets.
+        } else if (species == 1) {
             canvas.drawOval(30, 43, 74, 119, paint);
             canvas.drawOval(126, 43, 170, 119, paint);
         } else {
@@ -53,8 +55,12 @@ public final class TelebotsPetAvatarView extends View {
         paint.setColor(0xff142436);
         canvas.drawCircle(78, 111, 8, paint);
         canvas.drawCircle(122, 111, 8, paint);
-        paint.setColor(species == 2 ? 0xff54362c : 0xffeb7c91);
-        canvas.drawCircle(100, 135, 9, paint);
+        paint.setColor(species == 3 ? 0xfff28b38 : species == 2 ? 0xff54362c : 0xffeb7c91);
+        if (species == 3) {
+            canvas.drawOval(79, 127, 121, 146, paint);
+        } else {
+            canvas.drawCircle(100, 135, 9, paint);
+        }
         paint.setColor(0xff142436);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(4);
