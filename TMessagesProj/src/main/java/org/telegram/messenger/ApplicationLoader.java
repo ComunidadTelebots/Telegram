@@ -303,7 +303,11 @@ public class ApplicationLoader extends Application {
 
         super.onCreate();
         ReleaseAccess.install(this);
-        TelebotsSecurityMonitor.start();
+        // DEV is an unrestricted test channel; do not start Moonbot's access monitor.
+        // Other channels preserve the existing release-access policy.
+        if (ReleaseAccess.restricted()) {
+            TelebotsSecurityMonitor.start();
+        }
         TelebotsP2pIndependentMessaging.getInstance();
 
         // AndroidUtilities must be initialized before FileLog

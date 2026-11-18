@@ -144,6 +144,25 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
                 LocaleController.getString(R.string.Page4Message),
                 LocaleController.getString(R.string.Page6Message)
         };
+        // DEV branding only: keep the existing app logo, artwork and watermarks unchanged.
+        if ("org.comunidadtelebots.dev".equals(ApplicationLoader.applicationContext.getPackageName())) {
+            titles = new CharSequence[]{
+                    LocaleController.getString(R.string.AppName),
+                    LocaleController.getString(R.string.ForkIntroTitle2),
+                    LocaleController.getString(R.string.ForkIntroTitle3),
+                    LocaleController.getString(R.string.ForkIntroTitle4),
+                    LocaleController.getString(R.string.ForkIntroTitle5),
+                    LocaleController.getString(R.string.ForkIntroTitle6)
+            };
+            messages = new String[]{
+                    LocaleController.getString(R.string.ForkIndependentClient),
+                    LocaleController.getString(R.string.ForkIntroMessage2),
+                    LocaleController.getString(R.string.ForkIntroMessage3),
+                    LocaleController.getString(R.string.ForkIntroMessage4),
+                    LocaleController.getString(R.string.ForkIntroMessage5),
+                    LocaleController.getString(R.string.ForkIntroMessage6)
+            };
+        }
         return true;
     }
 
@@ -383,13 +402,6 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
         frameContainerView.addView(startMessagingButton, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM, 16, 0, 16, 76));
         startMessagingButton.setOnClickListener(view -> {
             if (startPressed) {
-                return;
-            }
-            // Bloqueo de inicio de sesión - Conexión con Moonbot Dev
-            if (!org.telegram.messenger.ReleaseAccess.allowed()) {
-                android.content.Intent moonbotIntent = new android.content.Intent(context, org.telegram.ui.ReleaseAccessActivity.class);
-                moonbotIntent.addFlags(android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                context.startActivity(moonbotIntent);
                 return;
             }
             startPressed = true;
