@@ -87,6 +87,8 @@ jobs:
           destination.write_text(source, encoding='utf-8')
           PY
           mkdir -p TMessagesProj/config "$GRADLE_USER_HOME"
+          # A legacy keystore is tracked by the Telegram source; never reuse it for DEV.
+          rm -f -- TMessagesProj/config/release.keystore
           if [[ -n "$KEYSTORE_BASE64" || -n "$STORE_PASSWORD" || -n "$KEY_ALIAS" || -n "$KEY_PASSWORD" || -n "$CERT_SHA256" ]]; then
             # Never mix permanent and disposable credentials.
             for key in KEYSTORE_BASE64 STORE_PASSWORD KEY_ALIAS KEY_PASSWORD CERT_SHA256; do
@@ -111,7 +113,7 @@ jobs:
             keytool -genkeypair -noprompt -keystore TMessagesProj/config/release.keystore \
               -alias "$SIGN_KEY_ALIAS" -storepass "$SIGN_STORE_PASSWORD" \
               -keypass "$SIGN_KEY_PASSWORD" -keyalg RSA -keysize 3072 \
-              -validity 30 -dname "CN=Comunidad Telebots DEV, OU=Testing, O=Comunidad Telebots, C=ES" >/dev/null
+              -validity 365 -dname "CN=Comunidad Telebots DEV, OU=Testing, O=Comunidad Telebots, C=ES"
             echo "SIGNING_MODE=temporary" >> "$GITHUB_ENV"
             echo "::warning::Temporary DEV signature: this APK cannot update previous builds signed with another key. Uninstall before replacing; local app data may be lost."
           fi
