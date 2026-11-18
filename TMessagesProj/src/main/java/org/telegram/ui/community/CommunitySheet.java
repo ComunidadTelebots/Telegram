@@ -86,6 +86,7 @@ import org.telegram.ui.community.sheet.CommunityAddOptionsSheet;
 import org.telegram.ui.community.sheet.CommunityInviteOnlySheet;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import me.vkryl.android.animator.BoolAnimator;
 import me.vkryl.android.animator.FactorAnimator;
@@ -415,18 +416,27 @@ public class CommunitySheet extends BottomSheet implements NotificationCenter.No
             items.add(UItem.asSpace(0, dp(56)));
         }
         if (chatsToAddToCommunity != null) {
-            final String query = search && lastSearchChatsString != null ?
-                lastSearchChatsString.toLowerCase() : null;
+            final String query = search && lastSearchChatsString != null
+                ? lastSearchChatsString.trim().toLowerCase(Locale.ROOT) : "";
+            final boolean usernameOnly = query.startsWith("@");
+            final String usernameQuery = usernameOnly ? query.substring(1) : query;
+            final LocaleController localeController = LocaleController.getInstance();
+            final String transliteratedQuery = usernameOnly ? "" : localeController.getTranslitString(query);
 
             for (TLRPC.Chat chat : chatsToAddToCommunity) {
-                if (search && !TextUtils.isEmpty(query)) {
-                    if (chat.title != null) {
-                        String title = chat.title.toLowerCase();
-                        if (title.contains(query)) {
-                            items.add(UItem.asProfileCell(chat));
-                        }
-                    }
-                } else {
+                if (query.isEmpty()) {
+                    items.add(UItem.asProfileCell(chat));
+                    continue;
+                }
+
+                final String username = ChatObject.getPublicUsername(chat);
+                final boolean matchesUsername = !usernameQuery.isEmpty() && username != null
+                    && username.toLowerCase(Locale.ROOT).contains(usernameQuery);
+                final String title = chat.title == null ? "" : chat.title.toLowerCase(Locale.ROOT);
+                final boolean matchesTitle = !usernameOnly && (title.contains(query)
+                    || (!TextUtils.isEmpty(transliteratedQuery)
+                        && localeController.getTranslitString(title).contains(transliteratedQuery)));
+                if (matchesUsername || matchesTitle) {
                     items.add(UItem.asProfileCell(chat));
                 }
             }
