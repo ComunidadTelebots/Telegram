@@ -47,6 +47,9 @@ public class CommunityPetsActivity extends BaseFragment {
     private TextView scanInfo;
     private EditText name;
     private Spinner species;
+    private Spinner bodyStyle;
+    private CheckBox hairTuft;
+    private TelebotsCompanionOverlayView previewPet;
     private CheckBox enabled;
     private Button feed;
     private Button play;
@@ -84,6 +87,8 @@ public class CommunityPetsActivity extends BaseFragment {
                         ? LocaleController.getString(R.string.TelebotsPetsNoOrigin)
                         : TelebotsPetStore.originLabel()));
         avatar.setPet(TelebotsPetStore.species(), TelebotsPetStore.color());
+        avatar.setAppearance(TelebotsPetStore.bodyStyle(), TelebotsPetStore.hairTuft());
+        if (previewPet != null) previewPet.refreshAppearance();
         boolean active = TelebotsPetStore.enabled();
         if (feed != null) feed.setEnabled(active);
         if (play != null) play.setEnabled(active);
@@ -100,6 +105,8 @@ public class CommunityPetsActivity extends BaseFragment {
     private void persistAppearance() {
         TelebotsPetStore.setName(name.getText().toString());
         TelebotsPetStore.setSpecies(species.getSelectedItemPosition());
+        TelebotsPetStore.setBodyStyle(bodyStyle.getSelectedItemPosition());
+        TelebotsPetStore.setHairTuft(hairTuft.isChecked());
         refresh();
     }
 
@@ -155,10 +162,10 @@ public class CommunityPetsActivity extends BaseFragment {
         body.addView(previewLabel);
         FrameLayout preview = new FrameLayout(context);
         preview.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundGray));
-        TelebotsCompanionOverlayView demoPet = new TelebotsCompanionOverlayView(context);
+        previewPet = new TelebotsCompanionOverlayView(context);
         FrameLayout.LayoutParams demoParams = new FrameLayout.LayoutParams(dp(92), dp(92),
                 Gravity.CENTER);
-        preview.addView(demoPet, demoParams);
+        preview.addView(previewPet, demoParams);
         body.addView(preview, new LinearLayout.LayoutParams(-1, dp(136)));
 
         avatar = new TelebotsPetAvatarView(context);
@@ -184,6 +191,20 @@ public class CommunityPetsActivity extends BaseFragment {
                 }));
         species.setSelection(TelebotsPetStore.species());
         body.addView(species);
+        body.addView(label(context, LocaleController.getString(R.string.TelebotsPetsBody)));
+        bodyStyle = new Spinner(context);
+        bodyStyle.setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item,
+                new String[]{
+                        LocaleController.getString(R.string.TelebotsPetsRound),
+                        LocaleController.getString(R.string.TelebotsPetsSlim)
+                }));
+        bodyStyle.setSelection(TelebotsPetStore.bodyStyle());
+        body.addView(bodyStyle);
+        hairTuft = new CheckBox(context);
+        hairTuft.setMinHeight(dp(52));
+        hairTuft.setText(LocaleController.getString(R.string.TelebotsPetsTuft));
+        hairTuft.setChecked(TelebotsPetStore.hairTuft());
+        body.addView(hairTuft);
         body.addView(button(context, R.string.TelebotsPetsSave, this::persistAppearance));
 
         status = label(context, "");
@@ -230,6 +251,8 @@ public class CommunityPetsActivity extends BaseFragment {
             enabled.setChecked(false);
             name.setText(TelebotsPetStore.name());
             species.setSelection(TelebotsPetStore.species());
+            bodyStyle.setSelection(TelebotsPetStore.bodyStyle());
+            hairTuft.setChecked(TelebotsPetStore.hairTuft());
             refresh();
         }));
         refresh();
