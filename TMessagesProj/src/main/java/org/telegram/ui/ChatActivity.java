@@ -9003,6 +9003,14 @@ public class ChatActivity extends BaseFragment implements
         Timer.finish(t);
 
         org.telegram.ui.skins.ClientChrome.apply(actionBar, avatarContainer, getResourceProvider());
+        // Optional virtual companion, modeled after Telegram's experimental beta overlay.
+        // Only direct non-secret chats; never inspect message content.
+        if (currentUser != null && !currentUser.bot && !UserObject.isUserSelf(currentUser)
+                && currentChat == null && currentEncryptedChat == null
+                && chatMode == 0 && !inPreviewMode && !inBubbleMode && !isInsideContainer) {
+            org.telegram.ui.Components.TelebotsCompanionOverlayView.attach(
+                    contentView, dialog_id, true, false, currentUser.id == 777000, false);
+        }
         return fragmentView;
     }
 
