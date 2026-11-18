@@ -19,6 +19,31 @@ public final class TelebotsPetStore {
         prefs().edit().putBoolean(PREFIX + "enabled", enabled).apply();
     }
 
+    /** Chats are disabled by default, separately from the virtual pet. */
+    public static boolean companionInChats() {
+        return prefs().getBoolean(PREFIX + "companion_chats", false);
+    }
+
+    public static void setCompanionInChats(boolean enabled) {
+        prefs().edit().putBoolean(PREFIX + "companion_chats", enabled).apply();
+    }
+
+    public static boolean reduceMotion() {
+        return prefs().getBoolean(PREFIX + "reduce_motion", false);
+    }
+
+    public static void setReduceMotion(boolean enabled) {
+        prefs().edit().putBoolean(PREFIX + "reduce_motion", enabled).apply();
+    }
+
+    public static boolean isChatHidden(long dialogId) {
+        return prefs().getBoolean(PREFIX + "chat_hidden_" + dialogId, false);
+    }
+
+    public static void setChatHidden(long dialogId, boolean hidden) {
+        prefs().edit().putBoolean(PREFIX + "chat_hidden_" + dialogId, hidden).apply();
+    }
+
     public static String name() {
         String stored = prefs().getString(PREFIX + "name", "Nube");
         return stored == null || stored.trim().isEmpty() ? "Nube" : stored;
@@ -76,6 +101,8 @@ public final class TelebotsPetStore {
                 .remove(PREFIX + "species").remove(PREFIX + "color")
                 .remove(PREFIX + "origin").remove(PREFIX + "mood")
                 .remove(PREFIX + "energy").remove(PREFIX + "affection")
-                .remove(PREFIX + "interactions").apply();
+                .remove(PREFIX + "interactions")
+                .remove(PREFIX + "companion_chats")
+                .remove(PREFIX + "reduce_motion").apply();
     }
 }
