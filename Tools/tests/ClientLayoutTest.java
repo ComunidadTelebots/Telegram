@@ -22,6 +22,11 @@ public final class ClientLayoutTest {
         check(ClientLayout.UNIGRAM.bottomInsetDp(80) == 0, "Side bar removes obsolete bottom inset");
         check(ClientLayout.IOS.extentDp(2f) > ClientLayout.IOS.extentDp(1f), "Large font expands navigation");
         check(ClientLayout.ANDROID.extentDp(2f) == 0, "Native layout unchanged");
+        check(ClientLayout.IOS.extentDp(Float.POSITIVE_INFINITY) == 56, "Infinite font scale cannot overflow bottom nav");
+        check(ClientLayout.WEB_A.extentDp(Float.NEGATIVE_INFINITY) == 64, "Negative infinite scale cannot overflow side nav");
+        check(ClientLayout.WEB_K.extentDp(Float.NaN) == 60, "NaN scale cannot overflow side nav");
+        check(ClientLayout.UNIGRAM.extentDp(0.5f) == 72, "Smaller finite fonts retain base width");
+        check(ClientLayout.TELEGRAM_X.extentDp(3f) == 104, "Large valid fonts still expand top nav");
         check(ClientLayout.IOS.bottomInsetDp(80, 2f) == ClientLayout.IOS.extentDp(2f), "Insets follow scaled bar");
         System.out.println("Client layout and inset regression tests passed");
     }
