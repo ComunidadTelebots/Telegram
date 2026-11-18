@@ -25,4 +25,9 @@
     <string name="TelebotsPetsScanDone">Aspecto creado a partir del objeto</string>
     <string name="TelebotsPetsPrivacy">Opcional y privado: la imagen se analiza en el dispositivo y se descarta. No accede a chats ni contactos. La conversación generativa con IA aún no está implementada.</string>
     <string name="TelebotsPetsReset">Eliminar datos locales de la mascota</string>
+    <string name="TelebotsCompanionSettings">Mascota en las conversaciones</string>
+    <string name="TelebotsCompanionInChats">Mostrar en chats privados no secretos</string>
+    <string name="TelebotsCompanionReduceMotion">Reducir animaciones y consumo</string>
+    <string name="TelebotsCompanionPrivacy">Desactivada por defecto. No lee ni envía mensajes. Excluye chats secretos, grupos y bots. Tócala para interactuar y usa × para ocultarla en un chat.</string>
+    <string name="TelebotsCompanionPreview">Vista previa interactiva</string>
 </resources>
