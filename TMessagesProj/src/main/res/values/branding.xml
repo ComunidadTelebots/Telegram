@@ -26,4 +26,9 @@
     <string name="TelebotsPetsScanDone">Pet appearance created from your object</string>
     <string name="TelebotsPetsPrivacy">Optional and private: image analysis runs locally. Photos are discarded; no chats or contacts are read. A generative AI conversation is not yet implemented.</string>
     <string name="TelebotsPetsReset">Delete local pet data</string>
+    <string name="TelebotsCompanionSettings">Companion in conversations</string>
+    <string name="TelebotsCompanionInChats">Show in private non-secret chats</string>
+    <string name="TelebotsCompanionReduceMotion">Reduce animations and battery use</string>
+    <string name="TelebotsCompanionPrivacy">Off by default. Never reads or sends messages. Secret chats, groups and bots are excluded. Tap to interact; use × to hide in a specific chat.</string>
+    <string name="TelebotsCompanionPreview">Interactive preview</string>
 </resources>
