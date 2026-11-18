@@ -179,7 +179,8 @@ public class CommunityPetsActivity extends BaseFragment {
                 new String[]{
                         LocaleController.getString(R.string.TelebotsPetsCat),
                         LocaleController.getString(R.string.TelebotsPetsDog),
-                        LocaleController.getString(R.string.TelebotsPetsFox)
+                        LocaleController.getString(R.string.TelebotsPetsFox),
+                        LocaleController.getString(R.string.TelebotsPetsDuck)
                 }));
         species.setSelection(TelebotsPetStore.species());
         body.addView(species);
