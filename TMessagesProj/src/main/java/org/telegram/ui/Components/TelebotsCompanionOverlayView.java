@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.SharedConfig;
+import org.telegram.messenger.LiteMode;
 import org.telegram.messenger.TelebotsCompanionPolicy;
 import org.telegram.messenger.TelebotsPetState;
 import org.telegram.messenger.TelebotsPetStore;
@@ -51,6 +52,15 @@ public final class TelebotsCompanionOverlayView extends FrameLayout {
         LayoutParams indicatorParams = new LayoutParams(dp(27), dp(27),
                 Gravity.BOTTOM | Gravity.RIGHT);
         addView(indicator, indicatorParams);
+        TextView hide = new TextView(context);
+        hide.setText("×");
+        hide.setTextSize(16);
+        hide.setGravity(Gravity.CENTER);
+        hide.setTextColor(Color.WHITE);
+        hide.setContentDescription("Ocultar mascota en este chat");
+        hide.setBackgroundColor(0xaa253044);
+        LayoutParams hideParams = new LayoutParams(dp(30), dp(30), Gravity.TOP | Gravity.RIGHT);
+        addView(hide, hideParams);
         setContentDescription(TelebotsPetStore.name() + ", mascota interactiva");
         setOnClickListener(v -> react());
     }
@@ -63,7 +73,7 @@ public final class TelebotsCompanionOverlayView extends FrameLayout {
         TelebotsPetState next = TelebotsPetStore.load().interact(TelebotsPetState.ENCOURAGE);
         TelebotsPetStore.save(next);
         int duration = TelebotsCompanionPolicy.animationDurationMs(
-                TelebotsPetStore.reduceMotion(), false, SharedConfig.isLowRamDevice());
+                TelebotsPetStore.reduceMotion(), LiteMode.isPowerSaverApplied(), SharedConfig.isLowRamDevice());
         indicator.setText(next.interactions % 2 == 0 ? "♥" : "✦");
         if (duration == 0) return;
         avatar.animate().cancel();
@@ -137,6 +147,11 @@ public final class TelebotsCompanionOverlayView extends FrameLayout {
         params.rightMargin = dp(12);
         params.bottomMargin = dp(96);
         parent.addView(pet, params);
+        View hide = pet.getChildAt(2);
+        hide.setOnClickListener(v -> {
+            TelebotsPetStore.setChatHidden(dialogId, true);
+            parent.removeView(pet);
+        });
         return pet;
     }
 }
