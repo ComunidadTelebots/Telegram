@@ -1,0 +1,71 @@
+name: QA de cambios Android (sin secretos)
+
+on:
+  pull_request:
+    branches: [dev]
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  repository-hygiene:
+    name: Integridad del repositorio y cambios
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Obtener el código
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Comprobar integridad y archivos sensibles
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import pathlib
+          import subprocess
+          import sys
+
+          files = subprocess.check_output(
+              ["git", "ls-files", "-z"]
+          ).decode("utf-8", errors="replace").split("\0")
+          tracked = set(filter(None, files))
+
+          required = [
+              "gradlew",
+              "gradle/wrapper/gradle-wrapper.jar",
+              "gradle/wrapper/gradle-wrapper.properties",
+              "settings.gradle",
+          ]
+          missing = [path for path in required if path not in tracked]
+          if missing:
+              print("Faltan archivos necesarios para compilar:", ", ".join(missing))
+              sys.exit(1)
+
+          forbidden = [
+              "TMessagesProj/src/main/java/org/telegram/messenger/BuildVars.java",
+              "TMessagesProj/config/release.keystore",
+          ]
+          exposed = [path for path in forbidden if path in tracked]
+          if exposed:
+              print("Archivos sensibles incluidos en Git:", ", ".join(exposed))
+              sys.exit(1)
+
+          print("OK: estructura Gradle mínima y secretos de firma fuera de Git")
+          PY
+
+      - name: Comprobar espacios y conflictos de integración
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            git diff --check "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}"
+          else
+            git diff-tree --check --no-commit-id -r HEAD
+          fi
+          echo "OK: comprobación de diferencias completada"
