@@ -96,13 +96,12 @@ public final class TelebotsPetStore {
     }
 
     public static void clear() {
-        prefs().edit()
-                .remove(PREFIX + "enabled").remove(PREFIX + "name")
-                .remove(PREFIX + "species").remove(PREFIX + "color")
-                .remove(PREFIX + "origin").remove(PREFIX + "mood")
-                .remove(PREFIX + "energy").remove(PREFIX + "affection")
-                .remove(PREFIX + "interactions")
-                .remove(PREFIX + "companion_chats")
-                .remove(PREFIX + "reduce_motion").apply();
+        SharedPreferences.Editor editor = prefs().edit();
+        for (String key : prefs().getAll().keySet()) {
+            if (key.startsWith(PREFIX)) {
+                editor.remove(key);
+            }
+        }
+        editor.apply();
     }
 }
