@@ -13,6 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
@@ -29,6 +30,7 @@ import org.telegram.ui.ActionBar.ActionBar;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.TelebotsPetAvatarView;
+import org.telegram.ui.Components.TelebotsCompanionOverlayView;
 
 import java.io.InputStream;
 
@@ -126,6 +128,38 @@ public class CommunityPetsActivity extends BaseFragment {
             refresh();
         });
         body.addView(enabled);
+
+        TextView section = label(context, LocaleController.getString(R.string.TelebotsCompanionSettings));
+        section.setTextSize(18);
+        body.addView(section);
+
+        CheckBox inChats = new CheckBox(context);
+        inChats.setText(LocaleController.getString(R.string.TelebotsCompanionInChats));
+        inChats.setMinHeight(dp(52));
+        inChats.setChecked(TelebotsPetStore.companionInChats());
+        inChats.setOnCheckedChangeListener((v, checked) ->
+                TelebotsPetStore.setCompanionInChats(checked));
+        body.addView(inChats);
+
+        CheckBox reduceMotion = new CheckBox(context);
+        reduceMotion.setText(LocaleController.getString(R.string.TelebotsCompanionReduceMotion));
+        reduceMotion.setMinHeight(dp(52));
+        reduceMotion.setChecked(TelebotsPetStore.reduceMotion());
+        reduceMotion.setOnCheckedChangeListener((v, checked) ->
+                TelebotsPetStore.setReduceMotion(checked));
+        body.addView(reduceMotion);
+        body.addView(label(context, LocaleController.getString(R.string.TelebotsCompanionPrivacy)));
+
+        TextView previewLabel = label(context, LocaleController.getString(R.string.TelebotsCompanionPreview));
+        previewLabel.setTextSize(17);
+        body.addView(previewLabel);
+        FrameLayout preview = new FrameLayout(context);
+        preview.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundGray));
+        TelebotsCompanionOverlayView demoPet = new TelebotsCompanionOverlayView(context);
+        FrameLayout.LayoutParams demoParams = new FrameLayout.LayoutParams(dp(92), dp(92),
+                Gravity.CENTER);
+        preview.addView(demoPet, demoParams);
+        body.addView(preview, new LinearLayout.LayoutParams(-1, dp(136)));
 
         avatar = new TelebotsPetAvatarView(context);
         LinearLayout.LayoutParams avatarParams = new LinearLayout.LayoutParams(-1, dp(175));
