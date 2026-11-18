@@ -34,7 +34,13 @@ public enum ClientLayout {
 
     public int extentDp(float fontScale) {
         if (placement == Placement.NATIVE || this == MACOS) return extentDp;
-        return extentDp + (int) Math.ceil(Math.max(0f, fontScale - 1f) * (placement == Placement.SIDE ? 32 : 28));
+        // A malformed font scale must not overflow the navigation size on Android.
+        if (Float.isNaN(fontScale) || Float.isInfinite(fontScale)) return extentDp;
+        // Keep regular accessibility scales unchanged while bounding even finite extremes.
+        // Do the arithmetic in double before narrowing to int to avoid wraparound.
+        double extraDp = Math.ceil(Math.max(0d, (double) fontScale - 1d)
+                * (placement == Placement.SIDE ? 32 : 28));
+        return extentDp + (int) Math.min(extraDp, 512 - extentDp);
     }
 
     public int bottomInsetDp(int original, float fontScale) {
