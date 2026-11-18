@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ForkIndependentClient">Cliente independiente que utiliza la API de Telegram. No está afiliado a Telegram ni cuenta con su respaldo.</string>
+    <string name="ForkIntroTitle2">Mensajería</string>
+    <string name="ForkIntroTitle3">Comunidad</string>
+    <string name="ForkIntroTitle4">Privacidad</string>
+    <string name="ForkIntroTitle5">Funciones</string>
+    <string name="ForkIntroTitle6">Sincronización</string>
+    <string name="ForkIntroMessage2">Habla con tus contactos utilizando la red de Telegram.</string>
+    <string name="ForkIntroMessage3">Participa en grupos, canales y conversaciones.</string>
+    <string name="ForkIntroMessage4">Controla tus ajustes de privacidad y seguridad.</string>
+    <string name="ForkIntroMessage5">Disfruta de mensajes, llamadas y multimedia.</string>
+    <string name="ForkIntroMessage6">Accede a tus chats desde tus dispositivos.</string>
 </resources>
