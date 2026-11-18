@@ -34,6 +34,8 @@ public enum ClientLayout {
 
     public int extentDp(float fontScale) {
         if (placement == Placement.NATIVE || this == MACOS) return extentDp;
+        // A malformed font scale must not overflow the navigation size on Android.
+        if (Float.isNaN(fontScale) || Float.isInfinite(fontScale)) return extentDp;
         return extentDp + (int) Math.ceil(Math.max(0f, fontScale - 1f) * (placement == Placement.SIDE ? 32 : 28));
     }
 
