@@ -32,4 +32,8 @@
     <string name="TelebotsCompanionPrivacy">Off by default. Never reads or sends messages. Secret chats, groups and bots are excluded. Tap to interact; use × to hide in a specific chat.</string>
     <string name="TelebotsCompanionPreview">Interactive preview</string>
     <string name="TelebotsPetsDuck">Duck</string>
+    <string name="TelebotsPetsBody">Body shape</string>
+    <string name="TelebotsPetsRound">Round</string>
+    <string name="TelebotsPetsSlim">Slim</string>
+    <string name="TelebotsPetsTuft">Hair tuft</string>
 </resources>
