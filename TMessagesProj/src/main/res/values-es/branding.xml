@@ -1,4 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ForkIndependentClient">Cliente independiente que utiliza la API de Telegram. No está afiliado a Telegram ni cuenta con su respaldo.</string>
+    <string name="TelebotsPetsTitle">Mascotas virtuales e IA</string>
+    <string name="TelebotsPetsEnabled">Activar mascota virtual</string>
+    <string name="TelebotsPetsName">Nombre de la mascota</string>
+    <string name="TelebotsPetsSpecies">Especie</string>
+    <string name="TelebotsPetsCat">Gato</string>
+    <string name="TelebotsPetsDog">Perro</string>
+    <string name="TelebotsPetsFox">Zorro</string>
+    <string name="TelebotsPetsSave">Guardar mascota</string>
+    <string name="TelebotsPetsStats">Ánimo: %1$d/100  Energía: %2$d/100  Cariño: %3$d/100  Actividades: %4$d</string>
+    <string name="TelebotsPetsFeed">Alimentar</string>
+    <string name="TelebotsPetsPlay">Jugar</string>
+    <string name="TelebotsPetsRest">Descansar</string>
+    <string name="TelebotsPetsEncourage">Dar ánimos</string>
+    <string name="TelebotsPetsScannerTitle">Crear mascota a partir de un objeto</string>
+    <string name="TelebotsPetsScannerExplanation">Fotografía un objeto o selecciona una imagen. El reconocimiento local extrae una etiqueta y un color predominante para crear una mascota vectorial. No es un modelo generativo de imágenes.</string>
+    <string name="TelebotsPetsOrigin">Objeto reconocido: %1$s</string>
+    <string name="TelebotsPetsNoOrigin">Sin escanear</string>
+    <string name="TelebotsPetsChoosePhoto">Elegir una foto</string>
+    <string name="TelebotsPetsCamera">Escanear con la cámara</string>
+    <string name="TelebotsPetsCameraUnavailable">La cámara no está disponible</string>
+    <string name="TelebotsPetsScanFailed">No se ha podido analizar la imagen</string>
+    <string name="TelebotsPetsScanDone">Aspecto creado a partir del objeto</string>
+    <string name="TelebotsPetsPrivacy">Opcional y privado: la imagen se analiza en el dispositivo y se descarta. No accede a chats ni contactos. La conversación generativa con IA aún no está implementada.</string>
+    <string name="TelebotsPetsReset">Eliminar datos locales de la mascota</string>
 </resources>
