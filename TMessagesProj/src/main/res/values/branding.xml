@@ -31,4 +31,5 @@
     <string name="TelebotsCompanionReduceMotion">Reduce animations and battery use</string>
     <string name="TelebotsCompanionPrivacy">Off by default. Never reads or sends messages. Secret chats, groups and bots are excluded. Tap to interact; use × to hide in a specific chat.</string>
     <string name="TelebotsCompanionPreview">Interactive preview</string>
+    <string name="TelebotsPetsDuck">Duck</string>
 </resources>
