@@ -41,6 +41,7 @@ public final class TelebotsCompanionOverlayView extends FrameLayout {
 
         avatar = new TelebotsPetAvatarView(context);
         avatar.setPet(TelebotsPetStore.species(), TelebotsPetStore.color());
+        avatar.setAppearance(TelebotsPetStore.bodyStyle(), TelebotsPetStore.hairTuft());
         addView(avatar, new LayoutParams(-1, -1));
 
         indicator = new TextView(context);
@@ -67,6 +68,12 @@ public final class TelebotsCompanionOverlayView extends FrameLayout {
 
     private static int dp(int size) {
         return AndroidUtilities.dp(size);
+    }
+
+    public void refreshAppearance() {
+        avatar.setPet(TelebotsPetStore.species(), TelebotsPetStore.color());
+        avatar.setAppearance(TelebotsPetStore.bodyStyle(), TelebotsPetStore.hairTuft());
+        setContentDescription(TelebotsPetStore.name() + ", mascota interactiva");
     }
 
     public void react() {
