@@ -147,15 +147,20 @@ public class IntroActivity extends BaseFragment implements NotificationCenter.No
         // DEV branding only: keep the existing app logo, artwork and watermarks unchanged.
         if ("org.comunidadtelebots.dev".equals(ApplicationLoader.applicationContext.getPackageName())) {
             titles = new CharSequence[]{
-                    "Comunidad Telebots", "Mensajería", "Comunidad", "Privacidad", "Funciones", "Sincronización"
+                    LocaleController.getString(R.string.AppName),
+                    LocaleController.getString(R.string.ForkIntroTitle2),
+                    LocaleController.getString(R.string.ForkIntroTitle3),
+                    LocaleController.getString(R.string.ForkIntroTitle4),
+                    LocaleController.getString(R.string.ForkIntroTitle5),
+                    LocaleController.getString(R.string.ForkIntroTitle6)
             };
             messages = new String[]{
-                    "Cliente independiente que utiliza la API de Telegram.",
-                    "Comunícate con tus contactos a través de Telegram.",
-                    "Participa en grupos, canales y conversaciones.",
-                    "Controla tus ajustes de privacidad y seguridad.",
-                    "Disfruta de mensajes, llamadas y multimedia.",
-                    "Accede a tus chats desde tus dispositivos."
+                    LocaleController.getString(R.string.ForkIndependentClient),
+                    LocaleController.getString(R.string.ForkIntroMessage2),
+                    LocaleController.getString(R.string.ForkIntroMessage3),
+                    LocaleController.getString(R.string.ForkIntroMessage4),
+                    LocaleController.getString(R.string.ForkIntroMessage5),
+                    LocaleController.getString(R.string.ForkIntroMessage6)
             };
         }
         return true;
