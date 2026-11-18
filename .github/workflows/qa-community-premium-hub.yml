@@ -1,0 +1,27 @@
+name: QA Comunidad Telebots Premium hub
+
+on:
+  pull_request:
+    branches: [dev]
+    paths:
+      - 'TMessagesProj/src/main/java/org/telegram/ui/CommunityPremiumHubActivity.java'
+      - 'TMessagesProj/src/main/java/org/telegram/ui/SettingsActivity.java'
+      - 'Tools/tests/test_community_premium_hub_contract.py'
+      - '.github/workflows/qa-community-premium-hub.yml'
+  push:
+    branches: [feature/community-premium-settings-hub-20261118]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Check settings and navigation contracts
+        run: python3 -m unittest discover -s Tools/tests -p 'test_community_premium_hub_contract.py' -v
