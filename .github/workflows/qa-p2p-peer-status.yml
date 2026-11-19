@@ -1,0 +1,43 @@
+name: QA P2P peer count and safety disclosure
+
+on:
+  pull_request:
+    branches: [dev]
+    paths:
+      - 'TMessagesProj/src/main/java/org/telegram/ui/TelebotsP2pChatActivity.java'
+      - 'TMessagesProj/src/main/java/org/telegram/ui/TelebotsPeerStatus.java'
+      - 'Tools/tests/TelebotsPeerStatusTest.java'
+      - 'Tools/tests/test_p2p_peer_ui_contract.py'
+      - '.github/workflows/qa-p2p-peer-status.yml'
+  push:
+    branches: [fix/p2p-peer-count-and-safety-copy-20261119]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  p2p-ui-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Descargar código sin secretos
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Java 21
+        uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a # v5.5.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Contratos de UI y limitaciones explícitas del transporte
+        run: python3 -m unittest discover -s Tools/tests -p 'test_p2p_peer_ui_contract.py' -v
+      - name: Casos de pares activos (JVM)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/peer-count-tests"
+          javac -encoding UTF-8 -d "$RUNNER_TEMP/peer-count-tests" \
+            TMessagesProj/src/main/java/org/telegram/ui/TelebotsPeerStatus.java \
+            Tools/tests/TelebotsPeerStatusTest.java
+          java -cp "$RUNNER_TEMP/peer-count-tests" TelebotsPeerStatusTest
