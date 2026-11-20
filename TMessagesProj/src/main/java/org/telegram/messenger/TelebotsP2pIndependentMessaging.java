@@ -169,11 +169,7 @@ public class TelebotsP2pIndependentMessaging {
             byte[] bytes = payload.toString().getBytes(StandardCharsets.UTF_8);
 
             // 1. Send via local network UDP broadcast
-            DatagramSocket udpSocket = new DatagramSocket();
-            udpSocket.setBroadcast(true);
-            DatagramPacket packet = new DatagramPacket(bytes, bytes.length, InetAddress.getByName("255.255.255.255"), P2P_UDP_BEACON_PORT);
-            udpSocket.send(packet);
-            udpSocket.close();
+            TelebotsUdpSender.send(bytes, InetAddress.getByName("255.255.255.255"), P2P_UDP_BEACON_PORT);
 
             // 2. Transmit to registered active peers in Routing Mesh
             for (String peerAddress : TelebotsP2pRoutingMesh.getInstance().getActivePeers().keySet()) {
@@ -278,11 +274,7 @@ public class TelebotsP2pIndependentMessaging {
                 beacon.put("timestamp", System.currentTimeMillis());
 
                 byte[] bytes = beacon.toString().getBytes(StandardCharsets.UTF_8);
-                DatagramSocket socket = new DatagramSocket();
-                socket.setBroadcast(true);
-                DatagramPacket packet = new DatagramPacket(bytes, bytes.length, InetAddress.getByName("255.255.255.255"), P2P_UDP_BEACON_PORT);
-                socket.send(packet);
-                socket.close();
+                TelebotsUdpSender.send(bytes, InetAddress.getByName("255.255.255.255"), P2P_UDP_BEACON_PORT);
             } catch (Exception ignored) {}
         }, 2, 12, TimeUnit.SECONDS);
     }
