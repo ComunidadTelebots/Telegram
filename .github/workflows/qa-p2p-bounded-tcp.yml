@@ -1,0 +1,54 @@
+name: QA P2P bounded TCP ingress
+
+on:
+  pull_request:
+    branches: [dev]
+    paths:
+      - 'TMessagesProj/src/main/java/org/telegram/messenger/P2pInboundFrame.java'
+      - 'TMessagesProj/src/main/java/org/telegram/messenger/TelebotsP2pIndependentMessaging.java'
+      - 'Tools/tests/P2pInboundFrameTest.java'
+      - '.github/workflows/qa-p2p-bounded-tcp.yml'
+  push:
+    branches: [fix/p2p-bounded-tcp-ingress-20261121]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bounded-input:
+    name: Bounded framing and socket timeout contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Check out code without stored credentials
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Prepare Java 21
+        uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a # v5.5.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Check inbound socket framing integration
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          source = Path('TMessagesProj/src/main/java/org/telegram/messenger/TelebotsP2pIndependentMessaging.java').read_text(encoding='utf-8')
+          frame = source.split('private void handleClientSocket(Socket socket)', 1)[1].split('private void handleIncomingPacket(', 1)[0]
+          assert 'try (Socket client = socket)' in frame
+          assert 'client.setSoTimeout(5000)' in frame
+          assert 'P2pInboundFrame.readLine(client.getInputStream())' in frame
+          assert 'reader.readLine()' not in frame
+          print('Inbound socket framing integration contract passed')
+          PY
+      - name: Compile and run bounded frame regression checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/telebots-p2p-framing"
+          javac -encoding UTF-8 -d "$RUNNER_TEMP/telebots-p2p-framing" \
+            TMessagesProj/src/main/java/org/telegram/messenger/P2pInboundFrame.java \
+            Tools/tests/P2pInboundFrameTest.java
+          java -cp "$RUNNER_TEMP/telebots-p2p-framing" P2pInboundFrameTest
