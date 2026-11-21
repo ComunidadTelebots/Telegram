@@ -18,7 +18,7 @@ public final class P2pInboundFrame {
         ByteArrayOutputStream data = new ByteArrayOutputStream();
         int value;
         while ((value = buffered.read()) != -1) {
-            if (value == '\n') break;
+            if (value == '\n' || value == '\r') break;
             if (data.size() == MAX_FRAME_BYTES) {
                 throw new IOException("P2P TCP frame exceeds maximum size");
             }
