@@ -13,6 +13,7 @@ public final class P2pInboundFrameTest {
     public static void main(String[] args) throws Exception {
         check("hello".equals(read("hello\nignored")), "Single LF line");
         check("hello".equals(read("hello\r\n")), "CRLF line");
+        check("hello".equals(read("hello\rignored")), "Standalone CR terminates a line");
         check("without terminator".equals(read("without terminator")), "EOF as line terminator");
         check(P2pInboundFrame.readLine(new ByteArrayInputStream(new byte[0])) == null, "Empty stream");
         check("".equals(read("\n")), "Empty line");
@@ -33,6 +34,6 @@ public final class P2pInboundFrameTest {
             rejected = true;
         }
         check(rejected, "Byte limit applies to UTF-8 multibyte characters");
-        System.out.println("P2P bounded TCP framing: 9 checks passed");
+        System.out.println("P2P bounded TCP framing: 10 checks passed");
     }
 }
