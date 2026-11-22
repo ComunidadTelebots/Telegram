@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Verify native libraries in a release APK for modern 16 KiB Android devices.
 
-This validates ELF PT_LOAD p_align, not only the ZIP entry offset. It is intentionally
-a release gate: any unknown or incompatible native library fails the build.
+This validates ELF PT_LOAD p_align, not only the ZIP entry offset. Android
+16 KiB page-size devices are 64-bit; apply the 16 KiB requirement to arm64-v8a
+and x86_64, while still validating 32-bit ELF at a 4 KiB minimum. Reject corrupt
+libraries for every ABI. ZIP alignment is checked separately with zipalign.
 """
 import argparse
 import struct
@@ -44,6 +46,7 @@ def elf_load_alignments(data):
 def inspect(apk):
     libraries = 0
     failures = []
+    legacy_32bit = []
     abis = set()
     with zipfile.ZipFile(apk) as archive:
         bad = archive.testzip()
@@ -52,19 +55,30 @@ def inspect(apk):
         for name in archive.namelist():
             if not name.startswith("lib/") or not name.endswith(".so"):
                 continue
+            parts = name.split("/")
+            if len(parts) != 3:
+                failures.append((name, "Unexpected native library path"))
+                continue
+            abi = parts[1]
             libraries += 1
-            abis.add(name.split("/")[1])
+            abis.add(abi)
+            if abi not in ("arm64-v8a", "x86_64", "armeabi-v7a", "x86"):
+                failures.append((name, "Unknown ABI"))
+                continue
             try:
                 alignments = elf_load_alignments(archive.read(name))
-                if any(a < 16384 or a % 16384 for a in alignments):
+                minimum = 16384 if abi in ("arm64-v8a", "x86_64") else 4096
+                if any(a < minimum or a % minimum for a in alignments):
                     failures.append((name, alignments))
+                elif abi in ("armeabi-v7a", "x86") and any(a < 16384 or a % 16384 for a in alignments):
+                    legacy_32bit.append(name)
             except (ValueError, struct.error) as exc:
                 failures.append((name, str(exc)))
     if not libraries:
         raise ValueError("APK has no native libraries")
     if "arm64-v8a" not in abis:
         raise ValueError("APK is missing ARM64 native libraries for Samsung devices")
-    return libraries, abis, failures
+    return libraries, abis, failures, legacy_32bit
 
 
 if __name__ == "__main__":
@@ -72,12 +86,14 @@ if __name__ == "__main__":
     parser.add_argument("apk")
     args = parser.parse_args()
     try:
-        libraries, abis, failures = inspect(args.apk)
+        libraries, abis, failures, legacy_32bit = inspect(args.apk)
         print(f"Native libraries checked: {libraries}; ABIs: {', '.join(sorted(abis))}")
         if failures:
             for name, align in failures:
-                print(f"16-KB incompatible: {name}: {align}", file=sys.stderr)
+                print(f"Native ELF alignment invalid: {name}: {align}", file=sys.stderr)
             sys.exit(1)
-        print("PASS: every loadable ELF segment supports 16-KB memory pages")
+        if legacy_32bit:
+            print(f"NOTE: {len(legacy_32bit)} 32-bit libraries have 4-KB ELF alignment; 16-KB devices use the checked 64-bit libraries.")
+        print("PASS: all 64-bit loadable ELF segments support 16-KB memory pages; 32-bit segments meet 4-KB minimum")
     except (OSError, ValueError, zipfile.BadZipFile) as err:
         sys.exit(f"APK native compatibility check failed: {err}")
