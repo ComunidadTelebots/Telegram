@@ -11,4 +11,19 @@
     <string name="ForkIntroMessage4">Controla tus ajustes de privacidad y seguridad.</string>
     <string name="ForkIntroMessage5">Disfruta de mensajes, llamadas y multimedia.</string>
     <string name="ForkIntroMessage6">Accede a tus chats desde tus dispositivos.</string>
+    <string name="TelebotsPerformanceTitle">Rendimiento según el dispositivo</string>
+    <string name="TelebotsPerformanceDevice">Dispositivo detectado</string>
+    <string name="TelebotsPerformanceDetection">Capacidad estimada: %1$s</string>
+    <string name="TelebotsPerformanceChoose">Elige cómo se adapta Comunidad Telebots</string>
+    <string name="TelebotsPerformanceAuto">Automático (recomendado)</string>
+    <string name="TelebotsPerformanceAutoInfo">Adapta los efectos a la capacidad detectada</string>
+    <string name="TelebotsPerformanceBasic">Básico</string>
+    <string name="TelebotsPerformanceBasicInfo">Menos efectos visuales y animaciones</string>
+    <string name="TelebotsPerformanceBalanced">Equilibrado</string>
+    <string name="TelebotsPerformanceBalancedInfo">Efectos moderados y navegación más ligera</string>
+    <string name="TelebotsPerformancePowerful">Potente</string>
+    <string name="TelebotsPerformancePowerfulInfo">Más efectos solo si el hardware lo permite</string>
+    <string name="TelebotsPerformanceNote">Solo cambian los efectos visuales. Se mantienen los límites de memoria y ahorro de batería. No aumenta la potencia del móvil ni de la tablet.</string>
+    <string name="TelebotsPerformanceApply">Aplicar perfil</string>
+    <string name="TelebotsPerformanceMenu">Rendimiento adaptativo · móvil y tablet</string>
 </resources>
