@@ -17,6 +17,45 @@ public final class TelebotsInterfaceProfiles {
     private static final String PREF_LIBRARY = "telebots_interface_library_v1";
     public static final int MAX_PROFILES = 20;
 
+    public static final String[] SECTION_IDS = {"design", "reading", "connections", "phrases", "downloads",
+            "mesh", "chat", "vault", "performance", "accessibility", "updates", "privacy", "backup", "channel"};
+    private static final String PREF_SECTION_ORDER = "telebots_section_order_v1";
+
+    public static JSONArray sectionOrder() {
+        JSONArray stored;
+        try { stored = new JSONArray(prefs().getString(PREF_SECTION_ORDER, "[]")); }
+        catch (JSONException e) { stored = new JSONArray(); }
+        JSONArray ordered = new JSONArray();
+        java.util.HashSet<String> seen = new java.util.HashSet<>();
+        for (int i = 0; i < stored.length(); i++) {
+            String id = stored.optString(i, "");
+            for (String valid : SECTION_IDS) {
+                if (valid.equals(id) && seen.add(id)) ordered.put(id);
+            }
+        }
+        for (String id : SECTION_IDS) if (seen.add(id)) ordered.put(id);
+        return ordered;
+    }
+
+    public static void saveSectionOrder(JSONArray order) {
+        JSONArray clean = new JSONArray();
+        java.util.HashSet<String> seen = new java.util.HashSet<>();
+        if (order != null) {
+            for (int i = 0; i < order.length(); i++) {
+                String id = order.optString(i, "");
+                for (String valid : SECTION_IDS)
+                    if (valid.equals(id) && seen.add(id)) clean.put(id);
+            }
+        }
+        for (String valid : SECTION_IDS) if (seen.add(valid)) clean.put(valid);
+        prefs().edit().putString(PREF_SECTION_ORDER, clean.toString()).apply();
+    }
+
+    public static void resetSectionOrder() {
+        prefs().edit().remove(PREF_SECTION_ORDER).apply();
+    }
+
+
     private TelebotsInterfaceProfiles() {}
 
     private static SharedPreferences prefs() {
