@@ -1,4 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ForkIndependentClient">Cliente independiente que utiliza la API de Telegram. No está afiliado a Telegram ni cuenta con su respaldo.</string>
+    <string name="ForkIntroTitle2">Mensajería</string>
+    <string name="ForkIntroTitle3">Comunidad</string>
+    <string name="ForkIntroTitle4">Privacidad</string>
+    <string name="ForkIntroTitle5">Funciones</string>
+    <string name="ForkIntroTitle6">Sincronización</string>
+    <string name="ForkIntroMessage2">Habla con tus contactos utilizando la red de Telegram.</string>
+    <string name="ForkIntroMessage3">Participa en grupos, canales y conversaciones.</string>
+    <string name="ForkIntroMessage4">Controla tus ajustes de privacidad y seguridad.</string>
+    <string name="ForkIntroMessage5">Disfruta de mensajes, llamadas y multimedia.</string>
+    <string name="ForkIntroMessage6">Accede a tus chats desde tus dispositivos.</string>
+    <string name="TelebotsPerformanceTitle">Rendimiento según el dispositivo</string>
+    <string name="TelebotsPerformanceDevice">Dispositivo detectado</string>
+    <string name="TelebotsPerformanceDetection">Capacidad estimada: %1$s</string>
+    <string name="TelebotsPerformanceChoose">Elige cómo se adapta Comunidad Telebots</string>
+    <string name="TelebotsPerformanceAuto">Automático (recomendado)</string>
+    <string name="TelebotsPerformanceAutoInfo">Adapta los efectos a la capacidad detectada</string>
+    <string name="TelebotsPerformanceBasic">Básico</string>
+    <string name="TelebotsPerformanceBasicInfo">Menos efectos visuales y animaciones</string>
+    <string name="TelebotsPerformanceBalanced">Equilibrado</string>
+    <string name="TelebotsPerformanceBalancedInfo">Efectos moderados y navegación más ligera</string>
+    <string name="TelebotsPerformancePowerful">Potente</string>
+    <string name="TelebotsPerformancePowerfulInfo">Más efectos solo si el hardware lo permite</string>
+    <string name="TelebotsPerformanceNote">Solo cambian los efectos visuales. Se mantienen los límites de memoria y ahorro de batería. No aumenta la potencia del móvil ni de la tablet.</string>
+    <string name="TelebotsPerformanceApply">Aplicar perfil</string>
+    <string name="TelebotsPerformanceMenu">Rendimiento adaptativo · móvil y tablet</string>
 </resources>
