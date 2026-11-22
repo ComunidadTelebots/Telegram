@@ -40,6 +40,12 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      - name: Probar el verificador de bibliotecas nativas antes de compilar
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s Tools/release -p 'test_verify_native_page_sizes.py' -v
+
       - name: Comprobar compatibilidad Firebase y mínimo Android antes del build
         shell: bash
         run: |
