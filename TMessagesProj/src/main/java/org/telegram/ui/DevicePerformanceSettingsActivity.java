@@ -64,7 +64,11 @@ public class DevicePerformanceSettingsActivity extends BaseFragment {
         scroll.setBackgroundColor(Theme.getColor(Theme.key_windowBackgroundWhite));
         LinearLayout content = new LinearLayout(context);
         content.setOrientation(LinearLayout.VERTICAL);
-        content.setPadding(dp(20), dp(20), dp(20), dp(24));
+        // Keep settings readable on narrow phones and large Galaxy tablets.
+        // A centered ~560dp content column avoids excessively wide radio rows.
+        int widthDp = context.getResources().getConfiguration().screenWidthDp;
+        int horizontalDp = Math.max(20, (widthDp - 560) / 2);
+        content.setPadding(dp(horizontalDp), dp(20), dp(horizontalDp), dp(24));
         scroll.addView(content);
 
         TextView deviceHeader = text(context, context.getString(R.string.TelebotsPerformanceDevice), 17);
