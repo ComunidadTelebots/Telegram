@@ -185,6 +185,14 @@ jobs:
           "$SDKMANAGER" 'platforms;android-36' 'build-tools;36.0.0' 'ndk;27.2.12479018' 'cmake;3.22.1' 'platform-tools'
           echo "$ANDROID_HOME/build-tools/36.0.0" >> "$GITHUB_PATH"
 
+      - name: Validar fusión del manifiesto y dependencias antes de compilar
+        shell: bash
+        run: |
+          set -euo pipefail
+          java -classpath gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain \
+            :TMessagesProj_App:processAfatReleaseMainManifest --no-daemon --max-workers=2 --console=plain \
+            -PAPP_CHANNEL=dev '-Dorg.gradle.jvmargs=-Xmx5g -XX:MaxMetaspaceSize=1g' --stacktrace
+
       - name: Compilar APK universal para Samsung A56 y Galaxy Tab A9+
         shell: bash
         run: |
