@@ -6,6 +6,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import org.telegram.messenger.SharedConfig;
 import org.telegram.ui.ActionBar.Theme;
+import org.json.JSONObject;
 
 public class UIProfileManager {
     public static final String PROFILE_TELEGRAM_MODERN = "telegram_modern";
@@ -24,6 +25,20 @@ public class UIProfileManager {
         if (profile == null) profile = PROFILE_TELEGRAM_MODERN;
 
         switch (profile) {
+            case TelebotsInterfaceProfiles.CUSTOM_PROFILE:
+                JSONObject custom = TelebotsInterfaceProfiles.active();
+                int bg = TelebotsInterfaceProfiles.safeColor(custom, "background", 0xff17191f);
+                int surface = TelebotsInterfaceProfiles.safeColor(custom, "surface", 0xff252830);
+                int fg = TelebotsInterfaceProfiles.safeColor(custom, "foreground", 0xffffffff);
+                int accent = TelebotsInterfaceProfiles.safeColor(custom, "accent", 0xffd8ae62);
+                Theme.setColor(Theme.key_windowBackgroundGray, bg, true);
+                Theme.setColor(Theme.key_windowBackgroundWhite, surface, true);
+                Theme.setColor(Theme.key_windowBackgroundWhiteBlackText, fg, true);
+                Theme.setColor(Theme.key_windowBackgroundWhiteGrayText, accent, true);
+                Theme.setColor(Theme.key_actionBarDefault, bg, true);
+                Theme.setColor(Theme.key_actionBarDefaultTitle, fg, true);
+                Theme.setColor(Theme.key_actionBarDefaultIcon, accent, true);
+                break;
             case PROFILE_TELEGRAM_X:
                 Theme.setColor(Theme.key_windowBackgroundGray, 0xff18222d, true);
                 Theme.setColor(Theme.key_windowBackgroundWhite, 0xff1e2c3a, true);
@@ -60,6 +75,7 @@ public class UIProfileManager {
         String profile = SharedConfig.uiThemeProfile;
         if (profile == null) profile = PROFILE_TELEGRAM_MODERN;
         switch (profile) {
+            case TelebotsInterfaceProfiles.CUSTOM_PROFILE: return TelebotsInterfaceProfiles.active().optInt("rowDp", 76);
             case PROFILE_TELEGRAM_X: return 76;
             case PROFILE_IOS: return 70;
             case PROFILE_UNIGRAM: return 68;
@@ -73,6 +89,7 @@ public class UIProfileManager {
         String profile = SharedConfig.uiThemeProfile;
         if (profile == null) profile = PROFILE_TELEGRAM_MODERN;
         switch (profile) {
+            case TelebotsInterfaceProfiles.CUSTOM_PROFILE: return TelebotsInterfaceProfiles.active().optInt("avatarDp", 56);
             case PROFILE_TELEGRAM_X: return 56;
             case PROFILE_IOS: return 60;
             case PROFILE_UNIGRAM: return 48;
@@ -85,6 +102,7 @@ public class UIProfileManager {
         String profile = SharedConfig.uiThemeProfile;
         if (profile == null) profile = PROFILE_TELEGRAM_MODERN;
         switch (profile) {
+            case TelebotsInterfaceProfiles.CUSTOM_PROFILE: return TelebotsInterfaceProfiles.active().optInt("bubbleDp", 14);
             case PROFILE_IOS: return 18;
             case PROFILE_TELEGRAM_X: return 12;
             case PROFILE_HOLO: return 4;
