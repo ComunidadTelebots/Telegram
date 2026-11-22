@@ -5575,6 +5575,26 @@ public class EmojiView extends FrameLayout implements
         }, time);
     }
 
+    public void openFavoriteStickers() {
+        if (stickersBanned || stickersTab == null || pager == null) {
+            return;
+        }
+        for (int i = 0; i < currentTabs.size(); i++) {
+            if (currentTabs.get(i).type == TAB_STICKERS) {
+                pager.setCurrentItem(i, false);
+                showBackspaceButton(false, false);
+                showStickerSettingsButton(shouldDrawBackground || shouldDrawStickerSettings, false);
+                if (favTabNum >= 0) {
+                    stickersTab.selectTab(favTabNum);
+                } else {
+                    android.widget.Toast.makeText(getContext(), getString(R.string.TelebotsFavoriteStickerHint),
+                        android.widget.Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+        }
+    }
+
     public void switchToGifRecent() {
         showBackspaceButton(false, false);
         showStickerSettingsButton(false, false);
