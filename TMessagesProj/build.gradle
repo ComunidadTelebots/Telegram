@@ -67,7 +67,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging:22.0.0'
     implementation 'com.google.firebase:firebase-datatransport:18.1.0'
     implementation 'com.google.firebase:firebase-appindexing:20.0.0'
-    implementation platform('com.google.firebase:firebase-bom:35.0.0')
+    // BoM 35.x requires API 24 for Analytics/Crashlytics; this module targets API 21.
+    // Firebase 34.19.0 is the last pre-35 line retaining the compatible SDK generation.
+    implementation platform('com.google.firebase:firebase-bom:34.19.0')
     implementation 'com.google.firebase:firebase-crashlytics'
     implementation 'com.google.firebase:firebase-crashlytics-ndk'
     implementation 'com.google.firebase:firebase-config'
