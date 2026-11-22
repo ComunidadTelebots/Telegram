@@ -15,7 +15,7 @@ MANIFEST = ROOT / "TMessagesProj/src/main/AndroidManifest.xml"
 
 
 def minimum_sdk(script):
-    match = re.search(r"\\bminSdkVersion\\s+(\\d+)\\b", script)
+    match = re.search(r"\bminSdkVersion\s+(\d+)\b", script)
     if match is None:
         raise AssertionError("minSdkVersion missing")
     return int(match.group(1))
@@ -28,7 +28,7 @@ class FirebaseCompatibilityTests(unittest.TestCase):
         cls.app = APPLICATION.read_text(encoding="utf-8")
 
     def test_firebase_bom_not_newer_than_api21_compatible_line(self):
-        match = re.search(r"firebase-bom:(\\d+)\\.(\\d+)\\.(\\d+)", self.library)
+        match = re.search(r"firebase-bom:(\d+)\.(\d+)\.(\d+)", self.library)
         self.assertIsNotNone(match, "Firebase BoM must be explicitly versioned")
         major, minor, patch = map(int, match.groups())
         self.assertLessEqual((major, minor, patch), (34, 19, 0))
@@ -48,7 +48,7 @@ class FirebaseCompatibilityTests(unittest.TestCase):
 
     def test_no_firebase_manifest_override(self):
         text = MANIFEST.read_text(encoding="utf-8")
-        self.assertNotRegex(text, r'tools:overrideLibrary="[^"]*com\\.google\\.firebase')
+        self.assertNotRegex(text, r'tools:overrideLibrary="[^"]*com\.google\.firebase')
         self.assertNotIn("firebase-analytics:24.0.0", self.library)
 
 
