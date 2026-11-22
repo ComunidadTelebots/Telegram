@@ -117,6 +117,7 @@ public class CommunityInterfaceEditorActivity extends BaseFragment {
             dimensions[i] = slider;
             content.addView(slider);
         }
+        button("Organizar bloques arrastrando", () -> presentFragment(new CommunityLayoutEditorActivity()));
         label("Vista previa (sin modificar tus chats)");
         preview = new LinearLayout(content.getContext());
         preview.setOrientation(LinearLayout.VERTICAL);
