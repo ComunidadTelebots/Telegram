@@ -52,6 +52,7 @@ public class CommunitySettingsActivity extends BaseFragment {
                 break;
             case DESIGN:
                 label(body, "Diseños Históricos y Perfiles Avanzados");
+                entry(body, "✎ Crear y editar mis interfaces", () -> presentFragment(new CommunityInterfaceEditorActivity()));
                 entry(body, "Cambiar Año Histórico (Actual: " + SharedConfig.uiVersionYear + ")", () -> {
                     SharedConfig.uiVersionYear = SharedConfig.uiVersionYear >= 2026 ? 2013 : SharedConfig.uiVersionYear + 1;
                     SharedConfig.saveConfig();
