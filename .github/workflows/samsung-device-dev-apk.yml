@@ -5,7 +5,7 @@ run-name: Samsung DEV 12.10.6.1 universal · ${{ github.ref_name }}
 # A failed build must not publish an APK or be reported as successful.
 on:
   push:
-    branches: [release/samsung-a56-tab-a9plus-dev-20261122]
+    branches: [release/samsung-a56-tab-a9plus-dev-20261122, release/dev-installable-qa-20261122]
   workflow_dispatch:
 
 permissions:
