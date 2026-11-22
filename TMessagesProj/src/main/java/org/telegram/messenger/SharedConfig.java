@@ -286,6 +286,8 @@ public class SharedConfig {
     public static String searchEngineCustomURLQuery, searchEngineCustomURLAutocomplete;
     public static boolean chatBubbles = Build.VERSION.SDK_INT >= 30;
     public static boolean raiseToSpeak = false;
+    public static boolean showStoryStrip = true;
+    private static final String SHOW_STORY_STRIP_KEY = "telebots_show_story_strip";
     public static boolean raiseToListen = true;
     public static boolean nextMediaTap = true;
     public static boolean recordViaSco = false;
@@ -603,6 +605,7 @@ public class SharedConfig {
             SaveToGallerySettingsHelper.load(preferences);
             mapPreviewType = preferences.getInt("mapPreviewType", 2);
             searchEngineType = preferences.getInt("searchEngineType", 0);
+            showStoryStrip = preferences.getBoolean(SHOW_STORY_STRIP_KEY, true);
             raiseToListen = preferences.getBoolean("raise_to_listen", true);
             raiseToSpeak = preferences.getBoolean("raise_to_speak", false);
             nextMediaTap = preferences.getBoolean("next_media_on_tap", true);
@@ -1265,6 +1268,15 @@ public class SharedConfig {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean("raise_to_speak", raiseToSpeak);
         editor.apply();
+    }
+
+    public static void setShowStoryStrip(boolean show) {
+        if (showStoryStrip == show) {
+            return;
+        }
+        showStoryStrip = show;
+        MessagesController.getGlobalMainSettings().edit().putBoolean(SHOW_STORY_STRIP_KEY, show).apply();
+        NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.storyStripVisibilityChanged);
     }
 
     public static void toggleRaiseToListen() {

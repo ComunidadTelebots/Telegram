@@ -79,6 +79,13 @@ public class CommunitySettingsActivity extends BaseFragment {
                     SharedConfig.saveConfig();
                     if(parentLayout!=null)parentLayout.rebuildAllFragmentViews(true,true);
                 });
+                TextCheckCell storyStrip = new TextCheckCell(context);
+                storyStrip.setTextAndCheck(text(R.string.TelebotsShowStoryStrip), SharedConfig.showStoryStrip, false);
+                storyStrip.setOnClickListener(v -> {
+                    SharedConfig.setShowStoryStrip(!SharedConfig.showStoryStrip);
+                    storyStrip.setChecked(SharedConfig.showStoryStrip);
+                });
+                body.addView(storyStrip, LayoutHelper.createLinear(-1, -2));
                 body.addView(new SkinSelectorCell(context,skin->{if(parentLayout!=null)parentLayout.rebuildAllFragmentViews(true,true);}),LayoutHelper.createLinear(-1,-2));
                 break;
             case P2P_MESH:
