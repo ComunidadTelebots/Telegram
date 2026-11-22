@@ -1,0 +1,28 @@
+name: QA Firebase / Android API 21
+on:
+  push:
+    branches: [fix/firebase-bom-api21-compat-20261122]
+  pull_request:
+    branches: [release/samsung-a56-tab-a9plus-dev-20261122]
+    paths:
+      - 'TMessagesProj/build.gradle'
+      - 'TMessagesProj_App/build.gradle'
+      - 'Tools/release/test_firebase_min_sdk_contract.py'
+      - '.github/workflows/samsung-device-dev-apk.yml'
+      - '.github/workflows/qa-firebase-api21.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sdk-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout without credentials
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Check Firebase SDK and Android minimum compatibility
+        run: python3 -m unittest discover -s Tools/release -p 'test_firebase_min_sdk_contract.py' -v
