@@ -44,6 +44,7 @@ public class CommunitySettingsActivity extends BaseFragment {
                 entry(body,"💬 Chat P2P Off-Grid",()->presentFragment(new TelebotsP2pChatActivity()));
                 entry(body,"🛡️ Moonbot Security Vault",()->presentFragment(new TelebotsSecurityVaultActivity()));
                 entry(body,R.string.TelebotsPerformance,()->presentFragment(new CommunityPerformanceActivity()));
+                entry(body,R.string.TelebotsPerformanceMenu,()->presentFragment(new DevicePerformanceSettingsActivity()));
                 entry(body,R.string.TelebotsAccessibility,()->open(ACCESSIBILITY));
                 entry(body,R.string.TelebotsUpdates,()->presentFragment(new AppUpdatesActivity()));
                 entry(body,R.string.TelebotsPrivacy,()->open(PRIVACY));
