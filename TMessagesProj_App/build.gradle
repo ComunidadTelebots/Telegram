@@ -143,6 +143,9 @@ android {
             buildConfigField "boolean", "BUNDLE", "true"
         }
         afat {
+            // Firebase Analytics 24.x requires minSdk 24. This DEV flavor targets
+            // modern Samsung devices; do not override the library's manifest.
+            minSdkVersion 24
             ndk {
                 abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
             }
