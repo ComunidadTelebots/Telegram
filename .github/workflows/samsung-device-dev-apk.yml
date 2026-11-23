@@ -40,6 +40,10 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      - name: Verificar script de QA compatible con sh antes de compilar
+        shell: bash
+        run: python3 -m unittest discover -s Tools/release -p 'test_emulator_shell_contract.py' -v
+
       - name: Probar el verificador de bibliotecas nativas antes de compilar
         shell: bash
         run: |
@@ -278,7 +282,7 @@ jobs:
           emulator-boot-timeout: 900
           disable-animations: true
           script: |
-            set -euo pipefail
+            set -eu
             apk="artifacts/telebots-dev-universal.apk"
             test -s "$apk"
             adb install "$apk"
