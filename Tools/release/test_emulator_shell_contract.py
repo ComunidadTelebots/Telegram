@@ -13,11 +13,17 @@ WORKFLOW = Path(__file__).resolve().parents[2] / ".github/workflows/samsung-devi
 
 
 def emulator_script(text):
-    match = re.search(r"(?m)^          script: \\|\\n((?:            [^\\n]*\\n|\\n)+)", text)
-    if match is None:
+    lines = text.splitlines()
+    start = next((i for i, line in enumerate(lines)
+                  if line == "          script: |"), None)
+    if start is None:
         raise AssertionError("Missing emulator runner script")
-    return "\n".join(line[12:] if line.startswith("            ") else line
-                     for line in match.group(1).splitlines())
+    commands = []
+    for line in lines[start + 1:]:
+        if line and not line.startswith("            "):
+            break
+        commands.append(line[12:] if line.startswith("            ") else "")
+    return "\n".join(commands)
 
 
 class EmulatorShellContractTests(unittest.TestCase):
