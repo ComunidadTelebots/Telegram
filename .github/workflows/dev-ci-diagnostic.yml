@@ -1,0 +1,19 @@
+name: DEV CI diagnostic
+
+on:
+  push:
+    branches:
+      - release/normal-apk-20261118
+    paths:
+      - .github/workflows/dev-ci-diagnostic.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Confirmar ejecución de GitHub Actions
+        run: echo "GitHub Actions runner started"

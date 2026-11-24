@@ -43,7 +43,7 @@ public final class ReleaseAccess {
         return name.substring(name.lastIndexOf('.') + 1);
     }
     public static boolean restricted() {
-        return true; // Forzar Moonbot Dev SIEMPRE (incluso en dev/emulador)
+        return !"dev".equals(channel()); // DEV opens normally; other channels retain Moonbot access control
     }
     private static boolean emulatorPreview(String channel) {
         return false;

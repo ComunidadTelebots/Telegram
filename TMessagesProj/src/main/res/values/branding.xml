@@ -2,4 +2,14 @@
 <resources>
     <string name="ForkAppName" translatable="false">Comunidad Telebots</string>
     <string name="ForkIndependentClient">An independent client using the Telegram API. Not affiliated with or endorsed by Telegram.</string>
+    <string name="ForkIntroTitle2">Messaging</string>
+    <string name="ForkIntroTitle3">Community</string>
+    <string name="ForkIntroTitle4">Privacy</string>
+    <string name="ForkIntroTitle5">Features</string>
+    <string name="ForkIntroTitle6">Sync</string>
+    <string name="ForkIntroMessage2">Chat with your contacts using the Telegram network.</string>
+    <string name="ForkIntroMessage3">Keep in touch through groups, channels and conversations.</string>
+    <string name="ForkIntroMessage4">Manage your privacy and security settings.</string>
+    <string name="ForkIntroMessage5">Send messages, make calls and share media.</string>
+    <string name="ForkIntroMessage6">Access your chats across your devices.</string>
 </resources>
