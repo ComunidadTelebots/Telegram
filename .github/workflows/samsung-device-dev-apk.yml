@@ -42,7 +42,21 @@ jobs:
 
       - name: Verificar script de QA compatible con sh antes de compilar
         shell: bash
-        run: python3 -m unittest discover -s Tools/release -p 'test_emulator_shell_contract.py' -v
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s Tools/release -p 'test_emulator_shell_contract.py' -v
+          python3 - <<'PY'
+          from pathlib import Path
+          workflow = Path(".github/workflows/samsung-device-dev-apk.yml").read_text()
+          # Scope checks to the actual emulator job, not this test's source.
+          qa = workflow.split("      - name: Preparar aceleración KVM del emulador\n", 1)[1]
+          assert "test -c /dev/kvm" in qa
+          assert "test -r /dev/kvm && test -w /dev/kvm" in qa
+          assert "disable-linux-hw-accel: false" in qa
+          assert "ANDROID_I_WANT_MY_TCG" not in qa
+          assert qa.index("test -c /dev/kvm") < qa.index("uses: ReactiveCircus/android-emulator-runner")
+          print("PASS emulator KVM configuration contract")
+          PY
 
       - name: Probar el verificador de bibliotecas nativas antes de compilar
         shell: bash
@@ -268,13 +282,25 @@ jobs:
           compression-level: 0
           include-hidden-files: false
 
+      - name: Preparar aceleración KVM del emulador
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! test -c /dev/kvm; then
+            echo "::error::El runner no expone /dev/kvm; QA de instalación no ejecutada"
+            exit 1
+          fi
+          # Restrict access to the current user on this ephemeral hosted runner.
+          if ! (test -r /dev/kvm && test -w /dev/kvm); then
+            sudo chown "$(id -u)" /dev/kvm
+            sudo chmod u+rw /dev/kvm
+          fi
+          test -r /dev/kvm && test -w /dev/kvm
+
       - name: Pruebas de instalación e interfaz en móvil y tablet Android (QA)
         uses: ReactiveCircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808 # v2
-        env:
-          # Emulator 37 rejects -accel off unless software TCG is explicitly enabled.
-          # GitHub-hosted runners may not expose /dev/kvm.
-          ANDROID_I_WANT_MY_TCG: 'yes'
         with:
+          disable-linux-hw-accel: false
           api-level: 35
           target: google_apis
           arch: x86_64
