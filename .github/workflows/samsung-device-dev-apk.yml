@@ -56,6 +56,24 @@ jobs:
           assert "ANDROID_I_WANT_MY_TCG" not in qa
           assert qa.index("test -c /dev/kvm") < qa.index("uses: ReactiveCircus/android-emulator-runner")
           print("PASS emulator KVM configuration contract")
+
+          # Exercise the exact crash/ANR pattern used by the device gate.
+          import re
+          import subprocess
+          pattern = re.search(r"crash_pattern='([^']+)'", qa).group(1)
+          cases = [
+              ("E/AndroidRuntime: FATAL EXCEPTION: main\nE/AndroidRuntime: Process: org.comunidadtelebots.dev, PID: 42", True),
+              ("E/AndroidRuntime: Process: org.comunidadtelebots.dev:worker, PID: 43", True),
+              ("I/am_crash: [0,42,org.comunidadtelebots.dev,1,java.lang.Error,message,File.java,1]", True),
+              ("I/am_anr: [0,42,org.comunidadtelebots.dev,1,Input dispatching timed out]", True),
+              ("E/AndroidRuntime: Process: org.comunidadtelebots.dev.other, PID: 42", False),
+              ("I/am_anr: [0,42,com.android.systemui,1,Input dispatching timed out]", False),
+              ("I/ActivityManager: Started org.comunidadtelebots.dev", False),
+          ]
+          for log, expected in cases:
+              result = subprocess.run(["grep", "-Eq", pattern], input=log + "\n", text=True)
+              assert result.returncode == (0 if expected else 1), (log, result.returncode)
+          print("PASS emulator crash/ANR detection: 7 cases")
           PY
 
       - name: Probar el verificador de bibliotecas nativas antes de compilar
@@ -322,14 +340,21 @@ jobs:
                 adb shell wm density 240
               fi
               adb shell am force-stop org.comunidadtelebots.dev || true
-              adb logcat -c
+              adb logcat -b crash -b events -c
               adb shell monkey -p org.comunidadtelebots.dev -c android.intent.category.LAUNCHER 1
               sleep 8
               adb shell pidof org.comunidadtelebots.dev
-              if adb logcat -d -v brief | grep -F 'FATAL EXCEPTION' | grep -F 'org.comunidadtelebots.dev'; then
-                echo "::error::Application crash on $profile"
+              # AndroidRuntime writes FATAL EXCEPTION and Process on separate lines.
+              # The events buffer also records crashes and ANRs with the package name.
+              crash_pattern='Process: org\.comunidadtelebots\.dev(:[^ ,]+)?, PID:|am_(crash|anr).*[,[]org\.comunidadtelebots\.dev(:[^,]+)?,'
+              qa_log="$(mktemp)"
+              adb logcat -b crash -b events -d -v brief > "$qa_log"
+              if grep -Eq "$crash_pattern" "$qa_log"; then
+                rm -f "$qa_log"
+                echo "::error::Application crash or ANR on $profile"
                 exit 1
               fi
+              rm -f "$qa_log"
               echo "PASS installation and startup: $profile"
             done
             adb shell wm size reset
