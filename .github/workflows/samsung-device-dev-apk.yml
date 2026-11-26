@@ -60,7 +60,8 @@ jobs:
           # Exercise the exact crash/ANR pattern used by the device gate.
           import re
           import subprocess
-          pattern = re.search(r"crash_pattern='([^']+)'", qa).group(1)
+          smoke = Path("Tools/release/emulator_smoke.sh").read_text(encoding="utf-8")
+          pattern = re.search(r"crash_pattern='([^']+)'", smoke).group(1)
           cases = [
               ("E/AndroidRuntime: FATAL EXCEPTION: main\nE/AndroidRuntime: Process: org.comunidadtelebots.dev, PID: 42", True),
               ("E/AndroidRuntime: Process: org.comunidadtelebots.dev:worker, PID: 43", True),
@@ -326,39 +327,7 @@ jobs:
           emulator-boot-timeout: 900
           disable-animations: true
           script: |
-            set -eu
-            apk="artifacts/telebots-dev-universal.apk"
-            test -s "$apk"
-            adb install "$apk"
-            adb shell pm path org.comunidadtelebots.dev | grep -Fq 'package:'
-            for profile in phone tablet; do
-              if [ "$profile" = phone ]; then
-                adb shell wm size 1080x2340
-                adb shell wm density 420
-              else
-                adb shell wm size 1600x2560
-                adb shell wm density 240
-              fi
-              adb shell am force-stop org.comunidadtelebots.dev || true
-              adb logcat -b crash -b events -c
-              adb shell monkey -p org.comunidadtelebots.dev -c android.intent.category.LAUNCHER 1
-              sleep 8
-              adb shell pidof org.comunidadtelebots.dev
-              # AndroidRuntime writes FATAL EXCEPTION and Process on separate lines.
-              # The events buffer also records crashes and ANRs with the package name.
-              crash_pattern='Process: org\.comunidadtelebots\.dev(:[^ ,]+)?, PID:|am_(crash|anr).*[,[]org\.comunidadtelebots\.dev(:[^,]+)?,'
-              qa_log="$(mktemp)"
-              adb logcat -b crash -b events -d -v brief > "$qa_log"
-              if grep -Eq "$crash_pattern" "$qa_log"; then
-                rm -f "$qa_log"
-                echo "::error::Application crash or ANR on $profile"
-                exit 1
-              fi
-              rm -f "$qa_log"
-              echo "PASS installation and startup: $profile"
-            done
-            adb shell wm size reset
-            adb shell wm density reset
+            sh "$GITHUB_WORKSPACE/Tools/release/emulator_smoke.sh"
 
       - name: Eliminar material de firma del runner
         if: always()
