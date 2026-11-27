@@ -40,7 +40,7 @@ class EmulatorShellContractTests(unittest.TestCase):
         self.assertLess(self.workflow.index("test_emulator_shell_contract.py"),
                         self.workflow.index(":TMessagesProj_App:assembleAfatRelease"))
 
-    def simulate(self, has_apk, crash=False):
+    def simulate(self, has_apk, crash=False, pid_mode="normal", log_failure=False):
         with tempfile.TemporaryDirectory(prefix="telebots smoke ") as folder:
             root = Path(folder)
             (root / "Tools/release").mkdir(parents=True)
@@ -56,8 +56,12 @@ class EmulatorShellContractTests(unittest.TestCase):
                 'printf "%s\\n" "$*" >> "$ADB_TRACE"\n'
                 'case "$*" in\n'
                 '  "shell pm path "*) echo "package:/data/app/base.apk";;\n'
-                '  "shell pidof "*) echo 42;;\n'
+                '  "shell pidof "*)\n'
+                '    if [ "$FAKE_PID_MODE" = missing ]; then exit 1; fi\n'
+                '    if [ "$FAKE_PID_MODE" = delayed ] && [ "$(grep -c "^shell pidof " "$ADB_TRACE")" -eq 1 ]; then exit 1; fi\n'
+                '    echo 42;;\n'
                 '  "logcat -b crash -b events -d -v brief") '
+                'if [ "$FAKE_LOG_FAILURE" = 1 ]; then exit 1; fi; '
                 'if [ "$FAKE_CRASH" = 1 ]; then echo "Process: org.comunidadtelebots.dev, PID: 42"; fi;;\n'
                 'esac\nexit 0\n', encoding="utf-8")
             adb.chmod(0o755)
@@ -66,7 +70,8 @@ class EmulatorShellContractTests(unittest.TestCase):
             sleeper.chmod(0o755)
             trace = root / "trace"
             env = dict(os.environ, GITHUB_WORKSPACE=str(root), ADB_TRACE=str(trace),
-                       FAKE_CRASH="1" if crash else "0",
+                       FAKE_CRASH="1" if crash else "0", FAKE_PID_MODE=pid_mode,
+                       FAKE_LOG_FAILURE="1" if log_failure else "0",
                        PATH=str(bin_dir) + os.pathsep + os.environ["PATH"])
             # Model the action: execute each non-empty line in a separate shell,
             # from outside the repository, not sharing shell variables.
@@ -93,10 +98,29 @@ class EmulatorShellContractTests(unittest.TestCase):
         self.assertEqual("", trace)
 
     def test_crash_fails_gate(self):
-        result, trace = self.simulate(True, crash=True)
+        result, trace = self.simulate(True, crash=True, pid_mode="missing")
         self.assertNotEqual(0, result.returncode)
         self.assertIn("Application crash or ANR on phone", result.stdout)
         self.assertNotIn("PASS installation and startup: tablet", result.stdout)
+
+    def test_missing_pid_collects_logs_and_fails_explicitly(self):
+        result, trace = self.simulate(True, pid_mode="missing")
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("Application process not found on phone", result.stdout)
+        self.assertEqual(6, trace.count("logcat -b crash -b events -d -v brief"))
+        self.assertNotIn("PASS installation and startup", result.stdout)
+
+    def test_delayed_start_can_reach_both_profiles(self):
+        result, trace = self.simulate(True, pid_mode="delayed")
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertIn("PASS installation and startup: tablet", result.stdout)
+        self.assertEqual(3, trace.count("shell pidof "))
+
+    def test_crash_buffer_failure_is_not_success(self):
+        result, trace = self.simulate(True, log_failure=True)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("Cannot read crash/event buffers on phone", result.stdout)
+        self.assertNotIn("PASS installation and startup", result.stdout)
 
 
 if __name__ == "__main__":
