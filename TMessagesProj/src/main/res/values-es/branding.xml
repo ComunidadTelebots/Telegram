@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ForkIndependentClient">Cliente independiente que utiliza la API de Telegram. No está afiliado a Telegram ni cuenta con su respaldo.</string>
+    <string name="TelebotsPerformanceTitle">Rendimiento por dispositivo</string>
+    <string name="TelebotsPerformanceDevice">Tu dispositivo</string>
+    <string name="TelebotsPerformanceDetection">Capacidad detectada: %1$s</string>
+    <string name="TelebotsPerformanceChoose">Elige cómo se adapta la aplicación</string>
+    <string name="TelebotsPerformanceAuto">Automático (recomendado)</string>
+    <string name="TelebotsPerformanceAutoInfo">Utiliza la capacidad medida del dispositivo</string>
+    <string name="TelebotsPerformanceBasic">Básico</string>
+    <string name="TelebotsPerformanceBasicInfo">Menos efectos visuales y animaciones</string>
+    <string name="TelebotsPerformanceBalanced">Equilibrado</string>
+    <string name="TelebotsPerformanceBalancedInfo">Efectos y consumo de batería moderados</string>
+    <string name="TelebotsPerformancePowerful">Potente</string>
+    <string name="TelebotsPerformancePowerfulInfo">Más efectos visuales si el hardware lo permite</string>
+    <string name="TelebotsPerformanceNote">Solo cambian los efectos visuales. El ahorro de batería tiene prioridad. No aumenta la potencia del dispositivo.</string>
+    <string name="TelebotsPerformanceApply">Aplicar perfil</string>
+    <string name="TelebotsPerformanceMenu">Rendimiento por dispositivo</string>
 </resources>
