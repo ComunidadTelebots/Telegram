@@ -6,8 +6,6 @@ import android.content.SharedPreferences;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -226,10 +224,12 @@ public class TelebotsP2pIndependentMessaging {
     }
 
     private void handleClientSocket(Socket socket) {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8))) {
-            String line = reader.readLine();
+        try (Socket client = socket) {
+            // Do not let unauthenticated peers hold an inbound worker indefinitely.
+            client.setSoTimeout(5000);
+            String line = P2pInboundFrame.readLine(client.getInputStream());
             if (line != null) {
-                handleIncomingPacket(line, socket.getInetAddress().getHostAddress());
+                handleIncomingPacket(line, client.getInetAddress().getHostAddress());
             }
         } catch (Exception e) {
             FileLog.e(e);
