@@ -695,7 +695,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         items.add(SettingCell.Factory.of(1, IconBackgroundColors.BLUE.top, IconBackgroundColors.BLUE.bottom, R.drawable.settings_account, getString(R.string.SettingsAccount), getString(R.string.SettingsAccountInfo)));
         items.add(SettingCell.Factory.of(2, IconBackgroundColors.ORANGE.top, IconBackgroundColors.ORANGE.bottom, R.drawable.settings_chat, getString(R.string.SettingsChat), getString(R.string.SettingsChatInfo)));
         items.add(UItem.asShadow(null));
-        items.add(SettingCell.Factory.of(101, IconBackgroundColors.BLUE_LIGHT.top, IconBackgroundColors.BLUE_LIGHT.bottom, R.drawable.settings_features, getString(R.string.TelebotsSettings)));
+        items.add(SettingCell.Factory.of(101, IconBackgroundColors.BLUE_LIGHT.top, IconBackgroundColors.BLUE_LIGHT.bottom, R.drawable.settings_features, getString(R.string.TelebotsSettings), "Bots, comunidad, novedades y recursos"));
         items.add(UItem.asShadow(null));
         items.add(SettingCell.Factory.of(3, IconBackgroundColors.GREEN.top, IconBackgroundColors.GREEN.bottom, R.drawable.settings_privacy, getString(R.string.SettingsPrivacySecurity), getString(R.string.SettingsPrivacySecurityInfo)));
         items.add(SettingCell.Factory.of(5, IconBackgroundColors.RED.top, IconBackgroundColors.RED.bottom, R.drawable.settings_sounds, getString(R.string.SettingsNotifications), getString(R.string.SettingsNotificationsInfo)));
@@ -871,7 +871,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
                 getMessagesController().openByUserName("comunidadtelebots", this, 0);
                 break;
             case 101:
-                presentSettingFragment(new CommunitySettingsActivity());
+                presentSettingFragment(new CommunityPremiumHubActivity());
                 break;
 
             case 17:
