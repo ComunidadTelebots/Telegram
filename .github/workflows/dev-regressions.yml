@@ -1,0 +1,29 @@
+name: DEV reader and compatibility regressions
+on:
+  push:
+    branches: [dev]
+  pull_request:
+    branches: [dev]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Reader, security and device policies (no APK publication)
+        run: |
+          python3 Tools/tests/run_amp_tests.py
+          python3 Tools/tests/test_security_boundaries.py
+          python3 Tools/tests/test_p2p_frame.py
+          python3 Tools/tests/test_community_compatibility.py
+          python3 Tools/tests/test_low_memory_policy.py
+          python3 Tools/tests/test_community_performance.py
