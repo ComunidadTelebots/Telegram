@@ -2935,6 +2935,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 .add(NotificationCenter.currentUserPremiumStatusChanged);
 
             observersGroup.addGlobal(NotificationCenter.didSetPasscode);
+            observersGroup.addGlobal(NotificationCenter.storyStripVisibilityChanged);
         }
         observersGroup
             .add(NotificationCenter.messagesDeleted)
@@ -7389,7 +7390,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 showArchiveHelp();
             }
         }
-        if (canShowStoryHint && !storyHintShown && storyHint != null && storiesEnabled) {
+        if (canShowStoryHint && !storyHintShown && storyHint != null && storiesEnabled && SharedConfig.showStoryStrip) {
             storyHintShown = true;
             canShowStoryHint = false;
             storyHint.show();
@@ -7500,6 +7501,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             searchAnimator = null;
         }
         searchIsShowed = show;
+        if (!show) {
+            updateStoriesVisibility(false);
+        }
         blur3_InvalidateBlur();
         if (show) {
             boolean onlyDialogsAdapter;
@@ -8898,7 +8902,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         final boolean storiesEnabled = getMessagesController().storiesEnabled();
         if (this.storiesEnabled != storiesEnabled) {
             updateFloatingButtonOffset();
-            if (!this.storiesEnabled && storiesEnabled && storyHint != null) {
+            if (!this.storiesEnabled && storiesEnabled && storyHint != null && SharedConfig.showStoryStrip) {
                 storyHint.show();
             }
             this.storiesEnabled = storiesEnabled;
@@ -10874,6 +10878,14 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     }
                 }
             }
+        } else if (id == NotificationCenter.storyStripVisibilityChanged) {
+            if (storiesVisibilityAnimator != null) {
+                storiesVisibilityAnimator.cancel();
+            }
+            if (storiesVisibilityAnimator2 != null) {
+                storiesVisibilityAnimator2.cancel();
+            }
+            updateStoriesVisibility(false);
         } else if (id == NotificationCenter.storiesUpdated) {
             updateStoriesVisibility(wasDrawn);
             updateVisibleRows(0);
@@ -12827,7 +12839,10 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         }
         boolean onlySelfStories = !isArchive() && getStoriesController().hasOnlySelfStories();
         boolean newVisibility;
-        if (communityId != 0) {
+        if (!isArchive() && !SharedConfig.showStoryStrip) {
+            onlySelfStories = false;
+            newVisibility = false;
+        } else if (communityId != 0) {
             newVisibility = false;
         } else if (isArchive()) {
             newVisibility = !getStoriesController().getHiddenList().isEmpty();
