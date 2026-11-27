@@ -12,4 +12,19 @@
     <string name="ForkIntroMessage4">Manage your privacy and security settings.</string>
     <string name="ForkIntroMessage5">Send messages, make calls and share media.</string>
     <string name="ForkIntroMessage6">Access your chats across your devices.</string>
+    <string name="TelebotsPerformanceTitle">Performance for your device</string>
+    <string name="TelebotsPerformanceDevice">Detected device</string>
+    <string name="TelebotsPerformanceDetection">Estimated capability: %1$s</string>
+    <string name="TelebotsPerformanceChoose">Choose how Comunidad Telebots adapts</string>
+    <string name="TelebotsPerformanceAuto">Automatic (recommended)</string>
+    <string name="TelebotsPerformanceAutoInfo">Adapt visuals to measured hardware capability</string>
+    <string name="TelebotsPerformanceBasic">Basic</string>
+    <string name="TelebotsPerformanceBasicInfo">Fewer visual effects and animations</string>
+    <string name="TelebotsPerformanceBalanced">Balanced</string>
+    <string name="TelebotsPerformanceBalancedInfo">Moderate effects, smoother navigation</string>
+    <string name="TelebotsPerformancePowerful">Powerful</string>
+    <string name="TelebotsPerformancePowerfulInfo">More effects only where hardware permits</string>
+    <string name="TelebotsPerformanceNote">Only visual effects change. Battery saving and memory limits remain enforced. Your phone or tablet does not become faster.</string>
+    <string name="TelebotsPerformanceApply">Apply device profile</string>
+    <string name="TelebotsPerformanceMenu">Adaptive performance · phone and tablet</string>
 </resources>
