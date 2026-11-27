@@ -10,6 +10,6 @@ subprojects { appProject ->
         if (!new File(channelResources, 'drawable-nodpi/comunidad_telebots_icon.png').isFile()) {
             throw new GradleException("Missing Comunidad Telebots icon for ${channel}")
         }
-        appProject.android.sourceSets.main.res.srcDir(channelResources)
+        appProject.extensions.getByName('android').sourceSets.main.res.srcDir(channelResources)
     }
 }
