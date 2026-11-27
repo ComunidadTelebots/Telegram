@@ -1,0 +1,47 @@
+name: QA catálogo de estilos y accesibilidad de navegación
+
+on:
+  pull_request:
+    branches: [dev]
+    paths:
+      - 'TMessagesProj/src/main/java/org/telegram/ui/skins/**'
+      - 'Tools/tests/ClientLayoutTest.java'
+      - 'Tools/tests/test_skin_catalog_contract.py'
+      - '.github/workflows/qa-skin-contract.yml'
+  push:
+    branches: [qa/skin-contract-fontscale-20261118]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-and-jvm:
+    name: Contratos de los 16 estilos y regresión JVM
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Descargar código sin credenciales
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Preparar Java 21
+        uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a # v5.5.0
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Contrastar constantes fuente con la referencia Canva conservada
+        run: python3 -m unittest discover -s Tools/tests -p 'test_skin_catalog_contract.py' -v
+
+      - name: Compilar y probar layout nativo sin SDK ni claves
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/telebots-layout-tests"
+          javac -encoding UTF-8 -d "$RUNNER_TEMP/telebots-layout-tests" \
+            TMessagesProj/src/main/java/org/telegram/ui/skins/ClientLayout.java \
+            Tools/tests/ClientLayoutTest.java
+          java -cp "$RUNNER_TEMP/telebots-layout-tests" ClientLayoutTest
