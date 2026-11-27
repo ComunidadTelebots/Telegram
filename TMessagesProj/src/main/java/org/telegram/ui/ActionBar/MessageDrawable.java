@@ -680,6 +680,19 @@ public class MessageDrawable extends Drawable {
 
     private void generatePath(Path path, Rect bounds, int padding, int rad, int smallRad, int nearRad, int top, boolean drawFullBottom, boolean drawFullTop, boolean customPaint) {
         path.rewind();
+        if (org.telegram.ui.skins.AuroraAppearance.isActive() && originalType == TYPE_TEXT && overrideRounding <= 0 && overrideRoundRadius == 0) {
+            // React aurora.css: 14/14/14/4 incoming, 14/14/4/14 outgoing.
+            float radius = Math.min(rad, (bounds.height() - 2f * padding) / 2f);
+            float corner = Math.min(dp(4), radius);
+            float topRadius = isTopNear ? corner : radius;
+            float bottomRadius = isBottomNear || botButtonsBottom ? corner : radius;
+            rect.set(bounds.left + (isOut ? padding : dp(8)), bounds.top + padding,
+                    bounds.right - (isOut ? dp(8) : padding), bounds.bottom - padding);
+            path.addRoundRect(rect, new float[] {topRadius, topRadius, topRadius, topRadius,
+                    isOut ? corner : bottomRadius, isOut ? corner : bottomRadius,
+                    isOut ? bottomRadius : corner, isOut ? bottomRadius : corner}, Path.Direction.CW);
+            return;
+        }
         int heightHalf = (bounds.height() - padding) >> 1;
         if (rad > heightHalf) {
             rad = heightHalf;

@@ -9,11 +9,14 @@ import org.telegram.messenger.MessagesController;
 import org.telegram.messenger.UserConfig;
 
 import java.io.File;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TelebotsSecurityMonitor {
 
     private static final Handler handler = new Handler(Looper.getMainLooper());
     private static boolean isRunning = false;
+    private static final AtomicBoolean updateCheckPending = new AtomicBoolean();
     
     // Canal oficial de la rama de desarrollo de Moonbot
     public static String DEV_CHANNEL_USERNAME = "comunidadtelebots";
@@ -56,22 +59,7 @@ public class TelebotsSecurityMonitor {
             
             // 3. Bloqueo por Actualización Obligatoria (Forzada por el Servidor Moonbot)
             if (!violated && org.telegram.messenger.ReleaseAccess.allowed()) {
-                org.telegram.messenger.ReleaseAccess.NETWORK.execute(() -> {
-                    try {
-                        long installedCode = org.telegram.messenger.ApplicationLoader.applicationContext.getPackageManager().getPackageInfo(org.telegram.messenger.ApplicationLoader.applicationContext.getPackageName(), 0).versionCode;
-                        org.json.JSONObject updateResult = org.telegram.messenger.ReleaseAccess.checkAndroidUpdate(installedCode);
-                        if (updateResult != null && "available".equals(updateResult.optString("status"))) {
-                            // Si el servidor marca "mandatory: true", bloqueamos y forzamos descarga.
-                            if (updateResult.optBoolean("mandatory", false) || updateResult.optBoolean("force_update", false)) {
-                                String updateUrl = updateResult.optString("url", "https://t.me/comunidadtelebots");
-                                handler.post(() -> org.telegram.messenger.ReleaseAccess.revokeAccessAndForceUpdate(updateUrl, "Actualización obligatoria detectada. Descargando desde el canal oficial..."));
-                                return;
-                            }
-                        }
-                    } catch (Exception e) {
-                        // Ignorar errores de red temporales
-                    }
-                });
+                checkForMandatoryUpdate();
             }
 
             if (violated) {
@@ -83,6 +71,34 @@ public class TelebotsSecurityMonitor {
                 checkSecurityLoop();
             }
         }, 10000); // 10 segundos
+    }
+
+    /** One queued or running lookup; slow requests must not accumulate behind access checks. */
+    private static void checkForMandatoryUpdate() {
+        if (!updateCheckPending.compareAndSet(false, true)) return;
+        try {
+            org.telegram.messenger.ReleaseAccess.NETWORK.execute(() -> {
+                try {
+                    long installedCode = org.telegram.messenger.ApplicationLoader.applicationContext.getPackageManager().getPackageInfo(org.telegram.messenger.ApplicationLoader.applicationContext.getPackageName(), 0).versionCode;
+                    org.json.JSONObject updateResult = org.telegram.messenger.ReleaseAccess.checkAndroidUpdate(installedCode);
+                    if (updateResult != null && "available".equals(updateResult.optString("status"))) {
+                        // Si el servidor marca "mandatory: true", bloqueamos y forzamos descarga.
+                        if (updateResult.optBoolean("mandatory", false) || updateResult.optBoolean("force_update", false)) {
+                            String updateUrl = updateResult.optString("url", "https://t.me/comunidadtelebots");
+                            handler.post(() -> org.telegram.messenger.ReleaseAccess.revokeAccessAndForceUpdate(updateUrl, "Actualización obligatoria detectada. Descargando desde el canal oficial..."));
+                            return;
+                        }
+                    }
+                } catch (Exception e) {
+                    // Ignorar errores de red temporales
+                } finally {
+                    updateCheckPending.set(false);
+                }
+            });
+        } catch (RejectedExecutionException ignored) {
+            // Allow a later tick to retry if the shared executor could not accept this one.
+            updateCheckPending.set(false);
+        }
     }
 
     private static boolean isDeviceRooted() {

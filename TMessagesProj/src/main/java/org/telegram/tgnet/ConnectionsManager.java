@@ -737,9 +737,12 @@ public class ConnectionsManager extends BaseController {
     }
 
     public void switchBackend(boolean restart) {
-        SharedPreferences preferences = MessagesController.getGlobalMainSettings();
-        preferences.edit().remove("language_showed2").commit();
-        native_switchBackend(currentAccount, restart);
+        // Backend changes are only for an unused login slot. An authorized account
+        // must be selected by its own slot, never converted to another server.
+        if (restart || UserConfig.getInstance(currentAccount).isClientActivated()) {
+            throw new IllegalStateException("Select another account instead of changing its backend");
+        }
+        native_switchBackend(currentAccount, false);
     }
 
     public boolean isTestBackend() {

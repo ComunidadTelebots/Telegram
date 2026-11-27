@@ -8,7 +8,8 @@ public enum ClientLayout {
     UNIGRAM(Placement.SIDE, 72),
     WEB_A(Placement.SIDE, 64),
     WEB_K(Placement.SIDE, 60),
-    MACOS(Placement.BOTTOM, 48);
+    MACOS(Placement.BOTTOM, 48),
+    AURORA(Placement.BOTTOM, 64);
 
     public enum Placement { NATIVE, BOTTOM, TOP, SIDE }
     public final Placement placement;
@@ -28,13 +29,17 @@ public enum ClientLayout {
             case "web": return WEB_A;
             case "webk": return WEB_K;
             case "macos": return MACOS;
+            case "aurora":
+            case "aurora-midnight": return AURORA;
             default: return ANDROID;
         }
     }
 
     public int extentDp(float fontScale) {
         if (placement == Placement.NATIVE || this == MACOS) return extentDp;
-        return extentDp + (int) Math.ceil(Math.max(0f, fontScale - 1f) * (placement == Placement.SIDE ? 32 : 28));
+        // Aurora keeps two label lines plus an icon at large system text sizes.
+        int textGrowth = this == AURORA ? 48 : placement == Placement.SIDE ? 32 : 28;
+        return extentDp + (int) Math.ceil(Math.max(0f, fontScale - 1f) * textGrowth);
     }
 
     public int bottomInsetDp(int original, float fontScale) {

@@ -1264,8 +1264,25 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     private final android.text.TextPaint readerTextPaint = new android.text.TextPaint(Paint.ANTI_ALIAS_FLAG);
     private int readerPressed;
     private Drawable readerInstantIcon;
+    private int readerInstantIconColor;
+    private boolean readerInstantIconColorSet;
+    // Allocate only for cells actually displaying a reader preview, never for every chat message.
+    private org.telegram.ui.Components.SingleLineTextCache[] readerTextCache;
+
+    private org.telegram.ui.Components.SingleLineTextCache readerTextCache(int slot) {
+        if (readerTextCache == null) readerTextCache = new org.telegram.ui.Components.SingleLineTextCache[5];
+        if (readerTextCache[slot] == null) readerTextCache[slot] = new org.telegram.ui.Components.SingleLineTextCache();
+        return readerTextCache[slot];
+    }
+
     private int photoReaderHeight;
     private boolean readerPreviewVisible;
+    private int readerPreviewCapacityRetries;
+    private boolean readerPreviewRetryPosted;
+    private final Runnable readerPreviewRetry = () -> {
+        readerPreviewRetryPosted = false;
+        if (attachedToWindow && readerPreviewVisible && readerPreviewCancel == null) requestReaderPreview();
+    };
     private final Rect readerVisibleRect = new Rect();
     private final Runnable readerVisibilityCheck = () -> updateReaderPreviewVisibility(isShown() && getLocalVisibleRect(readerVisibleRect));
 
@@ -1295,6 +1312,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
 
 
     private void cancelReaderPreview() {
+        removeCallbacks(readerPreviewRetry);
+        readerPreviewRetryPosted = false;
+        readerPreviewCapacityRetries = 0;
         readerPreviewGeneration++;
         if (readerPreviewCancel != null) readerPreviewCancel.run();
         readerPreviewCancel = null;
@@ -1306,6 +1326,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
 
     private void bindReaderPreview() {
         cancelReaderPreview();
+        readerTextCache = null;
         photoReaderHeight = 0;
         readerPreview = MessageLinkPreview.peek(getReaderPreviewMessageObject());
         removeCallbacks(readerVisibilityCheck);
@@ -1313,6 +1334,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     }
 
     private void requestReaderPreview() {
+        if (readerPreviewRetryPosted) return;
         final MessageObject message = getReaderPreviewMessageObject();
         final MessageObject boundMessage = currentMessageObject;
         if (!readerPreviewVisible || message == null || message.preview || !readerGroupBottom()
@@ -1329,6 +1351,16 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             requestLayout();
             invalidateWithParent();
         });
+        if (readerPreviewCancel == null) {
+            // A capacity refusal is not a negative AMP result. Retry only while this cell remains
+            // visible, at most once/second for one metadata timeout window (55s) plus margin.
+            if (readerPreviewCapacityRetries++ < 60) {
+                readerPreviewRetryPosted = true;
+                postDelayed(readerPreviewRetry, 1000);
+            }
+        } else {
+            readerPreviewCapacityRetries = 0;
+        }
     }
 
     private boolean hasReaderAmp() {
@@ -1349,15 +1381,20 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         readerTextPaint.setColor(color);
         boolean instant = title.equals(getString(R.string.InstantView));
         int iconSpace = instant ? dp(15) : 0;
-        CharSequence label = TextUtils.ellipsize(title, readerTextPaint, Math.max(1, bounds.width() - dp(12) - iconSpace), TextUtils.TruncateAt.END);
-        float textLeft = bounds.centerX() - (readerTextPaint.measureText(label.toString()) + iconSpace) / 2;
+        org.telegram.ui.Components.SingleLineTextCache textCache = readerTextCache(instant ? 1 : 0);
+        String label = textCache.get(title, readerTextPaint, bounds.width() - dp(12) - iconSpace, false);
+        float textLeft = bounds.centerX() - (textCache.measuredWidth() + iconSpace) / 2;
         if (instant) {
             if (readerInstantIcon == null) readerInstantIcon = getContext().getResources().getDrawable(R.drawable.msg_instant).mutate();
-            readerInstantIcon.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN));
+            if (!readerInstantIconColorSet || readerInstantIconColor != color) {
+                readerInstantIconColorSet = true;
+                readerInstantIconColor = color;
+                readerInstantIcon.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN));
+            }
             setDrawableBounds(readerInstantIcon, textLeft, bounds.centerY() - dp(6.5f), dp(9), dp(13));
             readerInstantIcon.draw(canvas);
         }
-        canvas.drawText(label.toString(), textLeft + iconSpace,
+        canvas.drawText(label, textLeft + iconSpace,
                 bounds.centerY() - (readerTextPaint.ascent() + readerTextPaint.descent()) / 2, readerTextPaint);
     }
 
@@ -1411,12 +1448,12 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         readerTextPaint.setColor(color);
         TLRPC.WebPage page = readerPreview.webpage;
         String title = !TextUtils.isEmpty(page.title) ? page.title : !TextUtils.isEmpty(page.site_name) ? page.site_name : readerPreview.url;
-        canvas.drawText(TextUtils.ellipsize(title, readerTextPaint, width - dp(20), TextUtils.TruncateAt.END).toString(), left + dp(10), top + dp(22), readerTextPaint);
+        canvas.drawText(readerTextCache(2).get(title, readerTextPaint, width - dp(20), false), left + dp(10), top + dp(22), readerTextPaint);
         readerTextPaint.setTypeface(null);
         readerTextPaint.setTextSize(dp(12));
         boolean description = !TextUtils.isEmpty(page.description);
-        if (description) canvas.drawText(TextUtils.ellipsize(page.description.replace('\n', ' '), readerTextPaint, width - dp(20), TextUtils.TruncateAt.END).toString(), left + dp(10), top + dp(43), readerTextPaint);
-        canvas.drawText(TextUtils.ellipsize(readerPreview.url, readerTextPaint, width - dp(20), TextUtils.TruncateAt.END).toString(), left + dp(10), top + dp(description ? 62 : 43), readerTextPaint);
+        if (description) canvas.drawText(readerTextCache(3).get(page.description, readerTextPaint, width - dp(20), true), left + dp(10), top + dp(43), readerTextPaint);
+        canvas.drawText(readerTextCache(4).get(readerPreview.url, readerTextPaint, width - dp(20), false), left + dp(10), top + dp(description ? 62 : 43), readerTextPaint);
         if (hasActions) drawReaderRow(canvas, photoInstantRect, left, top + dp(description ? 71 : 52), width, page.cached_page != null, color);
     }
 

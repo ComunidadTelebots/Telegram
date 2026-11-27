@@ -6116,6 +6116,9 @@ public class ChatAttachAlert extends BottomSheet implements NotificationCenter.N
             }
         }
 
+        pollsEnabled = pollsEnabled && org.telegram.ui.skins.DesignFeatureSettings.allows(
+                org.telegram.messenger.DesignFeaturePolicy.Feature.POLL_CREATION);
+
         if (restrictEphemeralMessageTypes) {
             pollsEnabled = false;
             todoEnabled = false;

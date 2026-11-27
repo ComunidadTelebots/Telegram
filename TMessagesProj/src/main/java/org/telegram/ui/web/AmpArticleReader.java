@@ -72,6 +72,7 @@ public final class AmpArticleReader {
                             author.author = WebInstantView.parseRichText(instant.webpage.author);
                             instant.webpage.cached_page.blocks.add(Math.min(1, instant.webpage.cached_page.blocks.size()), author);
                         }
+                        addLanguageOption(instant.webpage,result);
                         TL_iv.pageBlockFooter source = new TL_iv.pageBlockFooter();
                         source.text = WebInstantView.parseRichText(instant.webpage.site_name + " · " + result.originalUrl);
                         instant.webpage.cached_page.blocks.add(source);
@@ -95,6 +96,20 @@ public final class AmpArticleReader {
             cancelled.set(true);
             AndroidUtilities.runOnUIThread(() -> { if (stop[0] != null) stop[0].run(); });
         };
+    }
+
+    static void addLanguageOption(TLRPC.WebPage page,AmpResolver.Result result){
+        String preference=org.telegram.messenger.MessagesController.getGlobalMainSettings().getString("amp_preferred_language","app");
+        if("off".equals(preference))return;
+        java.util.Locale locale=LocaleController.getInstance().getCurrentLocale();
+        String target="app".equals(preference)?locale.toLanguageTag():preference;
+        AmpPageLanguages.Info info=AmpPageLanguages.inspect(result.languageHtml,result.originalUrl,target);
+        if(info.url==null)info=AmpPageLanguages.inspect(result.html,result.ampUrl,target);
+        if(info.url==null)return;
+        TL_iv.pageBlockParagraph paragraph=new TL_iv.pageBlockParagraph();TL_iv.textUrl link=new TL_iv.textUrl();link.url=info.url;
+        String name=java.util.Locale.forLanguageTag(info.target).getDisplayLanguage(locale);
+        link.text=WebInstantView.parseRichText(LocaleController.formatString("AmpOfficialLanguage",R.string.AmpOfficialLanguage,name));paragraph.text=link;
+        page.cached_page.blocks.add(Math.min(1,page.cached_page.blocks.size()),paragraph);
     }
 
     private static WebInstantView accessNotice(AmpResolver.Result result) {

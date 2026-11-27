@@ -153,8 +153,10 @@ android {
 
     // Keep packaging aligned with an ABI-limited native build (including IDE builds).
     def injectedAbis = providers.gradleProperty('android.injected.build.abi').orNull
-    if (injectedAbis) {
-        def selectedAbis = injectedAbis.split(',').collect { it.trim() }
+    if (injectedAbis || !rootProject.ext.forkBuildAbis.isEmpty()) {
+        // AGP compiles only the first compatible device ABI from the injected
+        // list. Packaging its remaining entries creates APKs that cannot start.
+        def selectedAbis = injectedAbis ? injectedAbis.split(',').collect { it.trim() }.take(1) : rootProject.ext.forkBuildAbis
         def supportedAbis = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
         if (!selectedAbis.every { supportedAbis.contains(it) }) {
             throw new GradleException("Unsupported native build ABI: ${injectedAbis}")
@@ -182,6 +184,12 @@ android {
     }
 
     defaultConfig {
+        if (project.hasProperty("AURORA_DEVICE_TEST")) {
+            testInstrumentationRunner "org.telegram.ui.skins.AuroraDeviceTest"
+        }
+        if (project.hasProperty("CLIENT_DESIGN_DEVICE_TEST")) {
+            testInstrumentationRunner "org.telegram.ui.skins.ClientDesignDeviceTest"
+        }
         if (project.hasProperty("AMP_READER_DEVICE_TEST")) {
             testInstrumentationRunner "org.telegram.ui.web.AmpReaderDeviceTest"
         }

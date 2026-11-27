@@ -8041,6 +8041,9 @@ public class MediaDataController extends BaseController {
             }
         }
 
+        if (richMessage == null) {
+            CommunityDraftHistory.captureLocal(currentAccount, dialogId, threadId, draftMessage.message);
+        }
         saveDraft(dialogId, threadId, draftMessage, replyToMessage, false);
 
         if (threadId == 0 || ChatObject.isForum(chat) || ChatObject.isMonoForum(chat)) {
@@ -8206,6 +8209,9 @@ public class MediaDataController extends BaseController {
     }
 
     public void saveDraft(long dialogId, long threadId, TLRPC.DraftMessage draft, TLRPC.Message replyToMessage, boolean fromServer) {
+        if (fromServer && (draft == null || draft instanceof TLRPC.TL_draftMessageEmpty || TextUtils.isEmpty(draft.message))) {
+            CommunityDraftHistory.remoteDraftCleared(currentAccount, dialogId, threadId);
+        }
         if (getMessagesController().isForum(dialogId) && threadId == 0 && TextUtils.isEmpty(draft.message)) {
             if (draft.reply_to instanceof TLRPC.TL_inputReplyToMessage) {
                 ((TLRPC.TL_inputReplyToMessage) draft.reply_to).reply_to_msg_id = 0;

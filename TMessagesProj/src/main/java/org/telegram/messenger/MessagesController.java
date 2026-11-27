@@ -16130,13 +16130,14 @@ public class MessagesController extends BaseController implements NotificationCe
         if (type == 1) {
             GramWalletStorage.wipeForUser(ApplicationLoader.applicationContext, currentAccount, getUserConfig().getClientUserId());
             unregistedPush();
+            final boolean logoutTestBackend = getConnectionsManager().isTestBackend();
             TLRPC.TL_auth_logOut req = new TLRPC.TL_auth_logOut();
             getConnectionsManager().sendRequest(req, (response, error) -> {
                 getConnectionsManager().cleanup(false);
                 AndroidUtilities.runOnUIThread(() -> {
                     if (response instanceof TLRPC.TL_auth_loggedOut) {
                         if (((TLRPC.TL_auth_loggedOut) response).future_auth_token != null) {
-                            AuthTokensHelper.addLogOutToken((TLRPC.TL_auth_loggedOut) response);
+                            AuthTokensHelper.addLogOutToken(logoutTestBackend, (TLRPC.TL_auth_loggedOut) response);
                         }
                     }
                 });
@@ -23744,6 +23745,8 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     public boolean storiesEnabled() {
+        if (!DesignFeaturePolicy.allows(DesignFeaturePolicy.Feature.STORY_POSTING,
+                SharedConfig.uiVersionYear, SharedConfig.allowFutureFeatures)) return false;
         switch (storiesPosting) {
             case "premium":
                 return getUserConfig().isPremium();

@@ -2045,17 +2045,34 @@ void ConnectionsManager::setUserId(int64_t userId) {
 
 void ConnectionsManager::switchBackend(bool restart) {
     scheduleTask([&, restart] {
-        currentDatacenterId = 1;
-        testBackend = !testBackend;
-        if (!restart) {
-            Handshake::cleanupServerKeys();
+        // Account sessions belong to their original server. Never overwrite one,
+        // including when authorization completed after the Java-side check.
+        if (restart || currentUserId != 0) {
+            return;
         }
+        // Requests made before the change must never be replayed to the other server.
+        requestsQueue.clear();
+        runningRequests.clear();
+        waitingLoginRequests.clear();
+        requestsByGuids.clear();
+        guidsByRequests.clear();
+        quickAckIdToRequestIds.clear();
+        sessionsToDestroy.clear();
+        // The discarded config/migration requests will not run their completion
+        // callbacks. Release their gates before initializing the new environment.
+        updatingDcSettings = false;
+        updatingDcSettingsWorkaround = false;
+        updatingDcSettingsAgain = false;
+        updatingDcSettingsAgainDcNum = 0;
+        updatingDcStartTime = 0;
+        lastDcUpdateTime = 0;
+        movingToDatacenterId = DEFAULT_DATACENTER_ID;
+        currentDatacenterId = 1;
+        Handshake::cleanupServerKeys();
         datacenters.clear();
+        testBackend = !testBackend;
         initDatacenters();
         saveConfig();
-        if (restart) {
-            exit(1);
-        }
     });
 }
 

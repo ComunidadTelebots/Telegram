@@ -1,5 +1,18 @@
 # APK firmados descargables desde GitHub
 
+Actualización 2026-11-09: el workflow se llama **Android APK y Google Play AAB**.
+La opción `apk` conserva el flujo de los cinco canales. La nueva opción
+`play-aab` fuerza `org.comunidadtelebots.stable`, compila todas las arquitecturas
+y valida el AAB antes de ofrecerlo como descarga. No lo publica en Play.
+Requiere `version_code_base` y `previous_play_version_code`; véase
+[`play/ALFA_2026-11-09.md`](play/ALFA_2026-11-09.md).
+
+Para un APK local con varias arquitecturas usar `COMMUNITY_BUILD_ABIS`, por
+ejemplo `arm64-v8a,x86_64`. No usar una lista en `android.injected.build.abi`
+para ese fin: AGP la interpreta como preferencias de un dispositivo y puede
+compilar solo la primera. El nuevo parámetro limita también la biblioteca
+compartida para que cada ABI anunciada contenga `libtmessages.49.so`.
+
 El workflow `.github/workflows/android-apk.yml` compila una APK release de Android bajo demanda y deja la descarga en **Actions → Android APK firmado → ejecución → Artifacts**. Mantiene los APK de los canales Telegram; no los sustituye ni envía publicaciones a esos canales. Tampoco publica en Google Play.
 
 ## Preparación del repositorio

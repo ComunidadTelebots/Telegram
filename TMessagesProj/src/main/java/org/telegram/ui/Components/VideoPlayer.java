@@ -231,6 +231,10 @@ public class VideoPlayer implements Player.Listener, VideoListener, AnalyticsLis
     }
 
     private void ensurePlayerCreated() {
+        // Reusing a player (for example, changing video quality) needs no new allocator/load control.
+        if (player != null && (!mixedAudio || audioPlayer != null)) {
+            return;
+        }
         DefaultLoadControl loadControl = new DefaultLoadControl.Builder()
             .setAllocator(new DefaultAllocator(true, C.DEFAULT_BUFFER_SEGMENT_SIZE))
             .setBufferDurationsMs(
@@ -279,8 +283,11 @@ public class VideoPlayer implements Player.Listener, VideoListener, AnalyticsLis
         }
         if (mixedAudio) {
             if (audioPlayer == null) {
+                // TrackSelector owns one player's listener and cannot be shared between players.
+                DefaultTrackSelector audioTrackSelector = new DefaultTrackSelector(ApplicationLoader.applicationContext, new AdaptiveTrackSelection.Factory());
+                audioTrackSelector.setParameters(trackSelector.getParameters());
                 audioPlayer = new ExoPlayer.Builder(ApplicationLoader.applicationContext)
-                        .setTrackSelector(trackSelector)
+                        .setTrackSelector(audioTrackSelector)
                         .setLoadControl(loadControl).build();
                 audioPlayer.addListener(new Player.Listener() {
 

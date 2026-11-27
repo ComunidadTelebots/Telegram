@@ -1,0 +1,6 @@
+Primera prueba de Aurora para Android.
+• Estilos Aurora y Aurora Midnight, adaptados desde Comunidad Telebots React.
+• Colores oscuros, acentos menta, fuente Manrope y burbujas sin cola.
+• Nueva navegación móvil para chats, contactos, llamadas y ajustes.
+• Corrección del arranque en compilaciones sin Firebase.
+Versión en pruebas: revisa acceso, mensajes, llamadas y notificaciones. Informa del modelo de móvil y los pasos si detectas un fallo.

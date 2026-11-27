@@ -6430,7 +6430,7 @@ public class Theme {
     }
 
     public static boolean isCurrentThemeDark() {
-        return currentTheme.isDark();
+        return org.telegram.ui.skins.AuroraAppearance.isActive() || currentTheme.isDark();
     }
 
     public static ThemeInfo getActiveTheme() {
@@ -7809,11 +7809,13 @@ public class Theme {
             dialogs_messagePrintingPaint = new TextPaint[2];
             for (int a = 0; a < 2; a++) {
                 dialogs_namePaint[a] = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-                dialogs_namePaint[a].setTypeface(AndroidUtilities.bold());
+                dialogs_namePaint[a].setTypeface(org.telegram.ui.skins.AuroraAppearance.semibold());
                 dialogs_nameEncryptedPaint[a] = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
-                dialogs_nameEncryptedPaint[a].setTypeface(AndroidUtilities.bold());
+                dialogs_nameEncryptedPaint[a].setTypeface(org.telegram.ui.skins.AuroraAppearance.semibold());
                 dialogs_messagePaint[a] = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
                 dialogs_messagePrintingPaint[a] = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
+                dialogs_messagePaint[a].setTypeface(org.telegram.ui.skins.AuroraAppearance.regular());
+                dialogs_messagePrintingPaint[a].setTypeface(org.telegram.ui.skins.AuroraAppearance.regular());
             }
             dialogs_searchNamePaint = new TextPaint(TextPaint.ANTI_ALIAS_FLAG);
             dialogs_searchNamePaint.setTypeface(AndroidUtilities.bold());
@@ -8032,6 +8034,12 @@ public class Theme {
             chat_msgTextPaintOneEmoji.setTextSize(dp(28 + 18));
             chat_msgTextPaintTwoEmoji.setTextSize(dp(24 + 14));
             chat_msgTextPaintThreeEmoji.setTextSize(dp(20 + 10));
+            chat_msgTextPaint.setTypeface(org.telegram.ui.skins.AuroraAppearance.regular());
+            chat_msgGameTextPaint.setTypeface(org.telegram.ui.skins.AuroraAppearance.regular());
+            chat_replyTextPaint.setTypeface(org.telegram.ui.skins.AuroraAppearance.regular());
+            chat_timePaint.setTypeface(org.telegram.ui.skins.AuroraAppearance.regular());
+            chat_namePaint.setTypeface(org.telegram.ui.skins.AuroraAppearance.semibold());
+            chat_replyNamePaint.setTypeface(org.telegram.ui.skins.AuroraAppearance.semibold());
             chat_msgTextPaint.setTextSize(dp(SharedConfig.fontSize));
             chat_msgGameTextPaint.setTextSize(dp(14));
             chat_msgBotButtonPaint.setTextSize(dp(15));
@@ -8979,6 +8987,11 @@ public class Theme {
     }
 
     public static int getCurrentColor(int key) {
+        SparseIntArray aurora = org.telegram.ui.skins.AuroraAppearance.palette();
+        if (aurora != null) {
+            int index = aurora.indexOfKey(key);
+            if (index >= 0) return aurora.valueAt(index);
+        }
         return currentColors.get(key);
     }
 
@@ -8991,6 +9004,18 @@ public class Theme {
     }
 
     public static int getColor(int key, boolean[] isDefault, boolean ignoreAnimation) {
+        SparseIntArray aurora = org.telegram.ui.skins.AuroraAppearance.palette();
+        if (aurora != null) {
+            int index = aurora.indexOfKey(key);
+            if (index < 0) {
+                int fallback = fallbackKeys.get(key, -1);
+                if (fallback >= 0) index = aurora.indexOfKey(fallback);
+            }
+            if (index >= 0) {
+                if (isDefault != null) isDefault[0] = false;
+                return aurora.valueAt(index);
+            }
+        }
         if (!ignoreAnimation && animatingColors != null) {
             int index = animatingColors.indexOfKey(key);
             if (index >= 0) {
@@ -9838,6 +9863,9 @@ public class Theme {
     }
 
     public static Drawable getCachedWallpaperNonBlocking() {
+        if (org.telegram.ui.skins.AuroraAppearance.isActive()) {
+            return org.telegram.ui.skins.AuroraAppearance.wallpaper();
+        }
         if (themedWallpaper != null) {
             return themedWallpaper;
         } else {
@@ -9846,10 +9874,11 @@ public class Theme {
     }
 
     public static boolean isWallpaperMotion() {
-        return isWallpaperMotion;
+        return !org.telegram.ui.skins.AuroraAppearance.isActive() && isWallpaperMotion;
     }
 
     public static boolean isPatternWallpaper() {
+        if (org.telegram.ui.skins.AuroraAppearance.isActive()) return false;
         String selectedBgSlug = getSelectedBackgroundSlug();
         return isPatternWallpaper || "CJz3BZ6YGEYBAAAABboWp6SAv04".equals(selectedBgSlug) || "qeZWES8rGVIEAAAARfWlK1lnfiI".equals(selectedBgSlug);
     }

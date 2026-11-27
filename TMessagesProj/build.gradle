@@ -74,8 +74,10 @@ dependencies {
     implementation 'com.google.firebase:firebase-datatransport:18.1.0'
     implementation 'com.google.firebase:firebase-appindexing:20.0.0'
     implementation platform('com.google.firebase:firebase-bom:32.7.0')
-    implementation 'com.google.firebase:firebase-crashlytics'
-    implementation 'com.google.firebase:firebase-crashlytics-ndk'
+    // 18.6.0 from the existing BoM ships 4 KiB-only native libraries. The
+    // 19.4.4 line supports 16 KiB pages and retains the experimental API 21 floor.
+    implementation 'com.google.firebase:firebase-crashlytics:19.4.4'
+    implementation 'com.google.firebase:firebase-crashlytics-ndk:19.4.4'
     implementation 'com.google.firebase:firebase-config'
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.android.gms:play-services-maps:18.1.0'
@@ -148,6 +150,9 @@ android {
     }
 
     defaultConfig {
+        if (!rootProject.ext.forkBuildAbis.isEmpty()) {
+            ndk { abiFilters.addAll(rootProject.ext.forkBuildAbis) }
+        }
         // Local emulator previews must never change the distributed release gate.
         buildConfigField "boolean", "EMULATOR_ACCESS_PREVIEW", "false"
         resValue "string", "fork_account_type", rootProject.ext.forkApplicationId
@@ -267,7 +272,9 @@ def getProps(String propName) {
         return "";
     }
 }
-apply plugin: 'com.google.gms.google-services'
+// Firebase registrations belong to the final application ID. Application
+// modules opt in through gradle/firebase.gradle; the shared library must not
+// inject upstream Google app IDs into builds that explicitly disable Firebase.
 
 
 task checkVisibility {

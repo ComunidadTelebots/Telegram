@@ -16,6 +16,8 @@ import org.telegram.ui.ActionBar.Theme;
 
 /** Native destination controls; no mock content or separate Telegram session. */
 public final class ClientNavigationView extends LinearLayout {
+    interface DestinationBar { void update(int destination, int unreadCount); }
+    private DestinationBar independentBar;
     public interface Listener {
         void select(int destination);
         default boolean longSelect(int destination, View anchor) { return false; }
@@ -35,6 +37,17 @@ public final class ClientNavigationView extends LinearLayout {
         super(context);
         this.layout = layout;
         this.resources = resources;
+        if (layout == ClientLayout.IOS || layout == ClientLayout.TELEGRAM_X || layout == ClientLayout.AURORA) {
+            View bar = layout == ClientLayout.AURORA
+                    ? new AuroraNavigationView(context, resources, listener)
+                    : layout == ClientLayout.IOS
+                    ? new IosNavigationView(context, resources, listener)
+                    : new TelegramXNavigationView(context, resources, listener);
+            independentBar = (DestinationBar) bar;
+            addView(bar, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+            update(0, 0);
+            return;
+        }
         boolean side = layout.placement == ClientLayout.Placement.SIDE;
         setOrientation(side ? VERTICAL : HORIZONTAL);
         setGravity(side ? Gravity.TOP : Gravity.CENTER);
@@ -98,6 +111,12 @@ public final class ClientNavigationView extends LinearLayout {
     }
 
     public void update(int destination, int unreadCount) {
+        if (independentBar != null) {
+            setBackgroundColor(Theme.getColor(layout == ClientLayout.TELEGRAM_X
+                    ? Theme.key_actionBarDefault : Theme.key_windowBackgroundWhite, resources));
+            independentBar.update(destination, unreadCount);
+            return;
+        }
         selected = destination;
         unread = unreadCount;
         setBackgroundColor(Theme.getColor(layout == ClientLayout.UNIGRAM

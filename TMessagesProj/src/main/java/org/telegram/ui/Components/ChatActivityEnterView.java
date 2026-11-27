@@ -120,6 +120,8 @@ import org.telegram.messenger.AccountInstance;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.AnimationNotificationsLocker;
 import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.CommunityUndoSendSettings;
+import org.telegram.messenger.UndoSendDelay;
 import org.telegram.messenger.BirthdayController;
 import org.telegram.messenger.BotForumHelper;
 import org.telegram.messenger.BotWebViewVibrationEffect;
@@ -438,6 +440,17 @@ public class ChatActivityEnterView extends FrameLayout implements
     private final static int POPUP_CONTENT_BOT_KEYBOARD = 1;
 
     private int currentAccount = UserConfig.selectedAccount;
+    private final UndoSendDelay communityUndoDelay = new UndoSendDelay(android.os.SystemClock::elapsedRealtime, new UndoSendDelay.Scheduler() {
+        @Override public void post(Runnable task, long delay) { AndroidUtilities.runOnUIThread(task, delay); }
+        @Override public void remove(Runnable task) { AndroidUtilities.cancelRunOnUIThread(task); }
+    });
+    private Bulletin communityUndoBulletin;
+    private long communityUndoOwner, communityUndoSendAs;
+    private boolean communityUndoBypass;
+    private final SharedPreferences.OnSharedPreferenceChangeListener communityUndoPreferenceListener = (preferences, key) -> {
+        if (key == null || CommunityUndoSendSettings.ownsKey(key, communityUndoOwner)) cancelCommunityUndoSend();
+    };
+
     private AccountInstance accountInstance = AccountInstance.getInstance(UserConfig.selectedAccount);
 
     private boolean isInitLineCount;
@@ -4126,6 +4139,7 @@ public class ChatActivityEnterView extends FrameLayout implements
         }
         senderSelectView = new SenderSelectView(getContext());
         senderSelectView.setOnClickListener(v -> {
+            cancelCommunityUndoSend();
             if (isLiveComment ? isPopupShowing() : getTranslationY() != 0) {
                 onEmojiSearchClosed = () -> senderSelectView.callOnClick();
                 if (isLiveComment) {
@@ -4187,6 +4201,7 @@ public class ChatActivityEnterView extends FrameLayout implements
                 }
 
                 senderSelectPopupWindow = new SenderSelectPopup(getContext(), parentFragment, controller, isChannel, defPeer, delegate.getSendAsPeers(), (recyclerView, senderView, peer) -> {
+                    cancelCommunityUndoSend();
                     if (senderSelectPopupWindow == null) return;
                     if (chatFull != null) {
                         chatFull.default_send_as = peer;
@@ -4774,10 +4789,52 @@ public class ChatActivityEnterView extends FrameLayout implements
         return false;
     }
 
+    /** Compact Android-era presentation over the current send pipeline, never a legacy protocol. */
+    private boolean showCompactSendOptions(View anchor) {
+        boolean self = UserObject.isUserSelf(parentFragment.getCurrentUser());
+        boolean schedule = parentFragment.canScheduleMessage()
+                && org.telegram.ui.skins.DesignFeatureSettings.allows(org.telegram.messenger.DesignFeaturePolicy.Feature.SCHEDULED_SEND);
+        boolean silent = !self && slowModeTimer <= 0
+                && org.telegram.ui.skins.DesignFeatureSettings.allows(org.telegram.messenger.DesignFeaturePolicy.Feature.SILENT_SEND);
+        if (!schedule && !silent && !SharedConfig.allowFutureFeatures) return false;
+        ItemOptions options = ItemOptions.makeOptions(parentFragment, anchor);
+        if (schedule) {
+            options.add(R.drawable.msg_calendar2, getString(self ? R.string.SetReminder : R.string.ScheduleMessage), () ->
+                    AlertsCreator.createScheduleDatePickerDialog(parentActivity, parentFragment.getDialogId(),
+                            (notify, date, repeat) -> sendMessageInternal(notify, date, repeat, 0, true), resourcesProvider));
+        }
+        if (silent) {
+            options.add(R.drawable.input_notify_off, getString(R.string.SendWithoutSound),
+                    () -> sendMessageInternal(false, 0, 0, 0, true));
+        }
+        if (SharedConfig.allowFutureFeatures) {
+            // The old compact surface must not strand effects, offers or other current controls.
+            options.add(R.drawable.msg_settings, getString(R.string.DesignModernSendOptions),
+                    () -> AndroidUtilities.runOnUIThread(() -> onSendLongClick(anchor, true)));
+        }
+        options.show();
+        return true;
+    }
+
     private ActionBarMenuSubItem actionScheduleButton;
     private boolean onSendLongClick(View view) {
+        return onSendLongClick(view, false);
+    }
+
+    private boolean onSendLongClick(View view, boolean modernOptions) {
         if (isInScheduleMode() || parentFragment != null && parentFragment.getChatMode() == ChatActivity.MODE_QUICK_REPLIES || animatorEphemeralMessageVisibility.getValue()) {
             return false;
+        }
+
+        if (!modernOptions && !isStories && parentFragment != null
+                && messageEditText != null && !TextUtils.isEmpty(messageEditText.getText())
+                && audioToSend == null && videoToSendMessageObject == null && !richDraftActive
+                && !voiceOnce && org.telegram.ui.skins.DesignFeatureSettings.usesCompactSendMenu()) {
+            if (!showCompactSendOptions(view)) {
+                android.widget.Toast.makeText(getContext(), getString(R.string.DesignNoSendOptions), android.widget.Toast.LENGTH_SHORT).show();
+            }
+            // Consume the hold even when this year has no options; releasing must not send.
+            return true;
         }
 
         if (isStories || (messageEditText == null || TextUtils.isEmpty(messageEditText.getText())) && parentFragment != null && parentFragment.messagePreviewParams != null && parentFragment.messagePreviewParams.forwardMessages != null && parentFragment.messagePreviewParams.forwardMessages.messages != null && !parentFragment.messagePreviewParams.forwardMessages.messages.isEmpty()) {
@@ -4811,8 +4868,15 @@ public class ChatActivityEnterView extends FrameLayout implements
                 });
                 sendPopupLayout.setShownFromBottom(false);
 
-                boolean scheduleButtonValue = parentFragment != null && parentFragment.canScheduleMessage();
-                boolean sendWithoutSoundButtonValue = !(self || slowModeTimer > 0 && !isInScheduleMode());
+                boolean scheduleButtonValue = parentFragment != null && parentFragment.canScheduleMessage()
+                        && org.telegram.ui.skins.DesignFeatureSettings.allows(org.telegram.messenger.DesignFeaturePolicy.Feature.SCHEDULED_SEND);
+                boolean sendWithoutSoundButtonValue = !(self || slowModeTimer > 0 && !isInScheduleMode())
+                        && org.telegram.ui.skins.DesignFeatureSettings.allows(org.telegram.messenger.DesignFeaturePolicy.Feature.SILENT_SEND);
+                if (!scheduleButtonValue && !sendWithoutSoundButtonValue) {
+                    sendPopupLayout = null;
+                    android.widget.Toast.makeText(getContext(), getString(R.string.DesignNoSendOptions), android.widget.Toast.LENGTH_SHORT).show();
+                    return true;
+                }
                 if (scheduleButtonValue) {
                     actionScheduleButton = new ActionBarMenuSubItem(getContext(), true, !sendWithoutSoundButtonValue, resourcesProvider);
                     if (self) {
@@ -5057,7 +5121,8 @@ public class ChatActivityEnterView extends FrameLayout implements
                 AndroidUtilities.runOnUIThread(dismissSendPreview, 500);
             }
         });
-        if ((containsSendMessage || putCameraTexture) && dialog_id >= 0) {
+        if ((containsSendMessage || putCameraTexture) && dialog_id >= 0
+                && org.telegram.ui.skins.DesignFeatureSettings.allows(org.telegram.messenger.DesignFeaturePolicy.Feature.MESSAGE_EFFECT_SELECTION)) {
             messageSendPreview.allowEffectSelector(parentFragment);
             messageSendPreview.setEffectId(effectId);
         }
@@ -5065,8 +5130,10 @@ public class ChatActivityEnterView extends FrameLayout implements
         ItemOptions options = ItemOptions.makeOptions(this, resourcesProvider, sendButton);
 
         final boolean self = parentFragment != null && UserObject.isUserSelf(parentFragment.getCurrentUser());
-        boolean scheduleButtonValue = parentFragment != null && parentFragment.canScheduleMessage();
-        boolean sendWithoutSoundButtonValue = !(self || slowModeTimer > 0 && !isInScheduleMode());
+        boolean scheduleButtonValue = parentFragment != null && parentFragment.canScheduleMessage()
+                && org.telegram.ui.skins.DesignFeatureSettings.allows(org.telegram.messenger.DesignFeaturePolicy.Feature.SCHEDULED_SEND);
+        boolean sendWithoutSoundButtonValue = !(self || slowModeTimer > 0 && !isInScheduleMode())
+                && org.telegram.ui.skins.DesignFeatureSettings.allows(org.telegram.messenger.DesignFeaturePolicy.Feature.SILENT_SEND);
         if (scheduleButtonValue) {
             options.add(R.drawable.msg_calendar2, getString(self ? R.string.SetReminder : R.string.ScheduleMessage), () -> {
                 AlertsCreator.createScheduleDatePickerDialog(parentActivity, parentFragment.getDialogId(), new AlertsCreator.ScheduleDatePickerDelegate() {
@@ -5812,6 +5879,7 @@ public class ChatActivityEnterView extends FrameLayout implements
         messageEditText.setGravity(Gravity.BOTTOM);
         messageEditText.setPadding(0, dp(9), 0, dp(10));
         messageEditText.setBackgroundDrawable(null);
+        messageEditText.setTypeface(org.telegram.ui.skins.AuroraAppearance.regular());
         messageEditText.setTextColor(getThemedColor(Theme.key_chat_messagePanelText));
         messageEditText.setLinkTextColor(getThemedColor(Theme.key_chat_messageLinkOut));
         messageEditText.setHighlightColor(getThemedColor(Theme.key_chat_inTextSelectionHighlight));
@@ -5914,6 +5982,7 @@ public class ChatActivityEnterView extends FrameLayout implements
 
             @Override
             public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+                cancelCommunityUndoSend();
                 if (ignorePrevTextChange) {
                     return;
                 }
@@ -6491,6 +6560,7 @@ public class ChatActivityEnterView extends FrameLayout implements
     }
 
     public void onDestroy() {
+        cancelCommunityUndoSend();
         if (audioTimelineView != null) {
             audioTimelineView.destroy();
         }
@@ -6612,6 +6682,7 @@ public class ChatActivityEnterView extends FrameLayout implements
     private Runnable hideKeyboardRunnable;
 
     public void onPause() {
+        cancelCommunityUndoSend();
         isPaused = true;
         if (senderSelectPopupWindow != null) {
             senderSelectPopupWindow.setPauseNotifications(false);
@@ -6667,6 +6738,7 @@ public class ChatActivityEnterView extends FrameLayout implements
     }
 
     public void setDialogId(long id, int account) {
+        if (id != dialog_id || account != currentAccount) cancelCommunityUndoSend();
         dialog_id = id;
         if (currentAccount != account) {
             notificationsLocker.unlock();
@@ -6903,6 +6975,7 @@ public class ChatActivityEnterView extends FrameLayout implements
     }
 
     public void setReplyingMessageObject(MessageObject messageObject, ChatActivity.ReplyQuote quote, MessageObject replyingTopMessage) {
+        cancelCommunityUndoSend();
         boolean animated = parentFragment != null && parentFragment.isForumInViewAsMessagesMode() && this.replyingTopMessage != replyingTopMessage;
         if (messageObject != null) {
             if (botMessageObject == null && botButtonsMessageObject != replyingMessageObject) {
@@ -7245,6 +7318,91 @@ public class ChatActivityEnterView extends FrameLayout implements
         isRecordingStateChanged();
     }
 
+    private long communityUndoEffectiveSender() {
+        TLRPC.Chat chat = dialog_id < 0 ? MessagesController.getInstance(currentAccount).getChat(-dialog_id) : null;
+        // Match SendMessagesHelper's effective sender, including anonymous channel admins.
+        return ChatObject.isChannel(chat)
+                ? ChatObject.getSendAsPeerId(chat, MessagesController.getInstance(currentAccount).getChatFull(-dialog_id), true)
+                : CommunityUndoSendSettings.owner(currentAccount);
+    }
+
+    private boolean communityUndoContextValid(CharSequence message, int scheduleDate, int repeatPeriod, long payStars) {
+        if (destroyed || isPaused || isLiveComment || ApplicationLoader.mainInterfacePaused || !isAttachedToWindow() || !isShown() || !hasWindowFocus()
+                || parentFragment == null || !parentFragment.isLastFragment() || parentFragment.isTopic || delegate == null
+                || currentAccount != UserConfig.selectedAccount || CommunityUndoSendSettings.owner(currentAccount) == 0
+                || !CommunityUndoSendSettings.enabled(currentAccount) || DialogObject.isEncryptedDialog(dialog_id)
+                || scheduleDate != 0 || repeatPeriod != 0 || payStars != 0 || getStarsPrice() != 0 || isInScheduleMode()
+                || audioToSend != null || videoToSendMessageObject != null || recordingAudioVideo || richDraftActive
+                || editingMessageObject != null || replyingMessageObject != null || replyingQuote != null || replyingTopMessage != null
+                || getThreadMessage() != null || getSendMonoForumPeerId() != 0 || getSendMessageSuggestionParams() != null
+                || delegate.hasForwardingMessages() || delegate.getReplyToStory() != null || delegate.getReplyQuote() != null
+                || effectId != 0 || messageSendPreview != null || forceShowSendButton || slowModeTimer > 0
+                || animatorEphemeralMessageVisibility.getValue() || message == null || message.length() == 0
+                || message.length() > accountInstance.getMessagesController().getMaxMessageLength()) return false;
+        TLRPC.User user = parentFragment.getCurrentUser();
+        if (user != null && user.bot || message.toString().trim().startsWith("/") || message.toString().trim().isEmpty()) return false;
+        // Restrict the initial feature to plain text. Formatting edits can occur without a text callback.
+        if (message instanceof Spanned) {
+            Spanned spanned = (Spanned) message;
+            for (android.text.style.CharacterStyle span : spanned.getSpans(0, message.length(), android.text.style.CharacterStyle.class)) {
+                if (span instanceof Emoji.EmojiSpan || span instanceof android.text.style.SuggestionSpan) continue;
+                // IME composing decoration is not outgoing Telegram formatting (e.g. a spellcheck underline).
+                boolean composing = (spanned.getSpanFlags(span) & Spanned.SPAN_COMPOSING) != 0;
+                if (composing && (span instanceof android.text.style.UnderlineSpan
+                        || span instanceof android.text.style.ForegroundColorSpan
+                        || span instanceof android.text.style.BackgroundColorSpan)) continue;
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean retainCommunityText(CharSequence text, boolean notify, int scheduleDate, int repeatPeriod, long payStars, boolean allowConfirm) {
+        if (!communityUndoContextValid(text, scheduleDate, repeatPeriod, payStars)) return false;
+        final String original = text.toString();
+        final int account = currentAccount, seconds = CommunityUndoSendSettings.seconds(account);
+        final long dialog = dialog_id, owner = CommunityUndoSendSettings.owner(account);
+        communityUndoOwner = owner;
+        final long sendAs = communityUndoSendAs = communityUndoEffectiveSender();
+        communityUndoBulletin = BulletinFactory.of(parentFragment).createSimpleBulletin(0,
+                LocaleController.formatString("CommunityUndoSendPending", R.string.CommunityUndoSendPending, seconds),
+                LocaleController.getString(R.string.CommunityUndoSendCancel), seconds * 1000 + 1500, this::cancelCommunityUndoSend);
+        communityUndoBulletin.getLayout().addCallback(new Bulletin.Layout.Callback() {
+            @Override public void onExitTransitionStart(Bulletin.Layout layout) {
+                if (communityUndoBulletin != null && communityUndoBulletin.getLayout() == layout) cancelCommunityUndoSend();
+            }
+        });
+        CommunityUndoSendSettings.preferences().registerOnSharedPreferenceChangeListener(communityUndoPreferenceListener);
+        communityUndoDelay.start(seconds * 1000L, () -> {
+            CharSequence current = messageEditText == null ? "" : messageEditText.getTextToUse();
+            return currentAccount == account && dialog_id == dialog && CommunityUndoSendSettings.owner(account) == owner
+                    && communityUndoEffectiveSender() == sendAs
+                    && CommunityUndoSendSettings.seconds(account) == seconds && TextUtils.equals(original, current)
+                    && communityUndoBulletin != null && communityUndoBulletin.isShowing()
+                    && communityUndoContextValid(current, scheduleDate, repeatPeriod, payStars);
+        }, () -> {
+            clearCommunityUndoNotice();
+            communityUndoBypass = true;
+            try { sendMessageInternal(notify, scheduleDate, repeatPeriod, payStars, allowConfirm); }
+            finally { communityUndoBypass = false; }
+        }, this::clearCommunityUndoNotice);
+        communityUndoBulletin.show();
+        return true;
+    }
+
+    private void clearCommunityUndoNotice() {
+        CommunityUndoSendSettings.preferences().unregisterOnSharedPreferenceChangeListener(communityUndoPreferenceListener);
+        Bulletin notice = communityUndoBulletin; communityUndoBulletin = null; communityUndoOwner = 0; communityUndoSendAs = 0;
+        if (notice != null) notice.hide();
+    }
+    public void cancelCommunityUndoSend() { communityUndoDelay.cancel(); }
+    public boolean hasPendingCommunityUndoSend() { return communityUndoDelay.isPending(); }
+
+    @Override protected void onDetachedFromWindow() {
+        cancelCommunityUndoSend();
+        super.onDetachedFromWindow();
+    }
+
     public boolean sendMessage() {
         if (richDraftActive && !UserConfig.getInstance(currentAccount).isPremium()) {
             RichEditor.openConversionSheet(getContext(), this::openRichEditorWithoutFormatting, () -> {
@@ -7272,6 +7430,8 @@ public class ChatActivityEnterView extends FrameLayout implements
     }
 
     protected boolean sendMessageInternal(boolean notify, int scheduleDate, int scheduleRepeatPeriod, long payStars, boolean allowConfirm) {
+        // A second press cannot bypass an active local cancellation window.
+        if (communityUndoDelay.isPending()) return true;
         final boolean allowConfirmFinal = allowConfirm && !animatorEphemeralMessageVisibility.getValue();
 
         final Runnable send = () -> {
@@ -7388,6 +7548,9 @@ public class ChatActivityEnterView extends FrameLayout implements
                 }
             }
             if (checkPremiumAnimatedEmoji(currentAccount, dialog_id, parentFragment, null, message)) {
+                return;
+            }
+            if (!communityUndoBypass && retainCommunityText(message, notify, scheduleDate, scheduleRepeatPeriod, payStars, allowConfirm)) {
                 return;
             }
             if (processSendingText(message, notify, scheduleDate, scheduleRepeatPeriod, payStars)) {
@@ -9889,6 +10052,7 @@ public class ChatActivityEnterView extends FrameLayout implements
     private long effectId;
 
     public void setEffectId(long effectId) {
+        cancelCommunityUndoSend();
         this.effectId = effectId;
         if (sendButton != null) {
             sendButton.setEffect(effectId);
@@ -9925,6 +10089,7 @@ public class ChatActivityEnterView extends FrameLayout implements
     }
 
     public void setEditingMessageObject(MessageObject messageObject, MessageObject.GroupedMessages groupedMessages, boolean caption) {
+        cancelCommunityUndoSend();
         if (audioToSend != null || videoToSendMessageObject != null || editingMessageObject == messageObject) {
             return;
         }
@@ -11139,6 +11304,7 @@ public class ChatActivityEnterView extends FrameLayout implements
     }
 
     public void updateSendAsButton(boolean forceHide, boolean animated) {
+        if (communityUndoDelay.isPending() && communityUndoEffectiveSender() != communityUndoSendAs) cancelCommunityUndoSend();
         if (delegate == null) {
             return;
         }

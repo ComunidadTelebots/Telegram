@@ -8,13 +8,16 @@ import android.content.SharedPreferences;
 import org.telegram.tgnet.SerializedData;
 import org.telegram.tgnet.TLRPC;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 public class AuthTokensHelper {
 
-    public static ArrayList<TLRPC.TL_auth_loggedOut> getSavedLogOutTokens() {
-        SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences("saved_tokens", Context.MODE_PRIVATE);
+    static String tokenPreferences(String base, boolean testBackend) {
+        return base + (testBackend ? "_test" : "");
+    }
+
+    public static ArrayList<TLRPC.TL_auth_loggedOut> getSavedLogOutTokens(boolean testBackend) {
+        SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences(tokenPreferences("saved_tokens", testBackend), Context.MODE_PRIVATE);
         int count = preferences.getInt("count", 0);
 
         if (count == 0) {
@@ -34,8 +37,8 @@ public class AuthTokensHelper {
         return tokens;
     }
 
-    public static void saveLogOutTokens(ArrayList<TLRPC.TL_auth_loggedOut> tokens) {
-        SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences("saved_tokens", Context.MODE_PRIVATE);
+    public static void saveLogOutTokens(boolean testBackend, ArrayList<TLRPC.TL_auth_loggedOut> tokens) {
+        SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences(tokenPreferences("saved_tokens", testBackend), Context.MODE_PRIVATE);
         ArrayList<TLRPC.TL_auth_loggedOut> activeTokens = new ArrayList<>();
         preferences.edit().clear().apply();
         int date = (int) (System.currentTimeMillis() / 1000L);
@@ -55,8 +58,8 @@ public class AuthTokensHelper {
         }
     }
 
-    public static ArrayList<TLRPC.TL_auth_authorization> getSavedLogInTokens() {
-        SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences("saved_tokens_login", Context.MODE_PRIVATE);
+    public static ArrayList<TLRPC.TL_auth_authorization> getSavedLogInTokens(boolean testBackend) {
+        SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences(tokenPreferences("saved_tokens_login", testBackend), Context.MODE_PRIVATE);
         int count = preferences.getInt("count", 0);
 
         if (count == 0) {
@@ -80,20 +83,17 @@ public class AuthTokensHelper {
         return tokens;
     }
 
-    public static void saveLogInToken(TLRPC.TL_auth_authorization token) {
-        if (BuildVars.DEBUG_VERSION) {
-            FileLog.d("saveLogInToken " + new String(token.future_auth_token, StandardCharsets.UTF_8));
-        }
-        ArrayList<TLRPC.TL_auth_authorization> tokens = getSavedLogInTokens();
+    public static void saveLogInToken(boolean testBackend, TLRPC.TL_auth_authorization token) {
+        ArrayList<TLRPC.TL_auth_authorization> tokens = getSavedLogInTokens(testBackend);
         if (tokens == null) {
             tokens = new ArrayList<>();
         }
         tokens.add(0, token);
-        saveLogInTokens(tokens);
+        saveLogInTokens(testBackend, tokens);
     }
 
-    private static void saveLogInTokens(ArrayList<TLRPC.TL_auth_authorization> tokens) {
-        SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences("saved_tokens_login", Context.MODE_PRIVATE);
+    private static void saveLogInTokens(boolean testBackend, ArrayList<TLRPC.TL_auth_authorization> tokens) {
+        SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences(tokenPreferences("saved_tokens_login", testBackend), Context.MODE_PRIVATE);
         ArrayList<TLRPC.TL_auth_authorization> activeTokens = new ArrayList<>();
         preferences.edit().clear().apply();
         for (int i = 0; i < Math.min(20, tokens.size()); i++) {
@@ -112,8 +112,8 @@ public class AuthTokensHelper {
         }
     }
 
-    public static void addLogOutToken(TLRPC.TL_auth_loggedOut response) {
-        SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences("saved_tokens", Context.MODE_PRIVATE);
+    public static void addLogOutToken(boolean testBackend, TLRPC.TL_auth_loggedOut response) {
+        SharedPreferences preferences = ApplicationLoader.applicationContext.getSharedPreferences(tokenPreferences("saved_tokens", testBackend), Context.MODE_PRIVATE);
         int count = preferences.getInt("count", 0);
         SerializedData data = new SerializedData(response.getObjectSize());
         response.serializeToStream(data);
@@ -122,7 +122,8 @@ public class AuthTokensHelper {
     }
 
     public static void clearLogInTokens() {
-        ApplicationLoader.applicationContext.getSharedPreferences("saved_tokens_login", Context.MODE_PRIVATE).edit().clear().apply();
-        ApplicationLoader.applicationContext.getSharedPreferences("saved_tokens", Context.MODE_PRIVATE).edit().clear().apply();
+        for (String name : new String[]{"saved_tokens_login", "saved_tokens", "saved_tokens_login_test", "saved_tokens_test"}) {
+            ApplicationLoader.applicationContext.getSharedPreferences(name, Context.MODE_PRIVATE).edit().clear().apply();
+        }
     }
 }

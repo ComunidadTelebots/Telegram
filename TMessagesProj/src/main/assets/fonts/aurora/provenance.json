@@ -1,0 +1,11 @@
+{
+  "react_repository": "https://github.com/ComunidadTelebots/telegram-react",
+  "react_commit": "55ff2366823eba3d2a2b7f0f599a186d9a39c9a3",
+  "font_source": "https://github.com/google/fonts/tree/main/ofl/manrope",
+  "font_source_sha256": "3ae11c49db0455a3cc33e37d380f20fdb8c7f8b41dc07625c177e3d87a9d6ae6",
+  "fonttools": "4.68.0",
+  "inputs": {
+    "src\\designs\\aurora.css": "99ee0adc13c0d588f3fe4c5507be24ae8696cc0795c0cc12472d9e6fb08e3f0c",
+    "src\\designs\\aurora-midnight.css": "a1ca61997107a3678e00160679686c752faa46ae647ac8bf94c66e3800883121"
+  }
+}

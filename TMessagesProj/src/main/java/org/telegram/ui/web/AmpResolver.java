@@ -18,9 +18,13 @@ import javax.net.ssl.*;
 /** Opt-in discovery/fetch. No cookies, credentials, JavaScript, private hosts or cleartext. */
 public final class AmpResolver {
     public static final class Result {
-        public final String originalUrl, ampUrl, contentUrl, html, provider;
+        public final String originalUrl, ampUrl, contentUrl, html, provider, languageHtml;
         public final boolean readerAllowed;
         public Result(String originalUrl, String ampUrl, String contentUrl, String html, String provider) {
+            this(originalUrl,ampUrl,contentUrl,html,provider,languageMarkup(html));
+        }
+        private Result(String originalUrl,String ampUrl,String contentUrl,String html,String provider,String languageHtml) {
+            this.languageHtml=languageHtml;
             this.originalUrl = originalUrl; this.ampUrl = ampUrl; this.contentUrl = contentUrl;
             this.html = html; this.provider = provider;
             this.readerAllowed = isAmpHtml(html);
@@ -95,7 +99,7 @@ public final class AmpResolver {
         String amp = discoverAmpUrl(origin.url, origin.html);
         if (amp == null) return null;
         Page page = fetch(amp, route);
-        return isAmpDocument(page.html) ? new Result(original, page.url, page.url, page.html, "Origen") : null;
+        return isAmpDocument(page.html) ? new Result(original, page.url, page.url, page.html, "Origen",languageMarkup(origin.html)) : null;
     }
     private static Result providers(Result origin, Route route) throws IOException {
         if (!origin.readerAllowed) return origin;
@@ -106,13 +110,18 @@ public final class AmpResolver {
                 Page page = fetch(url, route);
                 // A cache redirecting to another site is not labelled as that provider.
                 if (isAmpHtml(page.html) && URI.create(page.url).getHost().equals(URI.create(url).getHost()))
-                    return new Result(origin.originalUrl, origin.ampUrl, page.url, page.html, provider);
+                    return new Result(origin.originalUrl, origin.ampUrl, page.url, page.html, provider,origin.languageHtml);
             } catch (IOException ignored) { route.check(); }
         }
         route.check();
         return origin;
     }
 
+    private static String languageMarkup(String html) {
+        if(html==null)return "";StringBuilder result=new StringBuilder();Matcher tags=TAG.matcher(markup(html));
+        while(tags.find()){String tag=tags.group(1);if(tag.equalsIgnoreCase("html")||tag.equalsIgnoreCase("link")||tag.equalsIgnoreCase("meta")){if(result.length()+tags.group().length()>16384)break;result.append(tags.group());}}
+        return result.toString();
+    }
     private static Map<String, String> attributes(String source) {
         Map<String, String> result = new HashMap<>();
         Matcher matcher = ATTR.matcher(source);
@@ -325,7 +334,7 @@ public final class AmpResolver {
                     route.check();
                     String target = uri.getRawPath() + (uri.getRawQuery() == null ? "" : "?" + uri.getRawQuery());
                     tls.getOutputStream().write(("GET " + target + " HTTP/1.1\r\nHost: " + uri.getHost()
-                            + "\r\nUser-Agent: Alltech-AMP/1.0\r\nAccept: " + (dns ? "application/dns-message" : image ? "image/png,image/jpeg,image/webp,image/gif" : publicText ? "application/json,text/plain,text/html" : "text/html") + "\r\nAccept-Encoding: identity\r\nConnection: close\r\n\r\n").getBytes(StandardCharsets.US_ASCII));
+                            + "\r\nUser-Agent: Alltech-AMP/1.0\r\nAccept: " + (dns ? "application/dns-message" : image ? "image/png,image/jpeg,image/webp,image/gif" : publicText ? "application/json,text/plain,text/html" : "text/html") + "\r\nAccept-Encoding: identity\r\nConnection: keep-alive\r\n\r\n").getBytes(StandardCharsets.US_ASCII));
                     BufferedInputStream in = new BufferedInputStream(tls.getInputStream());
                     String status = line(in);
                     if (!status.matches("HTTP/1\\.[01] [0-9]{3}.*")) throw new IOException("HTTP status");
@@ -342,6 +351,9 @@ public final class AmpResolver {
                     if (communityTheme && !"application/json".equals(mime)) throw new IOException("Theme catalog content type");
                     if (code != 200 || (dns ? !"application/dns-message".equals(mime) : image ? !Arrays.asList("image/png", "image/jpeg", "image/webp", "image/gif").contains(mime) : chartData ? !Arrays.asList("text/csv", "text/tab-separated-values", "text/plain", "application/octet-stream").contains(mime) : publicText ? !Arrays.asList("application/json", "text/plain", "text/html").contains(mime) : !"text/html".equals(mime))) throw new IOException("Content type");
                     if (headers.containsKey("content-encoding") && !"identity".equalsIgnoreCase(headers.get("content-encoding"))) throw new IOException("Encoding");
+                    // Complete the HTTP-framed body before closing locally. Asking the server to
+                    // close can corrupt the final TCP/TLS record on older Windows emulator stacks.
+                    // Resources and the deadline still close every connection; none are pooled.
                     byte[] bytes = body(in, headers);
                     route.check();
                     return new Page(safe, bytes, image);
@@ -358,12 +370,14 @@ public final class AmpResolver {
                 factory=legacyTls;
                 if(factory==null)try {
                     SSLContext context=SSLContext.getInstance("TLS",org.conscrypt.Conscrypt.newProvider());
-                    context.init(null,null,null);legacyTls=factory=context.getSocketFactory();
+                    context.init(null, LegacyPublicTlsTrust.create(org.telegram.messenger.ApplicationLoader.applicationContext), null);
+                    legacyTls=factory=context.getSocketFactory();
                 }catch(java.security.GeneralSecurityException e){throw new IOException("TLS provider unavailable",e);}
             }
             SSLSocket socket=(SSLSocket)factory.createSocket(plain,host,port,true);
             // The host-bearing factory overload configures SNI, including Android 5 platform adapters.
-            socket.setEnabledProtocols(new String[]{"TLSv1.2","TLSv1.3"});
+            // Older Android runtimes need the TLS 1.2 path; certificate and hostname checks remain mandatory.
+            socket.setEnabledProtocols(Build.VERSION.SDK_INT<=22?new String[]{"TLSv1.2"}:new String[]{"TLSv1.2","TLSv1.3"});
             return socket;
         }
         return (SSLSocket) ((SSLSocketFactory) SSLSocketFactory.getDefault()).createSocket(plain, host, port, true);

@@ -179,3 +179,74 @@ La instrumentación solo se selecciona con -PAMP_READER_DEVICE_TEST=true y vive 
 - One initial API 21 article fetch reported a TLS BAD_RECORD_MAC; a repeat and the subsequent second-article run succeeded. No certificate checks were disabled and no DNS/proxy settings changed. This transient transport failure is recorded, not considered a reproduced renderer defect.
 - Validation: DEV + instrumentation build, pure Java chart model and Flourish mapping/rejection tests (including real public datasets), modern/legacy parser fixtures, provider boundary tests and AMP transport regression. Test JSON jar is a local test-only input, not an app dependency.
 - Limits: not a universal Flourish renderer. Reject unknown templates/types, facets, interactive series filtering, invalid data and multi-series Marimekko. Maps, animations, custom JS widgets, provider styling and annotations are not reproduced. Existing Datawrapper support remains.
+
+
+## AMP: official language alternatives and native news components (2026-10-27)
+
+Reading settings now expose `amp_preferred_language` (app locale by default,
+explicit language, or original). The local reader inspects the publisher's HTML
+language metadata and `link rel=alternate hreflang`. An available alternative is
+shown as a native article link. This is not machine translation or a guessed
+translated URL. Missing alternatives leave the original intact. Original-page
+metadata is retained when resolving its AMP page, within a 16 KiB budget.
+Only eligible public HTTPS links are offered. The initial implementation reads
+HTML declarations, not sitemap or HTTP Link declarations, and applies to the AMP
+reader, not all browser pages.
+
+Native Datawrapper components now cover bounded published choropleth/cartogram
+TopoJSON geometries, grouped/stacked bars, area series and paginated tables.
+Adapters use serialized provider formats, without publisher-specific domain
+rules or executing publisher JavaScript. Tables preserve readable cell data;
+embedded sparklines and arbitrary custom tooltip code are not rendered. Maps
+retain published classification thresholds and use native selection, zoom and
+pan. Oversized geometries and unsupported schemas fail explicitly.
+
+Regression commands: `test_amp_languages.py`, `test_native_chart_data.py`,
+`test_amp_maps.py`, `test_datawrapper_components.py`, `run_amp_tests.py`, and both
+Node reader fixtures. Dataset tests use optional downloaded public fixtures in
+ignored `.gradle/news-maps`, and the test-only org.json jar; these are not bundled
+with the app. Dataset examples include RTVE FSDyX/p5n0P maps, 5THk8 area and xBfkH
+785-row table, plus elDiario.es 4gQfU/MK3yF charts. Device instrumentation accepts
+`-e languageOnly true` for a controlled language-link integration test and
+restores the prior language preference afterwards.
+
+
+## Comunidad Telebots: herramientas personales de mensajes (2026-10-27)
+
+Acceso: Ajustes Comunidad Telebots → Mensajes y respuestas. Las pantallas
+conservan la cuenta del apartado padre.
+
+- Deshacer envío: opt-in por identidad; 3/5/10 segundos (5 predeterminado).
+  El texto permanece en el editor antes de processSendingText. Cancelar, editar,
+  abandonar el chat, pausar, cambiar identidad/contexto o desactivar la opción
+  anula la tarea en RAM. No reanuda tras morir el proceso. Esta primera versión
+  protege texto básico del botón normal; adjuntos, bots/comandos, programación,
+  pagos, secretos, respuestas, reenvíos, temas, efectos y formatos especiales
+  conservan el comportamiento normal, claramente indicado antes de activar.
+- Historial: opt-in, texto plano local en noBackup; 50 versiones totales,
+  8 por conversación/hilo, 4096 caracteres y 7 días. Excluye secretos, TTL y
+  privacidad desconocida. Restauración confirmada, sin envío y rechazando un
+  borrador que cambió mientras se mostraba la confirmación. Desactivar elimina
+  el historial; el borrador vacío remoto elimina las versiones de ese hilo.
+- Pendientes: acción contextual para mensajes normales; estados Por responder,
+  Esperando respuesta y Resuelto. Guarda hasta 200 referencias, no el cuerpo del
+  mensaje, y notas propias de hasta 500 caracteres. Apertura original manual,
+  edición de estado/nota y borrado local; sin envíos ni marcado de leído automático.
+
+UserConfig.clearConfig invalida y elimina historial y pendientes del dueño
+capturado antes de borrar su identidad. No hay sincronización entre dispositivos.
+Pruebas: test_undo_send_delay.py, CommunityDraftHistoryModelTest.java,
+test_draft_history_observers.py, test_pending_replies.py. La instrumentación
+communityToolsOnly navega por las tres pantallas y verifica el temporizador con
+callbacks ficticios; no envía mensajes ni reemplaza borradores reales.
+
+
+Validación final de herramientas de mensajes: BUILD SUCCESSFUL y DEV instalada
+sin borrar datos en Pixel API37 y Android5 API21. communityToolsOnly pasa en
+ambos: tres pantallas desde el grupo Mensajes y respuestas, callback simulado al
+vencer y cancelación sin duplicado; no se enviaron mensajes ni cambiaron borradores
+reales. Capturas locales en output/community-messaging. Modelos:22 casos historial,
+10 observadores, pruebas de pendientes y temporizador. La revisión añadió
+cancelación al cambiar Enviar como y preservación de versiones ante caché fría
+(UNKNOWN se oculta, no se borra). El envío real de extremo a extremo no se ejercitó
+con cuentas del usuario; los callbacks de envío de las pruebas fueron ficticios.

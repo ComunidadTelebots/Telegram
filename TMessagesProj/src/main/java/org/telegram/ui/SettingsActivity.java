@@ -1026,6 +1026,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         private BackupImageView avatarView;
         private SimpleTextView textView;
         private TextView counterView;
+        private TextView backendView;
         private ImageView arrowView;
 
         private final AnimatedEmojiDrawable.SwapAnimatedEmojiDrawable botDrawable;
@@ -1062,6 +1063,12 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
                 }
             });
 
+            backendView = new TextView(context);
+            backendView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
+            backendView.setSingleLine(true);
+            backendView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText, resourcesProvider));
+            backendView.setVisibility(GONE);
+
             counterView = new TextView(context);
             counterView.setPadding(dp(6.66f), 0, dp(6.66f), 0);
             counterView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 11);
@@ -1081,6 +1088,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
 
                 addView(arrowView, LayoutHelper.createLinear(24, 24, 0, Gravity.CENTER_VERTICAL | Gravity.LEFT, 12, 0, 0, 0));
                 addView(counterView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, 20, 0, Gravity.CENTER_VERTICAL, 0, 0, 0, 0));
+                addView(backendView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, 0, Gravity.CENTER_VERTICAL, 8, 0, 8, 0));
                 addView(textView, LayoutHelper.createLinear(0, LayoutHelper.MATCH_PARENT, 1f, Gravity.FILL, 18, 0, 0, 0));
                 addView(avatarView, LayoutHelper.createLinear(28, 28, Gravity.CENTER_VERTICAL | Gravity.RIGHT, 18, 0, 18, 0));
 
@@ -1089,6 +1097,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
 
                 addView(avatarView, LayoutHelper.createLinear(28, 28, Gravity.CENTER_VERTICAL | Gravity.LEFT, 18, 0, 18, 0));
                 addView(textView, LayoutHelper.createLinear(0, LayoutHelper.MATCH_PARENT, 1f, Gravity.FILL, 0, 0, 18, 0));
+                addView(backendView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, 0, Gravity.CENTER_VERTICAL, 0, 0, 8, 0));
                 addView(counterView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, 20, 0, Gravity.CENTER_VERTICAL, 0, 0, 0, 0));
                 addView(arrowView, LayoutHelper.createLinear(24, 24, 0, Gravity.CENTER_VERTICAL | Gravity.RIGHT, 0, 0, 12, 0));
             }
@@ -1096,6 +1105,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
 
         @Override
         public void updateColors() {
+            backendView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText, resourcesProvider));
             textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider));
             counterView.setBackground(Theme.createRoundRectDrawable(dp(10), Theme.getColor(Theme.key_featuredStickers_addButton, resourcesProvider)));
             arrowView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon, resourcesProvider), PorterDuff.Mode.SRC_IN));
@@ -1109,6 +1119,9 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
             avatarView.getImageReceiver().setCurrentAccount(account);
             avatarView.setForUserOrChat(user, avatarDrawable);
             textView.setText(UserObject.getUserName(user));
+            String backend = org.telegram.ui.Cells.AccountBackendLabel.forAccount(account);
+            backendView.setText(backend);
+            backendView.setVisibility(backend == null ? GONE : VISIBLE);
 
             botDrawable.setCurrentAccount(account);
             emojiStatusDrawable.setCurrentAccount(account);

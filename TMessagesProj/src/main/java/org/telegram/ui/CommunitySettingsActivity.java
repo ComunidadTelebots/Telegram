@@ -17,7 +17,7 @@ import org.telegram.utils.proxy.*;
 
 /** Settings owned by Comunidad Telebots. Official Telegram settings stay in their screens. */
 public class CommunitySettingsActivity extends BaseFragment {
-    public static final int HOME=0, DESIGN=1, READING=2, CONNECTIONS=3, PRIVACY=4, TOR=5, ACCESSIBILITY=6, P2P_MESH=7;
+    public static final int HOME=0, DESIGN=1, READING=2, CONNECTIONS=3, PRIVACY=4, TOR=5, ACCESSIBILITY=6, P2P_MESH=7, MESSAGING=8;
     private final int page;
     private TextCheckCell tor;
     private TextView torStatus;
@@ -26,7 +26,7 @@ public class CommunitySettingsActivity extends BaseFragment {
     public CommunitySettingsActivity(int page){this.page=page;}
     private String text(int id){return LocaleController.getString(id);}
     private final Runnable refreshTor=new Runnable(){@Override public void run(){if(!active || tor==null)return;updateTor();AndroidUtilities.runOnUIThread(this,5000);}};
-    private String titleStr(){switch(page){case DESIGN:return text(R.string.TelebotsDesign);case READING:return text(R.string.TelebotsReading);case CONNECTIONS:return text(R.string.TelebotsConnections);case PRIVACY:return text(R.string.TelebotsPrivacy);case TOR:return text(R.string.TorTitle);case ACCESSIBILITY:return text(R.string.TelebotsAccessibility);case P2P_MESH:return "Malla P2P (100 Funciones)";default:return text(R.string.TelebotsSettings);}}
+    private String titleStr(){switch(page){case DESIGN:return text(R.string.TelebotsDesign);case READING:return text(R.string.TelebotsReading);case CONNECTIONS:return text(R.string.TelebotsConnections);case PRIVACY:return text(R.string.TelebotsPrivacy);case TOR:return text(R.string.TorTitle);case ACCESSIBILITY:return text(R.string.TelebotsAccessibility);case MESSAGING:return text(R.string.CommunityMessagingTools);case P2P_MESH:return "Malla P2P (100 Funciones)";default:return text(R.string.TelebotsSettings);}}
     @Override public View createView(Context context){
         actionBar.setBackButtonImage(R.drawable.ic_ab_back);actionBar.setTitle(titleStr());
         actionBar.setActionBarMenuOnItemClick(new ActionBar.ActionBarMenuOnItemClick(){@Override public void onItemClick(int id){if(id==-1)finishFragment();}});
@@ -39,6 +39,7 @@ public class CommunitySettingsActivity extends BaseFragment {
                 entry(body,R.string.TelebotsDesign,()->open(DESIGN));
                 entry(body,R.string.TelebotsReading,()->open(READING));
                 entry(body,R.string.TelebotsConnections,()->open(CONNECTIONS));
+                entry(body,R.string.CommunityMessagingTools,()->open(MESSAGING));
                 entry(body,R.string.TelebotsPhrases,()->presentFragment(new CommunityQuickPhrasesActivity()));
                 entry(body,R.string.TelebotsDownloads,()->presentFragment(new CommunityDownloadsActivity()));
                 entry(body,"⚡ Telebots Mesh P2P Hub",()->presentFragment(new TelebotsMeshDashboardActivity()));
@@ -51,28 +52,23 @@ public class CommunitySettingsActivity extends BaseFragment {
                 entry(body,R.string.TelebotsBackupTitle,()->presentFragment(new CommunitySettingsBackupActivity()));
                 entry(body,R.string.TelebotsOfficialChannel,()->getMessagesController().openByUserName("comunidadtelebots",this,0));
                 break;
+            case MESSAGING:
+                label(body,text(R.string.CommunityMessagingToolsInfo));
+                entry(body,R.string.CommunityUndoSend,()->openAccountTool(new CommunityUndoSendActivity()));
+                entry(body,R.string.CommunityDraftHistory,()->openAccountTool(new CommunityDraftHistoryActivity()));
+                entry(body,R.string.CommunityPendingReplies,()->openAccountTool(new CommunityPendingRepliesActivity()));
+                break;
             case DESIGN:
-                label(body, "Diseños Históricos y Perfiles Avanzados");
-                entry(body, "Cambiar Año Histórico (Actual: " + SharedConfig.uiVersionYear + ")", () -> {
-                    SharedConfig.uiVersionYear = SharedConfig.uiVersionYear >= 2026 ? 2013 : SharedConfig.uiVersionYear + 1;
-                    SharedConfig.saveConfig();
-                    if(parentLayout!=null)parentLayout.rebuildAllFragmentViews(true,true);
-                });
-                entry(body, "Cambiar Perfil de Interfaz (Actual: " + SharedConfig.uiThemeProfile + ")", () -> {
-                    String[] profiles = {"telegram_modern", "ios", "telegram_x", "unigram", "macos", "cyberpunk", "oled_black", "holo_2013", "metro_fluent", "material_you"};
-                    int idx = 0;
-                    for (int i=0; i<profiles.length; i++) if (profiles[i].equals(SharedConfig.uiThemeProfile)) idx = i;
-                    SharedConfig.uiThemeProfile = profiles[(idx + 1) % profiles.length];
-                    SharedConfig.saveConfig();
-                    org.telegram.ui.Components.UIProfileManager.applyActiveProfileTheme();
-                    NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.needSetDayNightTheme, Theme.getActiveTheme(), false, null, -1, null);
-                    if(parentLayout!=null)parentLayout.rebuildAllFragmentViews(true,true);
-                });
-                entry(body, "Permitir Funciones Futuras: " + (SharedConfig.allowFutureFeatures ? "SÍ" : "NO"), () -> {
-                    SharedConfig.allowFutureFeatures = !SharedConfig.allowFutureFeatures;
-                    SharedConfig.saveConfig();
-                    if(parentLayout!=null)parentLayout.rebuildAllFragmentViews(true,true);
-                });
+                label(body, text(R.string.DesignFeatureScope));
+                entry(body, text(R.string.DesignFeatureYear) + ": " + SharedConfig.uiVersionYear,
+                        () -> org.telegram.ui.skins.DesignFeatureSettings.chooseYear(context, () -> {
+                            if (parentLayout != null) parentLayout.rebuildAllFragmentViews(true, true);
+                        }));
+                entry(body, text(R.string.DesignFeatureMode) + ": " + text(SharedConfig.allowFutureFeatures
+                                ? R.string.DesignFeaturesAll : R.string.DesignFeaturesHistorical),
+                        () -> org.telegram.ui.skins.DesignFeatureSettings.chooseMode(context, () -> {
+                            if (parentLayout != null) parentLayout.rebuildAllFragmentViews(true, true);
+                        }));
                 body.addView(new SkinSelectorCell(context,skin->{if(parentLayout!=null)parentLayout.rebuildAllFragmentViews(true,true);}),LayoutHelper.createLinear(-1,-2));
                 break;
             case P2P_MESH:
@@ -102,6 +98,14 @@ public class CommunitySettingsActivity extends BaseFragment {
                 saving.setChecked(PreviewNetworkPolicy.wifiOnly());
                 saving.setOnCheckedChangeListener((button,enabled)->MessagesController.getGlobalMainSettings().edit().putBoolean("amp_unmetered_only",enabled).apply());
                 body.addView(saving);label(body,text(R.string.AmpUnmeteredInfo));
+                String[] languageCodes={"app","es","en","fr","de","it","pt","ca","off"};
+                String[] languageNames={text(R.string.AmpLanguageApp),"Español","English","Français","Deutsch","Italiano","Português","Català",text(R.string.AmpLanguageOff)};
+                String selectedLanguage=MessagesController.getGlobalMainSettings().getString("amp_preferred_language","app");
+                int selectedIndex=0;for(int i=0;i<languageCodes.length;i++)if(languageCodes[i].equals(selectedLanguage))selectedIndex=i;
+                TextView languageRow=label(body,text(R.string.AmpLanguagePreference)+": "+languageNames[selectedIndex]);
+                languageRow.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueText));org.telegram.ui.Components.CommunitySettingsUi.button(languageRow);
+                languageRow.setOnClickListener(v->showDialog(new AlertDialog.Builder(context).setTitle(text(R.string.AmpLanguagePreference)).setItems(languageNames,(dialog,index)->{MessagesController.getGlobalMainSettings().edit().putString("amp_preferred_language",languageCodes[index]).apply();languageRow.setText(text(R.string.AmpLanguagePreference)+": "+languageNames[index]);}).create()));
+                label(body,text(R.string.AmpLanguageInfo));
                 break;
             case CONNECTIONS:
                 entry(body,R.string.DnsCatalogTitle,()->presentFragment(new DnsSettingsActivity()));
@@ -134,7 +138,8 @@ public class CommunitySettingsActivity extends BaseFragment {
         }
         return scroll;
     }
-    private void open(int value){presentFragment(new CommunitySettingsActivity(value));}
+    private void open(int value){openAccountTool(new CommunitySettingsActivity(value));}
+    private void openAccountTool(BaseFragment fragment){fragment.setCurrentAccount(currentAccount);presentFragment(fragment);}
     private TextView label(LinearLayout body,String value){TextView v=new TextView(body.getContext());v.setText(value);v.setTextSize(15);v.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText));v.setPadding(AndroidUtilities.dp(20),AndroidUtilities.dp(14),AndroidUtilities.dp(20),AndroidUtilities.dp(14));body.addView(v,LayoutHelper.createLinear(-1,-2));return v;}
     private void entry(LinearLayout body,int title,Runnable click){entry(body, text(title), click);}
     private void entry(LinearLayout body,String title,Runnable click){TextView v=label(body,title);v.setMinHeight(AndroidUtilities.dp(52));v.setGravity(Gravity.CENTER_VERTICAL);v.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueText));v.setBackground(Theme.createSelectorDrawable(Theme.getColor(Theme.key_listSelector),2));v.setOnClickListener(w->click.run());org.telegram.ui.Components.CommunitySettingsUi.button(v);}

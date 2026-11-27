@@ -281,8 +281,8 @@ public class ApplicationLoader extends Application {
         }
 
         MediaController.getInstance();
+        ContactsController.checkAllAppAccounts();
         for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) { //TODO improve account
-            ContactsController.getInstance(a).checkAppAccount();
             DownloadController.getInstance(a);
         }
         BillingController.getInstance().startConnection();

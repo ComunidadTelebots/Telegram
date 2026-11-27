@@ -38,6 +38,7 @@ public class AccountSelectCell extends FrameLayout {
 
     private SimpleTextView textView;
     private TextView infoTextView;
+    private TextView backendTextView;
     private BackupImageView imageView;
     private ImageView checkImageView;
     private AvatarDrawable avatarDrawable;
@@ -86,6 +87,12 @@ public class AccountSelectCell extends FrameLayout {
             checkImageView.setScaleType(ImageView.ScaleType.CENTER);
             checkImageView.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_chats_menuItemCheck), PorterDuff.Mode.MULTIPLY));
             addView(checkImageView, LayoutHelper.createFrame(40, LayoutHelper.MATCH_PARENT, Gravity.RIGHT | Gravity.TOP, 0, 0, 6, 0));
+            backendTextView = new TextView(context);
+            backendTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
+            backendTextView.setSingleLine(true);
+            backendTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
+            backendTextView.setVisibility(GONE);
+            addView(backendTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.RIGHT | Gravity.CENTER_VERTICAL, 0, 0, 52, 0));
         }
     }
 
@@ -112,6 +119,7 @@ public class AccountSelectCell extends FrameLayout {
         super.onAttachedToWindow();
         if (infoTextView == null) {
             textView.setTextColor(Theme.getColor(Theme.key_chats_menuItemText));
+            backendTextView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText));
         }
     }
 
@@ -134,6 +142,12 @@ public class AccountSelectCell extends FrameLayout {
         TLRPC.User user = UserConfig.getInstance(accountNumber).getCurrentUser();
         avatarDrawable.setInfo(account, user);
         textView.setText(ContactsController.formatName(user.first_name, user.last_name));
+        String backend = AccountBackendLabel.forAccount(account);
+        backendTextView.setText(backend);
+        backendTextView.setVisibility(backend == null ? GONE : VISIBLE);
+        FrameLayout.LayoutParams nameParams = (FrameLayout.LayoutParams) textView.getLayoutParams();
+        nameParams.rightMargin = dp(52) + (backend == null ? 0 : dp(8) + (int) Math.ceil(backendTextView.getPaint().measureText(backend)));
+        textView.setLayoutParams(nameParams);
         imageView.getImageReceiver().setCurrentAccount(account);
         imageView.setForUserOrChat(user, avatarDrawable);
         checkImageView.setVisibility(check && account == UserConfig.selectedAccount ? VISIBLE : INVISIBLE);

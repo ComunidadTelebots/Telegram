@@ -4588,20 +4588,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             } else if (position == clearLogsRow) {
                 FileLog.cleanupLogs();
             } else if (position == switchBackendRow) {
-                if (getParentActivity() == null) {
-                    return;
-                }
-                AlertDialog.Builder builder1 = new AlertDialog.Builder(getParentActivity(), resourcesProvider);
-                builder1.setMessage(LocaleController.getString(R.string.AreYouSure));
-                builder1.setTitle(LocaleController.getString(R.string.AppName));
-                builder1.setPositiveButton(LocaleController.getString(R.string.OK), (dialogInterface, i) -> {
-                    SharedConfig.pushAuthKey = null;
-                    SharedConfig.pushAuthKeyId = null;
-                    SharedConfig.saveConfig();
-                    getConnectionsManager().switchBackend(true);
-                });
-                builder1.setNegativeButton(LocaleController.getString(R.string.Cancel), null);
-                showDialog(builder1.create());
+                showBackendAccounts();
             } else if (position == languageRow) {
                 presentFragment(new LanguageSelectActivity());
             } else if (position == setUsernameRow) {
@@ -10489,6 +10476,59 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         return chatId != 0;
     }
 
+    private void showBackendAccounts() {
+        if (!(getParentActivity() instanceof LaunchActivity)) return;
+        final boolean targetTest = !getConnectionsManager().isTestBackend();
+        final String environment = getString(targetTest ? R.string.CommunityBackendTest : R.string.CommunityBackendProduction);
+        final ArrayList<Integer> accounts = new ArrayList<>();
+        final ArrayList<Long> owners = new ArrayList<>();
+        final ArrayList<CharSequence> labels = new ArrayList<>();
+        for (int account = 0; account < UserConfig.MAX_ACCOUNT_COUNT; account++) {
+            UserConfig config = UserConfig.getInstance(account);
+            if (config.isClientActivated() && ConnectionsManager.getInstance(account).isTestBackend() == targetTest) {
+                accounts.add(account);
+                owners.add(config.getClientUserId());
+                labels.add(UserObject.getUserName(config.getCurrentUser()) + " · " + environment);
+            }
+        }
+        labels.add(getString(R.string.AddAnotherAccount) + " · " + environment);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity(), resourcesProvider);
+        builder.setTitle(getString(R.string.CommunityBackendAccounts));
+        builder.setMessage(getString(R.string.CommunityBackendInfo));
+        builder.setItems(labels.toArray(new CharSequence[0]), (dialog, which) -> {
+            if (!(getParentActivity() instanceof LaunchActivity)) return;
+            if (which >= 0 && which < accounts.size()) {
+                int account = accounts.get(which);
+                UserConfig config = UserConfig.getInstance(account);
+                // The chooser may remain open while a session changes. Never select a replacement owner.
+                if (config.isClientActivated() && config.getClientUserId() == owners.get(which)
+                        && ConnectionsManager.getInstance(account).isTestBackend() == targetTest) {
+                    ((LaunchActivity) getParentActivity()).switchToAccount(account, true);
+                }
+                return;
+            }
+            if (which != accounts.size()) return;
+            // Apply the same account allowance as the main account selector, even with physical slots free.
+            final int accountLimit = UserConfig.hasPremiumOnAccounts()
+                    ? UserConfig.MAX_ACCOUNT_COUNT : UserConfig.MAX_ACCOUNT_DEFAULT_COUNT;
+            final boolean canAddAccount = UserConfig.getActivatedAccountsCount() < accountLimit;
+            // Resolve the free slot at selection time, not when the dialog was opened.
+            for (int account = 0; canAddAccount && account < UserConfig.MAX_ACCOUNT_COUNT; account++) {
+                if (account != currentAccount && !UserConfig.getInstance(account).isClientActivated()) {
+                    presentFragment(new LoginActivity(account, targetTest));
+                    return;
+                }
+            }
+            AlertDialog.Builder full = new AlertDialog.Builder(getParentActivity(), resourcesProvider);
+            full.setTitle(getString(R.string.CommunityBackendAccounts));
+            full.setMessage(getString(R.string.CommunityBackendNoSlot));
+            full.setPositiveButton(getString(R.string.OK), null);
+            showDialog(full.create());
+        });
+        builder.setNegativeButton(getString(R.string.Cancel), null);
+        showDialog(builder.create());
+    }
+
     private void updateRowsIds() {
         updateNotifications(false);
 
@@ -13918,7 +13958,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                     } else if (position == clearLogsRow) {
                         textCell.setText(LocaleController.getString(R.string.DebugClearLogs), switchBackendRow != -1);
                     } else if (position == switchBackendRow) {
-                        textCell.setText("Switch Backend", false);
+                        textCell.setText(getString(R.string.CommunityBackendAccounts), false);
                     } else if (position == devicesRow) {
                         textCell.setTextAndIcon(LocaleController.getString(R.string.Devices), R.drawable.msg2_devices, true);
                     } else if (position == setAvatarRow) {

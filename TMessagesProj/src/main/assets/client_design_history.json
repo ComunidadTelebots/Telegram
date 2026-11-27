@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewedOn": "2026-09-23",
+  "reviewedOn": "2026-11-06",
   "scope": "curated-design-milestones",
   "milestones": [
     {
@@ -445,6 +445,54 @@
         "src/scss/partials/_leftSidebar.scss",
         "src/scss/partials/_rightSidebar.scss",
         "src/stores/foldersSidebar.ts"
+      ]
+    },
+    {
+      "id": "ios:279f89e4d4f6",
+      "family": "ios",
+      "title": {
+        "es": "Pestaña de noticias configurable",
+        "en": "Configurable news tab"
+      },
+      "changes": {
+        "es": "El controlador raíz incorpora NewsScreen y muestra su pestaña según showNewsTab. Referencia de desarrollo, pendiente de adaptación a Android.",
+        "en": "The root controller adds NewsScreen and conditionally displays its tab through showNewsTab. Development reference, pending Android adaptation."
+      },
+      "date": "2026-10-28",
+      "commit": "279f89e4d4f63f17227bf877dc3d8990f22ecd58",
+      "tag": "",
+      "repository": "https://github.com/TelegramMessenger/Telegram-iOS",
+      "sourceUrl": "https://github.com/TelegramMessenger/Telegram-iOS/commit/279f89e4d4f63f17227bf877dc3d8990f22ecd58",
+      "compareUrl": "https://github.com/TelegramMessenger/Telegram-iOS/compare/6ad963e5b62d354da79040f388ae2b9132fb17b8...279f89e4d4f63f17227bf877dc3d8990f22ecd58",
+      "releaseUrl": "",
+      "implementation": "reference-only",
+      "verifiedBy": "source-diff",
+      "evidencePaths": [
+        "submodules/TelegramUI/Sources/TelegramRootController.swift"
+      ]
+    },
+    {
+      "id": "webk:ae67ff9763a7",
+      "family": "webk",
+      "title": {
+        "es": "Lista e historias con estilos aislados",
+        "en": "Isolated list and stories styles"
+      },
+      "changes": {
+        "es": "Añade propiedades CSS no heredadas para la altura de superposición y el plegado de historias. El objetivo declarado en el código es evitar recalcular las filas durante el desplazamiento. Pendiente de adaptación nativa.",
+        "en": "Adds non-inherited CSS properties for overlay height and stories folding. Source comments describe avoiding row restyling during scrolling. Pending native adaptation."
+      },
+      "date": "2026-11-05",
+      "commit": "ae67ff9763a77cce0b9d3ff993c1e0e11637f904",
+      "tag": "",
+      "repository": "https://github.com/morethanwords/tweb",
+      "sourceUrl": "https://github.com/morethanwords/tweb/commit/ae67ff9763a77cce0b9d3ff993c1e0e11637f904",
+      "compareUrl": "https://github.com/morethanwords/tweb/compare/cac8174ea6833147fc89991629e6c34296f32eb8...ae67ff9763a77cce0b9d3ff993c1e0e11637f904",
+      "releaseUrl": "",
+      "implementation": "reference-only",
+      "verifiedBy": "source-diff",
+      "evidencePaths": [
+        "src/scss/partials/_leftSidebar.scss"
       ]
     }
   ]

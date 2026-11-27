@@ -2,6 +2,9 @@
 import pathlib, subprocess, tempfile, sys
 root = pathlib.Path(__file__).resolve().parents[2]
 stubs = {
+ 'org/telegram/messenger/ApplicationLoader.java': 'package org.telegram.messenger;public class ApplicationLoader {public static Object applicationContext;}',
+ # Legacy certificate resources are covered by test_legacy_public_tls_trust.py and device tests.
+ 'org/telegram/ui/web/LegacyPublicTlsTrust.java': 'package org.telegram.ui.web;public class LegacyPublicTlsTrust {public static javax.net.ssl.TrustManager[] create(Object context){throw new AssertionError("Legacy trust requires its dedicated test");}}',
  'org/conscrypt/Conscrypt.java': 'package org.conscrypt;public class Conscrypt{public static java.security.Provider newProvider(){throw new AssertionError("Legacy TLS requires device test");}public static void setHostname(javax.net.ssl.SSLSocket s,String h){throw new AssertionError("Legacy TLS requires device test");}}',
 
 

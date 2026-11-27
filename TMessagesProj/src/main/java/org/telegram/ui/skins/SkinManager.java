@@ -15,6 +15,8 @@ import org.telegram.ui.skins.skins.AndroidOriginalSkin;
 import org.telegram.ui.skins.skins.AndroidRedesignSkin;
 import org.telegram.ui.skins.skins.AndroidSkin;
 import org.telegram.ui.skins.skins.AuroraSkin;
+import org.telegram.ui.skins.skins.AuroraMidnightSkin;
+import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.skins.skins.IosSkin;
 import org.telegram.ui.skins.skins.MacosSkin;
 import org.telegram.ui.skins.skins.TdesktopSkin;
@@ -58,6 +60,7 @@ public class SkinManager {
         skins.add(new UnigramSkin());
         skins.add(new TelegramXSkin());
         skins.add(new AuroraSkin());
+        skins.add(new AuroraMidnightSkin());
 
         Map<String, SkinBase> families = new LinkedHashMap<>();
         for (SkinBase skin : skins) {
@@ -79,7 +82,12 @@ public class SkinManager {
     public static SkinManager get() {
         if (instance == null) {
             synchronized (SkinManager.class) {
-                if (instance == null) instance = new SkinManager();
+                if (instance == null) {
+                    instance = new SkinManager();
+                    // Theme resource creation may call back into SkinManager.
+                    // Publish the manager before loading Aurora's assets.
+                    AuroraAppearance.select(instance.activeSkin.getId());
+                }
             }
         }
         return instance;
@@ -178,6 +186,12 @@ public class SkinManager {
     private void applyToSharedConfig(boolean notify) {
         SharedConfig.bubbleRadius = activeSkin.getBubbleRadiusDP();
         if (notify) {
+            boolean refreshAppearance = AuroraAppearance.isActive() || "aurora".equals(activeSkin.getFamilyId());
+            AuroraAppearance.select(activeSkin.getId());
+            if (refreshAppearance) {
+                Theme.reloadAllResources(ApplicationLoader.applicationContext);
+                Theme.refreshThemeColors();
+            }
             MessagesController.getGlobalMainSettings().edit()
                     .putInt("bubbleRadius", SharedConfig.bubbleRadius)
                     .apply();

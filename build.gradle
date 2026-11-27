@@ -24,6 +24,16 @@ if (!forkChannels.contains(forkChannel)) {
     throw new GradleException("APP_CHANNEL must be one of ${forkChannels}; got '${forkChannel}'")
 }
 ext.forkApplicationId = "${APP_PACKAGE}.${forkChannel}"
+// Unlike android.injected.build.abi (a device preference list), this option
+// explicitly builds every requested ABI in both the library and the APK.
+def requestedBuildAbis = providers.gradleProperty('COMMUNITY_BUILD_ABIS').orNull
+ext.forkBuildAbis = requestedBuildAbis ? requestedBuildAbis.split(',').collect { it.trim() }.unique() : []
+if (!ext.forkBuildAbis.every { it in ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'] }) {
+    throw new GradleException('COMMUNITY_BUILD_ABIS contains an unsupported ABI')
+}
+if (requestedBuildAbis && providers.gradleProperty('android.injected.build.abi').isPresent()) {
+    throw new GradleException('Use COMMUNITY_BUILD_ABIS or the IDE device ABI option, not both')
+}
 // Opt-in backport validation. Do not advertise API 21 support before device tests pass.
 ext.forkMinSdk = providers.gradleProperty('COMMUNITY_MIN_SDK').getOrElse('23').toInteger()
 if (!(ext.forkMinSdk in [21, 23])) {

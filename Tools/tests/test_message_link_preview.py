@@ -16,6 +16,14 @@ stubs = {
 'PreviewTest.java': '''import org.telegram.messenger.*;import org.telegram.tgnet.*;import org.telegram.ui.web.*;public class PreviewTest {
 static void ck(boolean b,String s){if(!b)throw new AssertionError(s);} static MessageObject msg(int id,String text){MessageObject m=new MessageObject();m.messageOwner.id=id;m.messageOwner.message=text;m.messageOwner.media=new TLRPC.MessageMedia();return m;}
 public static void main(String[]x){
+ Runnable[] busy=new Runnable[12];
+ for(int i=0;i<12;i++)busy[i]=MessageLinkPreview.request(msg(100+i,"https://capacity.com/"+i),true,true,r->{});
+ MessageObject overflow=msg(200,"https://capacity.com/overflow");int[] refused={0};
+ ck(MessageLinkPreview.request(overflow,true,true,r->refused[0]++)==null,"capacity returns retry signal");AndroidUtilities.drain();ck(refused[0]==0,"capacity must not deliver false negative");
+ busy[0].run();Runnable retry=MessageLinkPreview.request(overflow,true,true,r->{});ck(retry!=null&&ConnectionsManager.urls.size()==13,"retry obtains released slot");retry.run();for(int i=1;i<12;i++)busy[i].run();
+ MessageObject shared=msg(201,"https://capacity.com/shared");Runnable[] listeners=new Runnable[16];for(int i=0;i<16;i++)listeners[i]=MessageLinkPreview.request(shared,true,true,r->{});
+ ck(MessageLinkPreview.request(shared,true,true,r->refused[0]++)==null,"listener capacity returns retry signal");for(Runnable listener:listeners)listener.run();
+ ConnectionsManager.urls.clear();
  MessageObject m=msg(1,"Photo caption https://publisher.com/a and https://second.com/b");Object media=m.messageOwner.media;
  ck(MessageLinkPreview.findUrl(m).equals("https://publisher.com/a"),"first URL");
  int[] calls={0};MessageLinkPreview.request(m,false,true,r->calls[0]++);AndroidUtilities.drain();ck(ConnectionsManager.urls.isEmpty(),"not visible no fetch");calls[0]=0;

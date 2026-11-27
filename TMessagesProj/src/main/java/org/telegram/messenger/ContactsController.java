@@ -387,46 +387,58 @@ public class ContactsController extends BaseController {
     }
 
     public void checkAppAccount() {
-        systemAccount = null;
+        checkAppAccounts(new ContactsController[] {this});
+    }
+
+    /** Reconcile Android accounts once at startup instead of querying AccountManager per slot. */
+    public static void checkAllAppAccounts() {
+        ContactsController[] controllers = new ContactsController[UserConfig.MAX_ACCOUNT_COUNT];
+        for (int account = 0; account < controllers.length; account++) {
+            controllers[account] = getInstance(account);
+        }
+        checkAppAccounts(controllers);
+    }
+
+    private static void checkAppAccounts(ContactsController[] controllers) {
+        for (ContactsController controller : controllers) {
+            controller.systemAccount = null;
+        }
         Utilities.globalQueue.postRunnable(() -> {
             AccountManager am = AccountManager.get(ApplicationLoader.applicationContext);
             try {
                 Account[] accounts = am.getAccountsByType(ApplicationLoader.getApplicationId());
-                for (int a = 0; a < accounts.length; a++) {
-                    Account acc = accounts[a];
+                for (Account acc : accounts) {
                     boolean found = false;
-                    for (int b = 0; b < UserConfig.MAX_ACCOUNT_COUNT; b++) {
-                        TLRPC.User user = UserConfig.getInstance(b).getCurrentUser();
-                        if (user != null) {
-                            if (acc.name.equals("" + user.id)) {
-                                if (b == currentAccount) {
-                                    systemAccount = acc;
+                    for (int account = 0; account < UserConfig.MAX_ACCOUNT_COUNT; account++) {
+                        TLRPC.User user = UserConfig.getInstance(account).getCurrentUser();
+                        if (user != null && acc.name.equals(Long.toString(user.id))) {
+                            for (ContactsController controller : controllers) {
+                                if (controller.currentAccount == account) {
+                                    controller.systemAccount = acc;
                                 }
-                                found = true;
-                                break;
                             }
+                            found = true;
+                            break;
                         }
                     }
                     if (!found) {
                         try {
-                            am.removeAccount(accounts[a], null, null);
+                            am.removeAccount(acc, null, null);
                         } catch (Exception ignore) {
-
                         }
                     }
-
                 }
             } catch (Throwable ignore) {
-
             }
-            if (getUserConfig().isClientActivated()) {
-                readContacts();
-                if (systemAccount == null) {
-                    try {
-                        systemAccount = new Account("" + getUserConfig().getClientUserId(), ApplicationLoader.getApplicationId());
-                        am.addAccountExplicitly(systemAccount, "", null);
-                    } catch (Exception ignore) {
-
+            for (ContactsController controller : controllers) {
+                if (controller.getUserConfig().isClientActivated()) {
+                    controller.readContacts();
+                    if (controller.systemAccount == null) {
+                        try {
+                            controller.systemAccount = new Account(Long.toString(controller.getUserConfig().getClientUserId()), ApplicationLoader.getApplicationId());
+                            am.addAccountExplicitly(controller.systemAccount, "", null);
+                        } catch (Exception ignore) {
+                        }
                     }
                 }
             }

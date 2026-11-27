@@ -1267,6 +1267,7 @@ public class ChatActivity extends BaseFragment implements
     public final static int OPTION_SEND_MONEY = 117;
     // Keep fork-only menu IDs outside the upstream sequential range.
     public final static int OPTION_COMMUNITY_READ_LATER = 99032;
+    public final static int OPTION_COMMUNITY_PENDING_REPLY = 99033;
 
     private final static int[] allowedNotificationsDuringChatListAnimations = new int[]{
             NotificationCenter.messagesRead,
@@ -34328,6 +34329,11 @@ public class ChatActivity extends BaseFragment implements
                 getMediaDataController().addRecentSticker(MediaDataController.TYPE_FAVE, selectedObject, selectedObject.getDocument(), (int) (System.currentTimeMillis() / 1000), true);
                 break;
             }
+            case OPTION_COMMUNITY_PENDING_REPLY: {
+                if(currentEncryptedChat!=null||chatMode!=MODE_DEFAULT||!org.telegram.messenger.CommunityPendingReplies.canTrack(selectedObject))break;
+                org.telegram.messenger.CommunityPendingReplies.add(currentAccount,selectedObject,saved->{if(getParentActivity()!=null)android.widget.Toast.makeText(getParentActivity(),LocaleController.getString(saved?R.string.CommunityPendingSaved:R.string.CommunityPendingFailed),android.widget.Toast.LENGTH_LONG).show();});
+                break;
+            }
             case OPTION_COMMUNITY_READ_LATER: {
                 if (currentEncryptedChat != null || !ChatObject.isChannelAndNotMegaGroup(currentChat)
                         || selectedObject.getId() <= 0 || selectedObject.getDialogId() != -currentChat.id
@@ -46450,6 +46456,11 @@ public class ChatActivity extends BaseFragment implements
                     }
                     options.add(OPTION_VIEW_REPLIES_OR_THREAD);
                     icons.add(R.drawable.msg_viewreplies);
+                }
+                if(currentEncryptedChat==null&&chatMode==MODE_DEFAULT&&!isInsideContainer&&org.telegram.messenger.CommunityPendingReplies.canTrack(selectedObject)) {
+                    items.add(LocaleController.getString(R.string.CommunityPendingMark));
+                    options.add(OPTION_COMMUNITY_PENDING_REPLY);
+                    icons.add(R.drawable.msg_saved);
                 }
                 if (!isEphemeral && currentEncryptedChat == null && !selectedObject.isSponsored() && chatMode != MODE_SCHEDULED
                         && ChatObject.isChannelAndNotMegaGroup(currentChat) && selectedObject.getId() > 0 && selectedObject.getDialogId() == -currentChat.id) {

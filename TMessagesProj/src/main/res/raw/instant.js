@@ -36,17 +36,30 @@ function Readability(e,t){if(t&&t.documentElement)e=t,t=arguments[2];else if(!e|
             document = new DOMParser().parseFromString(html, 'text/html')
         }
 
+        // Standard published Flourish placeholder; do not execute its embed.js bootstrap.
+        function flourishSource(node) {
+            if (node.tagName.toLowerCase() !== 'div' || !/(^|\s)flourish-embed(\s|$)/.test(node.getAttribute('class') || '')) return null;
+            if (node.hasAttribute('data-base') || node.querySelector('iframe, amp-iframe')) return null;
+            var id = /^visualisation\/([0-9]{1,20})(?:\?[0-9]{1,20})?$/.exec(node.getAttribute('data-src') || '');
+            if (!id) return null;
+            var source = 'https://flo.uri.sh/visualisation/' + id[1] + '/embed';
+            var explicit = node.getAttribute('data-url');
+            if (explicit && explicit !== source && explicit !== 'https://public.flourish.studio/visualisation/' + id[1] + '/embed') return null;
+            return source;
+        }
+
         // Preserve only approved public chart markers through Readability's empty-div cleanup.
         // Detached DOM only: no publisher script or frame is executed.
         const chartMarkers = new Map()
-        document.querySelectorAll('iframe').forEach(frame => {
-            const source = frame.getAttribute('src') || ''
+        document.querySelectorAll('iframe, div.flourish-embed[data-src]').forEach(frame => {
+            const source = frame.tagName.toLowerCase() === 'iframe' ? frame.getAttribute('src') || '' : flourishSource(frame) || ''
             if (!/^https:\/\/(?:datawrapper\.dwcdn\.net|static\.dwcdn\.net|flo\.uri\.sh|public\.flourish\.studio)\//i.test(source)) return
+            const title = frame.getAttribute('title') || frame.getAttribute('aria-label') || ''
             const marker = document.createElement('p')
             const key = 'amp-chart-' + chartMarkers.size
             marker.setAttribute('data-local-chart', key)
-            marker.textContent = 'Gráfico interactivo: ' + (frame.getAttribute('title') || 'datos de la noticia')
-            chartMarkers.set(key, {tag: 'iframe', src: source, title: frame.getAttribute('title') || '', content: []})
+            marker.textContent = 'Gráfico interactivo: ' + (title || 'datos de la noticia')
+            chartMarkers.set(key, {tag: 'iframe', src: source, title: title, content: []})
             frame.replaceWith(marker)
         })
 

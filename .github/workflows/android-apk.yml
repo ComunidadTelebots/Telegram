@@ -1,11 +1,25 @@
-name: Android APK firmado
-run-name: Android ${{ inputs.channel || 'dev' }} · ${{ inputs.abi || 'arm64-v8a' }} · ${{ github.ref_name }}
+name: Android APK y Google Play AAB
+run-name: Android ${{ inputs.format || 'apk' }} · ${{ inputs.format == 'play-aab' && 'stable' || inputs.channel || 'dev' }} · ${{ github.ref_name }}
 
 on:
   push:
     branches: [codex/downloadable-builds]
   workflow_dispatch:
     inputs:
+      format:
+        description: APK directo o AAB para prueba cerrada de Google Play
+        type: choice
+        required: true
+        default: apk
+        options: [apk, play-aab]
+      version_code_base:
+        description: Solo AAB. Base nueva (código final = base x 10 + 1)
+        type: string
+        required: false
+      previous_play_version_code:
+        description: Solo AAB. Mayor código ya usado en Play Console (0 si no hay ninguno)
+        type: string
+        required: false
       channel:
         description: Paquete y canal de distribución
         type: choice
@@ -31,10 +45,13 @@ jobs:
     if: github.repository == 'ComunidadTelebots/Telegram'
     runs-on: ubuntu-24.04
     timeout-minutes: 180
-    environment: android-${{ inputs.channel || 'dev' }}
+    environment: android-${{ inputs.format == 'play-aab' && 'stable' || inputs.channel || 'dev' }}
     env:
-      CHANNEL: ${{ inputs.channel || 'dev' }}
+      CHANNEL: ${{ inputs.format == 'play-aab' && 'stable' || inputs.channel || 'dev' }}
       BUILD_ABI: ${{ inputs.abi || 'arm64-v8a' }}
+      PLAY_VERSION_BASE: ${{ inputs.version_code_base }}
+      PREVIOUS_PLAY_VERSION_CODE: ${{ inputs.previous_play_version_code }}
+      BUILD_FORMAT: ${{ inputs.format || 'apk' }}
       GRADLE_USER_HOME: ${{ runner.temp }}/telebots-gradle
     steps:
       - name: Descargar exactamente el commit solicitado
@@ -77,6 +94,8 @@ jobs:
           cert = re.sub(r'[:\s]', '', os.environ['CERT_SHA256']).lower()
           if not re.fullmatch(r'[a-f0-9]{64}', cert):
               raise SystemExit('CERT_SHA256 no tiene formato válido')
+          if os.environ['BUILD_FORMAT'] == 'play-aab' and cert == 'a08d7dc323ddf71ef3201944397e0d3cce7d40847263e11f328b68bbe19229ab':
+              raise SystemExit('Google Play requiere tu clave de carga privada, no la clave pública de pruebas')
           try:
               keystore = base64.b64decode(''.join(os.environ['KEYSTORE_BASE64'].split()), validate=True)
           except ValueError:
@@ -112,6 +131,7 @@ jobs:
           echo "$ANDROID_HOME/build-tools/36.0.0" >> "$GITHUB_PATH"
 
       - name: Compilar APK release
+        if: inputs.format != 'play-aab'
         shell: bash
         run: |
           set -euo pipefail
@@ -129,6 +149,7 @@ jobs:
             -Pkotlin.compiler.execution.strategy=in-process "${abi_args[@]}"
 
       - name: Verificar firma, paquete y preparar descarga
+        if: inputs.format != 'play-aab'
         shell: bash
         run: |
           set -euo pipefail
@@ -155,6 +176,7 @@ jobs:
           PY
 
       - name: Publicar descarga de APK verificado
+        if: inputs.format != 'play-aab'
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: telebots-${{ inputs.channel || 'dev' }}-${{ inputs.abi || 'arm64-v8a' }}-${{ github.run_number }}
@@ -166,6 +188,54 @@ jobs:
           retention-days: 14
           compression-level: 0
           include-hidden-files: false
+
+      - name: Compilar AAB para la aplicación existente de Google Play
+        if: inputs.format == 'play-aab'
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$PLAY_VERSION_BASE" =~ ^[1-9][0-9]{0,7}$ ]]
+          [[ "$PREVIOUS_PLAY_VERSION_CODE" =~ ^(0|[1-9][0-9]{0,9})$ ]]
+          test "$CHANNEL" = stable
+          java -classpath gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain \
+            :TMessagesProj_App:bundleBundleAfatRelease --no-daemon --max-workers=2 --console=plain \
+            -PAPP_CHANNEL=stable "-PAPP_VERSION_CODE=$PLAY_VERSION_BASE" -Pkotlin.incremental=false \
+            '-Dorg.gradle.jvmargs=-Xmx5g -XX:MaxMetaspaceSize=1g' \
+            -Pkotlin.compiler.execution.strategy=in-process
+
+      - name: Verificar AAB, firma de carga y bibliotecas de 16 KB
+        if: inputs.format == 'play-aab'
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 \
+            https://github.com/google/bundletool/releases/download/1.18.1/bundletool-all-1.18.1.jar \
+            -o "$RUNNER_TEMP/bundletool.jar"
+          echo "675786493983787ffa11550bdb7c0715679a44e1643f3ff980a529e9c822595c  $RUNNER_TEMP/bundletool.jar" | sha256sum -c -
+          mapfile -t bundles < <(find TMessagesProj_App/build/outputs/bundle/bundleAfatRelease -name '*.aab' -type f)
+          test "${#bundles[@]}" -eq 1
+          mkdir -p artifacts
+          python3 Tools/release/verify_play_bundle.py "${bundles[0]}" \
+            --bundletool "$RUNNER_TEMP/bundletool.jar" --jdk "$JAVA_HOME" \
+            --expected-certificate "$(cat "$RUNNER_TEMP/expected-certificate.sha256")" \
+            --previous-version-code "$PREVIOUS_PLAY_VERSION_CODE" --report artifacts/play-verification.json
+          cp "${bundles[0]}" artifacts/comunidad-telebots-play-alpha.aab
+          sha256sum artifacts/comunidad-telebots-play-alpha.aab > artifacts/SHA256SUMS.txt
+          cp Tools/release/play/es-ES-release-notes.txt artifacts/
+
+      - name: Descargar AAB validado (sin publicar en Google Play)
+        if: inputs.format == 'play-aab'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: comunidad-telebots-play-alpha-${{ inputs.version_code_base }}-${{ github.run_number }}
+          path: |
+            artifacts/*.aab
+            artifacts/play-verification.json
+            artifacts/SHA256SUMS.txt
+            artifacts/es-ES-release-notes.txt
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
 
       - name: Eliminar material de firma del runner
         if: always()

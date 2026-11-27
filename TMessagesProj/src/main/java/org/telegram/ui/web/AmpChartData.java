@@ -5,12 +5,12 @@ import java.util.List;
 
 /** Bounded numeric data for our Canvas renderer; never interprets publisher code. */
 public final class AmpChartData {
-    public enum Kind { LINE, BAR, PIE, STACKED, MARIMEKKO }
+    public enum Kind { LINE, BAR, PIE, STACKED, MARIMEKKO, AREA }
     public final Kind kind;
     public final String title, credit;
     public final double[] positions;
     public double[] widths;
-    public boolean proportional;
+    public boolean proportional, stacked;
     public String widthLabel = "";
     public final String[] labels, series;
     public final double[][] values;
@@ -36,7 +36,7 @@ public final class AmpChartData {
                 values[r-1][c-1]=number;
             }
         }
-        positions=positions(labels,kind==Kind.LINE);
+        positions=positions(labels,kind==Kind.LINE||kind==Kind.AREA);
         if(valid==0 || (kind==Kind.PIE && total()<=0))throw new IllegalArgumentException("Empty chart");
     }
     private static double[] positions(String[] labels,boolean continuous){

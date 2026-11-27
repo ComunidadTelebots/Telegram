@@ -459,6 +459,11 @@ public class UserConfig extends BaseController {
     }
 
     public void clearConfig() {
+        long communityOwner = getClientUserId();
+        if (communityOwner != 0) {
+            CommunityDraftHistory.onLogout(currentAccount, communityOwner);
+            CommunityPendingReplies.onLogout(currentAccount, communityOwner);
+        }
         getPreferences().edit().clear().apply();
 
         sharingMyLocationUntil = 0;

@@ -1273,6 +1273,15 @@ public class DialogCell extends BaseCell implements StoriesListPlaceProvider.Ava
             thumbSize = 19;
         }
 
+        if (org.telegram.ui.skins.AuroraAppearance.isActive()) {
+            float scale = Math.max(1f, getResources().getConfiguration().fontScale);
+            for (int i = 0; i < 2; i++) {
+                Theme.dialogs_namePaint[i].setTextSize(dp(14 * scale));
+                Theme.dialogs_nameEncryptedPaint[i].setTextSize(dp(14 * scale));
+                Theme.dialogs_messagePaint[i].setTextSize(dp(13 * scale));
+                Theme.dialogs_messagePrintingPaint[i].setTextSize(dp(13 * scale));
+            }
+        }
         currentDialogFolderDialogsCount = 0;
         CharSequence nameString = "";
         String timeString = "";

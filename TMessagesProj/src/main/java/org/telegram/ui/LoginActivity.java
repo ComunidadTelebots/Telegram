@@ -335,6 +335,50 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
     private boolean newAccount;
     private boolean syncContacts = true;
     private boolean testBackend = false;
+    private Boolean requestedLoginBackend;
+    private boolean backendSwitchPending;
+    private Runnable backendSwitchCheck;
+
+    private void prepareLoginBackend(boolean target) {
+        if (backendSwitchPending || getUserConfig().isClientActivated()) {
+            return;
+        }
+        testBackend = target;
+        requestedLoginBackend = target;
+        if (getConnectionsManager().isTestBackend() == target) {
+            return;
+        }
+        // A pending code/password from one environment cannot be reused on another.
+        ApplicationLoader.applicationContext.getSharedPreferences("logininfo2" + (newAccount ? "_" + currentAccount : ""), Context.MODE_PRIVATE).edit().clear().commit();
+        backendSwitchPending = true;
+        getConnectionsManager().switchBackend(false);
+        final long deadline = android.os.SystemClock.elapsedRealtime() + 10000;
+        backendSwitchCheck = () -> {
+            if (getConnectionsManager().isTestBackend() != target) {
+                if (android.os.SystemClock.elapsedRealtime() >= deadline) {
+                    backendSwitchCheck = null;
+                    // Remain fail-closed: do not allow a code to be sent to an unconfirmed server.
+                    if (getParentActivity() != null) {
+                        Toast.makeText(getParentActivity(), getString(R.string.ErrorOccurred), Toast.LENGTH_LONG).show();
+                        finishFragment();
+                    }
+                    return;
+                }
+                AndroidUtilities.runOnUIThread(backendSwitchCheck, 50);
+                return;
+            }
+            backendSwitchPending = false;
+            backendSwitchCheck = null;
+            if (views[VIEW_PHONE_INPUT] instanceof PhoneView) {
+                PhoneView phoneView = (PhoneView) views[VIEW_PHONE_INPUT];
+                if (phoneView.testBackendCheckBox != null) {
+                    phoneView.testBackendCheckBox.setEnabled(true);
+                }
+                phoneView.loadCountries();
+            }
+        };
+        AndroidUtilities.runOnUIThread(backendSwitchCheck, 50);
+    }
 
     @ActivityMode
     private int activityMode = MODE_LOGIN;
@@ -473,6 +517,11 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
         newAccount = true;
     }
 
+    public LoginActivity(int account, boolean targetTestBackend) {
+        this(account);
+        requestedLoginBackend = targetTestBackend;
+    }
+
     public LoginActivity changeEmail(Runnable onFinishCallback) {
         activityMode = MODE_CHANGE_LOGIN_EMAIL;
         currentViewNum = VIEW_ADD_EMAIL;
@@ -510,6 +559,10 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
     @Override
     public void onFragmentDestroy() {
         super.onFragmentDestroy();
+        if (backendSwitchCheck != null) {
+            AndroidUtilities.cancelRunOnUIThread(backendSwitchCheck);
+            backendSwitchCheck = null;
+        }
         for (int a = 0; a < views.length; a++) {
             if (views[a] != null) {
                 views[a].onDestroyActivity();
@@ -530,6 +583,12 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
     @Override
     public boolean onFragmentCreate() {
+        if (requestedLoginBackend != null) {
+            if (getUserConfig().isClientActivated()) {
+                return false;
+            }
+            prepareLoginBackend(requestedLoginBackend);
+        }
         getNotificationCenter().addObserver(this, NotificationCenter.didUpdateConnectionState);
         getNotificationCenter().addObserver(this, NotificationCenter.newSuggestionsAvailable);
         return super.onFragmentCreate();
@@ -1343,7 +1402,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
     }
 
     private void onDoneButtonPressed() {
-        if (!doneButtonVisible[currentDoneType]) {
+        if (backendSwitchPending || !doneButtonVisible[currentDoneType]) {
             return;
         }
         if (radialProgressView.getTag() != null) {
@@ -1670,7 +1729,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
         MessagesController.getInstance(currentAccount).checkPeerColors(false);
 
         if (res.future_auth_token != null) {
-            AuthTokensHelper.saveLogInToken(res);
+            AuthTokensHelper.saveLogInToken(getConnectionsManager().isTestBackend(), res);
         } else {
             FileLog.d("onAuthSuccess future_auth_token is empty");
         }
@@ -2478,7 +2537,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
             final boolean allowTestBackend = (BuildVars.DEBUG_VERSION || TEST_BACKEND_IN_STORE && !BuildConfig.BUNDLE) || getConnectionsManager().isTestBackend();
             if (allowTestBackend && activityMode == MODE_LOGIN) {
                 testBackendCheckBox = new CheckBoxCell(context, 2);
-                testBackendCheckBox.setText(getString(R.string.DebugTestBackend), "", testBackend = getConnectionsManager().isTestBackend(), false);
+                testBackendCheckBox.setText(getString(R.string.DebugTestBackend), "", testBackend = requestedLoginBackend != null ? requestedLoginBackend : getConnectionsManager().isTestBackend(), false);
                 addView(testBackendCheckBox, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT, Gravity.LEFT | Gravity.TOP, 16, 0, 16 + (LocaleController.isRTL && AndroidUtilities.isSmallScreen() ? 56 : 0), 0));
                 bottomMargin -= 24;
                 testBackendCheckBox.setOnClickListener(v -> {
@@ -2486,14 +2545,12 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                         return;
                     }
                     CheckBoxCell cell = (CheckBoxCell) v;
-                    testBackend = !testBackend;
-                    cell.setChecked(testBackend, true);
-
-                    boolean testBackend = allowTestBackend && getConnectionsManager().isTestBackend();
-                    if (testBackend != LoginActivity.this.testBackend) {
-                        getConnectionsManager().switchBackend(false);
+                    if (backendSwitchPending) {
+                        return;
                     }
-                    loadCountries();
+                    prepareLoginBackend(!testBackend);
+                    cell.setChecked(testBackend, true);
+                    cell.setEnabled(!backendSwitchPending);
                 });
             }
 
@@ -2583,11 +2640,15 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
         }
 
         private void loadCountries() {
+            if (backendSwitchPending) {
+                return;
+            }
+            final boolean countriesBackend = getConnectionsManager().isTestBackend();
             TLRPC.TL_help_getCountriesList req = new TLRPC.TL_help_getCountriesList();
             req.lang_code = LocaleController.getInstance().getCurrentLocaleInfo() != null ? LocaleController.getInstance().getCurrentLocaleInfo().getLangCode() : Locale.getDefault().getCountry();
             getConnectionsManager().sendRequest(req, (response, error) -> {
                 AndroidUtilities.runOnUIThread(() -> {
-                    if (error == null) {
+                    if (error == null && !backendSwitchPending && countriesBackend == getConnectionsManager().isTestBackend()) {
                         countriesArray.clear();
                         codesMap.clear();
                         phoneFormatMap.clear();
@@ -2857,7 +2918,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
 
         @Override
         public void onNextPressed(String code) {
-            if (getParentActivity() == null || nextPressed || isRequestingFirebaseSms) {
+            if (backendSwitchPending || getParentActivity() == null || nextPressed || isRequestingFirebaseSms) {
                 return;
             }
 
@@ -3084,7 +3145,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                 settings.allow_firebase = false;
             }
 
-            ArrayList<TLRPC.TL_auth_authorization> loginTokens = AuthTokensHelper.getSavedLogInTokens();
+            ArrayList<TLRPC.TL_auth_authorization> loginTokens = AuthTokensHelper.getSavedLogInTokens(getConnectionsManager().isTestBackend());
             if (loginTokens != null) {
                 for (int i = 0; i < loginTokens.size(); i++) {
                     if (loginTokens.get(i).future_auth_token == null) {
@@ -3093,16 +3154,13 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                     if (settings.logout_tokens == null) {
                         settings.logout_tokens = new ArrayList<>();
                     }
-                    if (BuildVars.DEBUG_VERSION) {
-                        FileLog.d("login token to check " + new String(loginTokens.get(i).future_auth_token, StandardCharsets.UTF_8));
-                    }
                     settings.logout_tokens.add(loginTokens.get(i).future_auth_token);
                     if (settings.logout_tokens.size() >= 20) {
                         break;
                     }
                 }
             }
-            ArrayList<TLRPC.TL_auth_loggedOut> tokens = AuthTokensHelper.getSavedLogOutTokens();
+            ArrayList<TLRPC.TL_auth_loggedOut> tokens = AuthTokensHelper.getSavedLogOutTokens(getConnectionsManager().isTestBackend());
             if (tokens != null) {
                 for (int i = 0; i < tokens.size(); i++) {
                     if (settings.logout_tokens == null) {
@@ -3113,7 +3171,7 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                         break;
                     }
                 }
-                AuthTokensHelper.saveLogOutTokens(tokens);
+                AuthTokensHelper.saveLogOutTokens(getConnectionsManager().isTestBackend(), tokens);
             }
             if (settings.logout_tokens != null) {
                 settings.flags |= 64;
@@ -4973,6 +5031,10 @@ public class LoginActivity extends BaseFragment implements NotificationCenter.No
                                     } else if (error.text.contains("PHONE_CODE_EMPTY") || error.text.contains("PHONE_CODE_INVALID")) {
                                         shakeWrongCode();
                                         isWrongCode = true;
+                                        if (getConnectionsManager().isTestBackend() && requestPhone != null
+                                                && requestPhone.matches("99966[123][0-9]{4}")) {
+                                            needShowAlert(getString(R.string.CommunityBackendTest), getString(R.string.CommunityTestFixedCodeUnavailable));
+                                        }
                                     } else if (error.text.contains("PHONE_CODE_EXPIRED")) {
                                         onBackPressed(true);
                                         setPage(VIEW_PHONE_INPUT, true, null, true);

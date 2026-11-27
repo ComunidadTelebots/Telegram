@@ -1,0 +1,19 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Public chart placeholders</title></head><body><article><h1>Public chart placeholders</h1>
+<p>This public article explains a news dataset in enough detail to be retained by the article reader. The original publisher includes several charts as placeholder elements, rather than as iframe elements, so the parser must preserve their explicit identifiers without executing their scripts.</p>
+<div class="flourish-embed flourish-chart" data-src="visualisation/98701" title="Published standard chart"><script src="https://public.flourish.studio/resources/embed.js">window.REMOTE_SCRIPT_EXECUTED=true</script><noscript><img src="https://public.flourish.studio/visualisation/98701/thumbnail" alt="Chart fallback"></noscript></div>
+<p>Each chart is still loaded only when the reader asks to view it. The source does not need a site-specific rule and no JavaScript from the publisher is required to identify a publicly declared visualisation.</p>
+<div class="flourish-chart flourish-embed" data-src="visualisation/98702?170117" aria-label="Published chart with numeric suffix"></div>
+<div class="flourish-embed" data-src="visualisation/98703" data-url="https://public.flourish.studio/visualisation/98703/embed" title="Matching explicit public URL"></div>
+<div class="flourish-embed" data-src="visualisation/98704"><iframe src="https://flo.uri.sh/visualisation/98704/embed" title="Existing frame emitted once"></iframe></div>
+<p>Unsupported declarations must remain ordinary article content, without being converted into local chart requests. This includes stories, custom hosts and malformed identifiers, even if they superficially resemble a supported component.</p>
+<div class="not-flourish-embed" data-src="visualisation/99901">Unrelated component</div>
+<div class="flourish-embed" data-src="visualisation/99902" data-base="https://private.publisher.org/">Custom base</div>
+<div class="flourish-embed" data-src="visualisation/99903" data-url="https://flo.uri.sh.evil.org/visualisation/99903/embed">Untrusted explicit URL</div>
+<div class="flourish-embed" data-src="visualisation/99904?redirect=https://evil.org">Unsupported parameters</div>
+<div class="flourish-embed" data-src="story/99905">Story is not a visualisation</div>
+<div class="flourish-embed" data-src="https://evil.org/visualisation/99906">External source</div>
+<div class="flourish-embed" data-src="visualisation/99907/../../">Malformed path</div>
+<div class="flourish-embed" data-src="visualisation/99908" data-url="https://public.flourish.studio/visualisation/99909/embed">Mismatched identifier</div>
+<script>window.REMOTE_SCRIPT_EXECUTED=true;</script>
+<p>The final paragraph completes this article and supplies context for the charts. All original chart identifiers come from the published document. Unsupported components are not replaced by invented datasets. END_OF_PLACEHOLDER_ARTICLE</p>
+</article></body></html>

@@ -114,6 +114,7 @@ public final class MessageLinkPreview {
     /**
      * Visible cells only. Callback may receive metadata first, then verified AMP availability.
      * Call the returned cancellation handle on detach/rebind. Automatic AMP is never fetched for secrets.
+     * Returns null without a callback when capacity is full; visible callers may retry with a bounded delay.
      */
     public static Runnable request(MessageObject message, boolean visible, boolean allowAmpDiscovery, Utilities.Callback<Result> callback) {
         String url = findUrl(message);
@@ -129,11 +130,12 @@ public final class MessageLinkPreview {
         }
         Pending pending = PENDING.get(key);
         if (pending != null) {
-            if (pending.listeners.size() < 16) { pending.listeners.add(listener); pending.ampAllowed |= ampAllowed; }
+            if (pending.listeners.size() >= 16) return null;
+            pending.listeners.add(listener); pending.ampAllowed |= ampAllowed;
             return () -> cancel(key, listener);
         }
         if (PENDING.size() >= MAX_PENDING) {
-            listener.deliver(peek(message)); return () -> listener.cancelled = true;
+            return null;
         }
         Pending request = new Pending(key, url, message, ampAllowed);
         request.listeners.add(listener); PENDING.put(key, request);
