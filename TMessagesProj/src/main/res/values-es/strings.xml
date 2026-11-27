@@ -1697,4 +1697,5 @@
 
     <string name="DesignModernSendOptions">Opciones modernas</string>
     <string name="DesignNoSendOptions">Sin opciones adicionales para este año.</string>
+    <string name="TelebotsFavoriteStickerHint">Mantén pulsado un sticker para añadirlo a tus favoritos.</string>
 </resources>

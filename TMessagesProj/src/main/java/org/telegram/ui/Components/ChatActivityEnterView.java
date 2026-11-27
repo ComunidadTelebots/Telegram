@@ -2765,6 +2765,39 @@ public class ChatActivityEnterView extends FrameLayout implements
                 }
             }
         });
+        if (isChat) {
+            emojiButton.setOnLongClickListener(v -> {
+                if (!allowStickers || editingMessageObject != null || isEditingBusinessLink() || isLiveComment) {
+                    return false;
+                }
+                if (adjustPanLayoutHelper != null && adjustPanLayoutHelper.animationInProgress()) {
+                    return true;
+                }
+                if (emojiButtonRestricted) {
+                    showRestrictedHint();
+                    return true;
+                }
+                if (!emojiViewVisible) {
+                    showPopup(1, POPUP_CONTENT_EMOJI_KEYBOARD);
+                }
+                if (emojiView != null && emojiViewVisible) {
+                    if (!stickersEnabled) {
+                        emojiView.showStickerBanHint(true, false, false);
+                        return true;
+                    }
+                    if (searchingType != 0) {
+                        setSearchingTypeInternal(0, true);
+                        emojiView.closeSearch(false);
+                        emojiView.hideSearchKeyboard();
+                    }
+                    emojiView.openFavoriteStickers();
+                }
+                return true;
+            });
+            ViewCompat.replaceAccessibilityAction(emojiButton,
+                AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_LONG_CLICK,
+                getString(R.string.FavoriteStickers), (view, arguments) -> view.performLongClick());
+        }
         messageEditTextContainer.addView(emojiButton, LayoutHelper.createFrame(DEFAULT_HEIGHT, DEFAULT_HEIGHT, Gravity.BOTTOM | Gravity.LEFT, 2, 0, 0, 0));
         setEmojiButtonImage(false, false);
 

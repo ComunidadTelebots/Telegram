@@ -12018,4 +12018,5 @@
 
     <string name="DesignModernSendOptions">Modern send options</string>
     <string name="DesignNoSendOptions">No extra send options for this year.</string>
+    <string name="TelebotsFavoriteStickerHint">Touch and hold a sticker to add it to your favorites.</string>
 </resources>
