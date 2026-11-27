@@ -13,6 +13,7 @@ import org.telegram.ui.ActionBar.*;
 import org.telegram.ui.Cells.SkinSelectorCell;
 import org.telegram.ui.Cells.TextCheckCell;
 import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.TelebotsInterfaceProfiles;
 import org.telegram.utils.proxy.*;
 
 /** Settings owned by Comunidad Telebots. Official Telegram settings stay in their screens. */
@@ -36,21 +37,26 @@ public class CommunitySettingsActivity extends BaseFragment {
             case HOME:
                 label(body,text(R.string.TelebotsSettingsInfo));
                 entry(body,"Compatibilidad del dispositivo",()->presentFragment(new CommunityCompatibilityActivity()));
-                entry(body,R.string.TelebotsDesign,()->open(DESIGN));
-                entry(body,R.string.TelebotsReading,()->open(READING));
-                entry(body,R.string.TelebotsConnections,()->open(CONNECTIONS));
                 entry(body,R.string.CommunityMessagingTools,()->open(MESSAGING));
-                entry(body,R.string.TelebotsPhrases,()->presentFragment(new CommunityQuickPhrasesActivity()));
-                entry(body,R.string.TelebotsDownloads,()->presentFragment(new CommunityDownloadsActivity()));
-                entry(body,"⚡ Telebots Mesh P2P Hub",()->presentFragment(new TelebotsMeshDashboardActivity()));
-                entry(body,"💬 Chat P2P Off-Grid",()->presentFragment(new TelebotsP2pChatActivity()));
-                entry(body,"🛡️ Moonbot Security Vault",()->presentFragment(new TelebotsSecurityVaultActivity()));
-                entry(body,R.string.TelebotsPerformance,()->presentFragment(new CommunityPerformanceActivity()));
-                entry(body,R.string.TelebotsAccessibility,()->open(ACCESSIBILITY));
-                entry(body,R.string.TelebotsUpdates,()->presentFragment(new AppUpdatesActivity()));
-                entry(body,R.string.TelebotsPrivacy,()->open(PRIVACY));
-                entry(body,R.string.TelebotsBackupTitle,()->presentFragment(new CommunitySettingsBackupActivity()));
-                entry(body,R.string.TelebotsOfficialChannel,()->getMessagesController().openByUserName("comunidadtelebots",this,0));
+                org.json.JSONArray sections = TelebotsInterfaceProfiles.sectionOrder();
+                for (int i = 0; i < sections.length(); i++) {
+                    switch (sections.optString(i)) {
+                        case "design": entry(body,R.string.TelebotsDesign,()->open(DESIGN)); break;
+                        case "reading": entry(body,R.string.TelebotsReading,()->open(READING)); break;
+                        case "connections": entry(body,R.string.TelebotsConnections,()->open(CONNECTIONS)); break;
+                        case "phrases": entry(body,R.string.TelebotsPhrases,()->presentFragment(new CommunityQuickPhrasesActivity())); break;
+                        case "downloads": entry(body,R.string.TelebotsDownloads,()->presentFragment(new CommunityDownloadsActivity())); break;
+                        case "mesh": entry(body,"⚡ Telebots Mesh P2P Hub",()->presentFragment(new TelebotsMeshDashboardActivity())); break;
+                        case "chat": entry(body,"💬 Chat P2P Off-Grid",()->presentFragment(new TelebotsP2pChatActivity())); break;
+                        case "vault": entry(body,"🛡️ Moonbot Security Vault",()->presentFragment(new TelebotsSecurityVaultActivity())); break;
+                        case "performance": entry(body,R.string.TelebotsPerformance,()->presentFragment(new CommunityPerformanceActivity())); break;
+                        case "accessibility": entry(body,R.string.TelebotsAccessibility,()->open(ACCESSIBILITY)); break;
+                        case "updates": entry(body,R.string.TelebotsUpdates,()->presentFragment(new AppUpdatesActivity())); break;
+                        case "privacy": entry(body,R.string.TelebotsPrivacy,()->open(PRIVACY)); break;
+                        case "backup": entry(body,R.string.TelebotsBackupTitle,()->presentFragment(new CommunitySettingsBackupActivity())); break;
+                        case "channel": entry(body,R.string.TelebotsOfficialChannel,()->getMessagesController().openByUserName("comunidadtelebots",this,0)); break;
+                    }
+                }
                 break;
             case MESSAGING:
                 label(body,text(R.string.CommunityMessagingToolsInfo));
@@ -69,6 +75,7 @@ public class CommunitySettingsActivity extends BaseFragment {
                         () -> org.telegram.ui.skins.DesignFeatureSettings.chooseMode(context, () -> {
                             if (parentLayout != null) parentLayout.rebuildAllFragmentViews(true, true);
                         }));
+                entry(body, "✎ Crear y editar mis interfaces", () -> presentFragment(new CommunityInterfaceEditorActivity()));
                 body.addView(new SkinSelectorCell(context,skin->{if(parentLayout!=null)parentLayout.rebuildAllFragmentViews(true,true);}),LayoutHelper.createLinear(-1,-2));
                 break;
             case P2P_MESH:
