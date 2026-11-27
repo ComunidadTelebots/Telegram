@@ -31,6 +31,15 @@ public final class AmpResolverTest {
         String base = "https://publisher.com/a";
         check("https://amp.publisher.com/a?x=1&y=2".equals(AmpResolver.discoverAmpUrl(base, "<link href='https://amp.publisher.com/a?x=1&amp;y=2' rel='alternate amphtml'>")), "Cross-host explicit amphtml");
         check("https://publisher.com/amp/a".equals(AmpResolver.discoverAmpUrl(base, "<LINK REL=amphtml HREF=/amp/a>")), "Relative unquoted href");
+        for (String invalid : new String[] {"http://publisher.com/amp", "https://127.0.0.1/amp", "https://", "", "   ", "javascript:alert(1)"}) {
+            check("https://publisher.com/valid-amp".equals(AmpResolver.discoverAmpUrl(base,
+                    "<link rel=amphtml href='" + invalid + "'><link rel=amphtml href='/valid-amp'>")),
+                    "Invalid first candidate must not hide a later valid link: " + invalid);
+        }
+        check("https://publisher.com/amp/a".equals(AmpResolver.discoverAmpUrl(base,
+                "<link rel='alternate AMPHTML' href=' \t/amp/a\r\n'>")), "HTML URL edge whitespace");
+        check("https://publisher.com/first".equals(AmpResolver.discoverAmpUrl(base,
+                "<link rel=amphtml href='/first'><link rel=amphtml href='/second'>")), "First eligible link wins");
         check(AmpResolver.discoverAmpUrl(base, "<!--<link rel='amphtml' href='/amp'>-->") == null, "Comment not link");
         check(AmpResolver.discoverAmpUrl(base, "<script>var x=\"<link rel='amphtml' href='/amp'>\"</script>") == null, "Script not link");
         for (String bad : new String[] {"http://publisher.com/a", "https://127.0.0.1/a", "https://publisher-com.cdn.ampproject.org/c/s/publisher.com/a", "javascript:alert(1)"})

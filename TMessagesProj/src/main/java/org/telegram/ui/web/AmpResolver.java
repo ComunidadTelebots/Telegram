@@ -147,10 +147,12 @@ public final class AmpResolver {
             String rel = a.get("rel"), href = a.get("href");
             if (rel != null && href != null && Arrays.asList(rel.toLowerCase(Locale.ROOT).split("\\s+")).contains("amphtml")) {
                 try {
+                    href = href.trim();
+                    if (href.isEmpty()) continue;
                     String url = AmpUrls.normalize(URI.create(base).resolve(href).toString());
                     // Follow the publisher's explicit AMP link (including an AMP subdomain), never guess a cache URL.
-                    return AmpUrls.isEligible(url) ? url : null;
-                } catch (Exception ignored) { return null; }
+                    if (AmpUrls.isEligible(url)) return url;
+                } catch (Exception ignored) { /* Try the next explicit candidate. */ }
             }
         }
         return null;
