@@ -365,6 +365,7 @@ public class ApplicationLoader extends Application {
         }
 
         applicationHandler = new Handler(applicationContext.getMainLooper());
+        Utilities.stageQueue.postRunnable(TelebotsInstantViewSeeder::discardLegacyCaches);
 
         AndroidUtilities.runOnUIThread(ApplicationLoader::startPushService);
 

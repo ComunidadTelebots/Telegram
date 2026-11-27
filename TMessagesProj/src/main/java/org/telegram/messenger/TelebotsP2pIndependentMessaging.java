@@ -91,6 +91,7 @@ public class TelebotsP2pIndependentMessaging {
 
     private ServerSocket serverSocket;
     private volatile boolean isRunning;
+    private final TelebotsPeerConnections connections = new TelebotsPeerConnections(20, 6000);
 
 
     public static TelebotsP2pIndependentMessaging getInstance() {
@@ -177,14 +178,22 @@ public class TelebotsP2pIndependentMessaging {
             if (!BROADCAST_CHANNEL.equals(msg.recipientId) && !peer.getValue().equals(msg.recipientId)) continue;
             try (javax.net.ssl.SSLSocket socket = (javax.net.ssl.SSLSocket) identity.context(
                     java.util.Collections.singleton(peer.getValue())).getSocketFactory().createSocket()) {
-                socket.setEnabledProtocols(TelebotsPeerIdentity.PROTOCOLS);
-                socket.setEnabledCipherSuites(TelebotsPeerIdentity.CIPHERS);
-                socket.connect(new java.net.InetSocketAddress(peer.getKey(), P2P_TCP_PORT), 3000);
-                socket.setSoTimeout(3000);
-                socket.startHandshake();
-                if (!isRunning || generation != session) return;
-                socket.getOutputStream().write((msg.toJson().toString() + "\n").getBytes(StandardCharsets.UTF_8));
-                socket.getOutputStream().flush();
+                final TelebotsPeerConnections.Lease lease;
+                synchronized (this) {
+                    if (!isRunning || generation != session) return;
+                    lease = connections.track(socket);
+                }
+                // The same deadline also bounds a slow remote handshake or blocked write.
+                try (TelebotsPeerConnections.Lease connection = lease) {
+                    socket.setEnabledProtocols(TelebotsPeerIdentity.PROTOCOLS);
+                    socket.setEnabledCipherSuites(TelebotsPeerIdentity.CIPHERS);
+                    socket.connect(new java.net.InetSocketAddress(peer.getKey(), P2P_TCP_PORT), 3000);
+                    socket.setSoTimeout(3000);
+                    socket.startHandshake();
+                    if (!isRunning || generation != session) return;
+                    socket.getOutputStream().write((msg.toJson().toString() + "\n").getBytes(StandardCharsets.UTF_8));
+                    socket.getOutputStream().flush();
+                }
             } catch (Exception ignored) { /* Never retry through plaintext or a different identity. */ }
         }
     }
@@ -233,10 +242,25 @@ public class TelebotsP2pIndependentMessaging {
                 try {
                     while (!tls.isClosed()) {
                         Socket client = tls.accept();
-                        try { networkPool.execute(() -> handleClientSocket(client, generation)); }
-                        catch (java.util.concurrent.RejectedExecutionException full) { client.close(); }
+                        final TelebotsPeerConnections.Lease lease;
+                        try {
+                            synchronized (TelebotsP2pIndependentMessaging.this) {
+                                if (!isRunning || generation != session) { client.close(); continue; }
+                                lease = connections.track(client);
+                            }
+                        } catch (java.io.IOException full) {
+                            try { client.close(); } catch (java.io.IOException ignored) { }
+                            continue;
+                        }
+                        try { networkPool.execute(() -> handleClientSocket(lease, generation)); }
+                        catch (java.util.concurrent.RejectedExecutionException full) { lease.close(); }
                     }
                 } catch (Exception ignored) { }
+                finally {
+                    synchronized (TelebotsP2pIndependentMessaging.this) {
+                        if (generation == session) stop();
+                    }
+                }
             });
             return true;
         } catch (Exception e) { stop(); return false; }
@@ -246,10 +270,13 @@ public class TelebotsP2pIndependentMessaging {
         isRunning = false;
         session++;
         try { if (serverSocket != null) serverSocket.close(); } catch (Exception ignored) { }
+        connections.closeAll();
     }
 
-    private void handleClientSocket(Socket socket, long generation) {
-        try (Socket client = socket) {
+    private void handleClientSocket(TelebotsPeerConnections.Lease lease, long generation) {
+        try (TelebotsPeerConnections.Lease connection = lease) {
+            if (connection.isClosed() || !isRunning || generation != session) return;
+            Socket client = connection.socket;
             client.setSoTimeout(3000);
             javax.net.ssl.SSLSocket tls = (javax.net.ssl.SSLSocket) client;
             tls.startHandshake();

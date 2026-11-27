@@ -1,165 +1,128 @@
 package org.telegram.messenger;
 
+import android.util.AtomicFile;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.concurrent.ConcurrentHashMap;
+import org.telegram.tgnet.ConnectionsManager;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
-
-/**
- * TelebotsInstantViewSeeder - Handles ZeroNet-style local web/AMP page caching and seeding
- * with AES-256 encryption at rest.
- */
+/** Device-local authenticated metadata cache. Cache keys never leave Android Keystore. */
 public class TelebotsInstantViewSeeder extends BaseController {
+    private static final TelebotsInstantViewSeeder[] Instance = new TelebotsInstantViewSeeder[UserConfig.MAX_ACCOUNT_COUNT];
 
-    private static volatile TelebotsInstantViewSeeder[] Instance = new TelebotsInstantViewSeeder[UserConfig.MAX_ACCOUNT_COUNT];
-    private final File seederDir;
-    private final byte[] aesKey;
-    private final ConcurrentHashMap<String, Long> seededPages = new ConcurrentHashMap<>();
-
-    public static TelebotsInstantViewSeeder getInstance(int account) {
-        TelebotsInstantViewSeeder localInstance = Instance[account];
-        if (localInstance == null) {
-            synchronized (TelebotsInstantViewSeeder.class) {
-                localInstance = Instance[account];
-                if (localInstance == null) {
-                    Instance[account] = localInstance = new TelebotsInstantViewSeeder(account);
-                }
-            }
-        }
-        return localInstance;
+    public static synchronized TelebotsInstantViewSeeder getInstance(int account) {
+        if (account < 0 || account >= Instance.length) throw new IllegalArgumentException("Account");
+        if (Instance[account] == null) Instance[account] = new TelebotsInstantViewSeeder(account);
+        return Instance[account];
     }
 
     public TelebotsInstantViewSeeder(int account) {
         super(account);
-        seederDir = new File(ApplicationLoader.applicationContext.getFilesDir(), "telebots_iv_seeder_" + account);
-        boolean created = seederDir.exists() || seederDir.mkdirs();
-        if (!created) {
-            FileLog.e("Failed to create seeder directory: " + seederDir.getAbsolutePath());
-        }
-        aesKey = generateAesKey(account);
+        // Legacy records have a public-derived key and no saved IV. They are a
+        // disposable cache, not a format we can safely migrate or return as text.
+        Utilities.stageQueue.postRunnable(() -> discardRecords(new File(
+                ApplicationLoader.applicationContext.getFilesDir(), "telebots_iv_seeder_" + account)));
     }
 
-    private byte[] generateAesKey(int account) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            String seed = "TelebotsZeroNetSeedKey_" + account + "_" + UserConfig.getInstance(account).getClientUserId();
-            return digest.digest(seed.getBytes(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            FileLog.e(e);
-            return new byte[32]; // fallback 32 bytes
+    static void discardLegacyCaches() {
+        for (int account = 0; account < UserConfig.MAX_ACCOUNT_COUNT; account++) {
+            discardRecords(new File(ApplicationLoader.applicationContext.getFilesDir(), "telebots_iv_seeder_" + account));
         }
+    }
+
+    private String scope() {
+        return currentAccount + "_" + UserConfig.getInstance(currentAccount).getClientUserId()
+                + "_" + ConnectionsManager.getInstance(currentAccount).isTestBackend();
+    }
+
+    private File directory(String scope) {
+        // Restoring encrypted blobs without their device-bound key cannot restore a usable cache.
+        return new File(ApplicationLoader.applicationContext.getNoBackupFilesDir(), "telebots_iv_seeder_v2/" + scope);
+    }
+
+    private byte[] binding(String scope, String url) {
+        if (url == null || url.isEmpty() || url.length() > 8192) throw new IllegalArgumentException("Cache URL");
+        return (scope + "\n" + url).getBytes(StandardCharsets.UTF_8);
+    }
+
+    private File record(String scope, String url) throws Exception {
+        byte[] hash = MessageDigest.getInstance("SHA-256").digest(binding(scope, url));
+        StringBuilder name = new StringBuilder();
+        for (byte value : hash) name.append(String.format(java.util.Locale.ROOT, "%02x", value & 255));
+        return new File(directory(scope), name + ".ivcache");
     }
 
     public void cacheAndSeedPage(String url, String htmlContent) {
+        if (url == null || htmlContent == null || htmlContent.length() > TelebotsCacheCipher.MAX_PLAIN_BYTES) return;
+        final String owner = scope();
         Utilities.stageQueue.postRunnable(() -> {
+            AtomicFile target = null;
+            FileOutputStream output = null;
             try {
-                String hash = getUrlHash(url);
-                byte[] encryptedData = encryptAes256(htmlContent.getBytes(StandardCharsets.UTF_8));
-
-                File file = new File(seederDir, hash + ".ivcache");
-                try (FileOutputStream fos = new FileOutputStream(file)) {
-                    fos.write(encryptedData);
-                }
-
-                seededPages.put(url, System.currentTimeMillis());
-                TelebotsP2pHubController.getInstance(currentAccount).addBandwidthServed(htmlContent.length());
-                FileLog.d("TelebotsInstantViewSeeder cached and seeded URL: " + url);
-            } catch (Exception e) {
-                FileLog.e(e);
+                if (!owner.equals(scope())) return;
+                byte[] encrypted = TelebotsCacheCipher.encrypt(htmlContent.getBytes(StandardCharsets.UTF_8),
+                        TelebotsCacheKey.getOrCreate("telebots_iv_cache_v2_" + owner), binding(owner, url));
+                File file = record(owner, url);
+                if (!owner.equals(scope())) return;
+                File dir = file.getParentFile();
+                if (!dir.isDirectory() && !dir.mkdirs()) throw new java.io.IOException("Cache directory unavailable");
+                target = new AtomicFile(file);
+                output = target.startWrite();
+                output.write(encrypted);
+                target.finishWrite(output);
+                output = null;
+            } catch (Exception unavailable) {
+                if (output != null && target != null) target.failWrite(output);
+                // Neither content nor URLs (which can contain tokens) belong in logs.
+                FileLog.e("Encrypted page cache unavailable");
             }
         });
     }
 
     public String getCachedPage(String url) {
         try {
-            String hash = getUrlHash(url);
-            File file = new File(seederDir, hash + ".ivcache");
-            if (!file.exists()) {
-                return null;
-            }
-
-            byte[] encryptedData = new byte[(int) file.length()];
-            try (FileInputStream fis = new FileInputStream(file)) {
-                int readBytes = fis.read(encryptedData);
-                if (readBytes <= 0) {
-                    return null;
+            String owner = scope();
+            AtomicFile target = new AtomicFile(record(owner, url));
+            try (FileInputStream input = target.openRead(); ByteArrayOutputStream bytes = new ByteArrayOutputStream()) {
+                byte[] buffer = new byte[4096];
+                int count;
+                while ((count = input.read(buffer)) != -1) {
+                    if (bytes.size() + count > TelebotsCacheCipher.MAX_RECORD_BYTES) return null;
+                    bytes.write(buffer, 0, count);
                 }
+                byte[] plain = TelebotsCacheCipher.decrypt(bytes.toByteArray(),
+                        TelebotsCacheKey.getOrCreate("telebots_iv_cache_v2_" + owner), binding(owner, url));
+                return owner.equals(scope()) ? new String(plain, StandardCharsets.UTF_8) : null;
             }
-
-            byte[] decryptedData = decryptAes256(encryptedData);
-            return new String(decryptedData, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            FileLog.e(e);
+        } catch (Exception unavailable) {
             return null;
         }
     }
 
+    /** Presence hint only; the read path authenticates the complete record before returning content. */
     public boolean isPageCached(String url) {
-        String hash = getUrlHash(url);
-        File file = new File(seederDir, hash + ".ivcache");
-        return file.exists();
+        try {
+            File file = record(scope(), url);
+            return file.isFile() && file.length() >= 32 && file.length() <= TelebotsCacheCipher.MAX_RECORD_BYTES;
+        } catch (Exception unavailable) { return false; }
     }
 
     public void clearCache() {
-        Utilities.stageQueue.postRunnable(() -> {
-            try {
-                File[] files = seederDir.listFiles();
-                if (files != null) {
-                    for (File f : files) {
-                        if (!f.delete()) {
-                            FileLog.e("Failed to delete cached file: " + f.getAbsolutePath());
-                        }
-                    }
-                }
-                seededPages.clear();
-            } catch (Exception e) {
-                FileLog.e(e);
+        final String owner = scope();
+        Utilities.stageQueue.postRunnable(() -> discardRecords(directory(owner)));
+    }
+
+    private static void discardRecords(File directory) {
+        File[] files = directory.listFiles();
+        if (files == null) return;
+        for (File file : files) {
+            if (file.isFile() && (file.getName().endsWith(".ivcache") || file.getName().endsWith(".ivcache.bak")
+                    || file.getName().endsWith(".ivcache.new"))) {
+                if (!file.delete()) FileLog.e("Could not discard derived page cache");
             }
-        });
-    }
-
-    private String getUrlHash(String url) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("MD5");
-            byte[] hash = digest.digest(url.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : hash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-            return hexString.toString();
-        } catch (Exception e) {
-            return String.valueOf(url.hashCode());
-        }
-    }
-
-    private byte[] encryptAes256(byte[] plainText) {
-        try {
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            SecretKeySpec keySpec = new SecretKeySpec(aesKey, "AES");
-            cipher.init(Cipher.ENCRYPT_MODE, keySpec);
-            return cipher.doFinal(plainText);
-        } catch (Exception e) {
-            FileLog.e(e);
-            return plainText;
-        }
-    }
-
-    private byte[] decryptAes256(byte[] cipherText) {
-        try {
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            SecretKeySpec keySpec = new SecretKeySpec(aesKey, "AES");
-            cipher.init(Cipher.DECRYPT_MODE, keySpec);
-            return cipher.doFinal(cipherText);
-        } catch (Exception e) {
-            FileLog.e(e);
-            return cipherText;
         }
     }
 
@@ -179,36 +142,20 @@ public class TelebotsInstantViewSeeder extends BaseController {
 
     public long getCacheSizeBytes() {
         long size = 0;
-        try {
-            File[] files = seederDir.listFiles();
-            if (files != null) {
-                for (File f : files) {
-                    if (f.isFile() && f.getName().endsWith(".ivcache")) {
-                        size += f.length();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            FileLog.e(e);
+        File[] files = directory(scope()).listFiles();
+        if (files != null) for (File file : files) {
+            if (file.isFile() && file.getName().endsWith(".ivcache")) size += file.length();
         }
         return size;
     }
 
     public int getCachedPagesCount() {
         int count = 0;
-        try {
-            File[] files = seederDir.listFiles();
-            if (files != null) {
-                for (File f : files) {
-                    if (f.isFile() && f.getName().endsWith(".ivcache")) {
-                        count++;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            FileLog.e(e);
+        File[] files = directory(scope()).listFiles();
+        if (files != null) for (File file : files) {
+            if (file.isFile() && file.getName().endsWith(".ivcache")) count++;
         }
-        return Math.max(count, seededPages.size());
+        return count;
     }
 
     public int getActivePeersCount() {
