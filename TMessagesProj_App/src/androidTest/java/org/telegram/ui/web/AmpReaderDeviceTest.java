@@ -353,9 +353,16 @@ public class AmpReaderDeviceTest extends Instrumentation {
                 }
                 result.putString("stream","AMP_DISCOVERY_DIAGNOSTIC_COMPLETE="+received+"\n");finish(received?Activity.RESULT_OK:Activity.RESULT_CANCELED,result);return;
             }
-            Intent intent=getTargetContext().getPackageManager().getLaunchIntentForPackage(getTargetContext().getPackageName());
+            // Instrumentation waits for the exact component; launcher aliases can leave it waiting forever.
+            Intent intent=new Intent(getTargetContext(), org.telegram.ui.LaunchActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            Activity activity=startActivitySync(intent);
+            ActivityMonitor monitor=addMonitor(org.telegram.ui.LaunchActivity.class.getName(),null,false);
+            Activity activity;
+            try {
+                getTargetContext().startActivity(intent);
+                activity=monitor.waitForActivityWithTimeout(15000);
+            } finally { removeMonitor(monitor); }
+            if(activity==null)throw new AssertionError("LaunchActivity did not resume within 15 seconds");
             Thread.sleep(2500);
 
             if(backendAccountsOnly){
@@ -400,9 +407,10 @@ public class AmpReaderDeviceTest extends Instrumentation {
                     final int title=titles[i];
                     runOnMainSync(()->{try{TextView entry=findText(settings.getFragmentView(),org.telegram.messenger.LocaleController.getString(title));if(entry==null)throw new AssertionError("Settings entry missing");entry.performClick();}catch(Throwable t){failure.set(t);}});
                     if(failure.get()!=null)throw new AssertionError(failure.get());Thread.sleep(800);
-                    if(!screens[i].isInstance(lastFragment()))throw new AssertionError("Wrong settings screen "+i);
+                    // Tablet settings live in the layers stack, not LaunchActivity's main stack.
+                    if(!screens[i].isInstance(settings.getParentLayout().getLastFragment()))throw new AssertionError("Wrong settings screen "+i);
                     report("COMMUNITY_SCREEN_OK: "+screens[i].getSimpleName());
-                    runOnMainSync(()->lastFragment().finishFragment(false));Thread.sleep(600);
+                    runOnMainSync(()->settings.getParentLayout().getLastFragment().finishFragment(false));Thread.sleep(600);
                 }
                 android.graphics.Bitmap shot=getUiAutomation().takeScreenshot();
                 if(shot!=null){java.io.File target=new java.io.File(getTargetContext().getCacheDir(),"community-messaging.png");try(java.io.FileOutputStream out=new java.io.FileOutputStream(target)){shot.compress(android.graphics.Bitmap.CompressFormat.PNG,100,out);}finally{shot.recycle();}report("SCREENSHOT: "+target);}
