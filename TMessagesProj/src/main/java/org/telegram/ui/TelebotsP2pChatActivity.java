@@ -70,13 +70,13 @@ public class TelebotsP2pChatActivity extends BaseFragment implements TelebotsP2p
         banner.setPadding(AndroidUtilities.dp(16), AndroidUtilities.dp(12), AndroidUtilities.dp(16), AndroidUtilities.dp(12));
 
         TextView bannerText = new TextView(context);
-        bannerText.setText("⚡ Mensajería directa entre pares. Los mensajes viajan por Wi-Fi y malla sin tocar servidores centrales.");
+        bannerText.setText("⚠ P2P experimental sin cifrado autenticado. No compartas información privada.");
         bannerText.setTextSize(12);
         bannerText.setTextColor(0xFF8E9EB5);
         banner.addView(bannerText, LayoutHelper.createLinear(0, -2, 1.0f));
 
         peersIndicator = new TextView(context);
-        peersIndicator.setText("👥 " + Math.max(TelebotsP2pRoutingMesh.getInstance().getActivePeers().size(), 1) + " pares");
+        peersIndicator.setText(TelebotsPeerStatus.label(TelebotsP2pRoutingMesh.getInstance().getActivePeers().size()));
         peersIndicator.setTextSize(12);
         peersIndicator.setTextColor(0xFF71D6C2);
         peersIndicator.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
@@ -233,6 +233,7 @@ public class TelebotsP2pChatActivity extends BaseFragment implements TelebotsP2p
     public void onResume() {
         super.onResume();
         TelebotsP2pIndependentMessaging.getInstance().addListener(this);
+        updatePeersIndicator();
     }
 
     @Override
@@ -249,9 +250,12 @@ public class TelebotsP2pChatActivity extends BaseFragment implements TelebotsP2p
 
     @Override
     public void onPeerDiscovered(String peerId, String address) {
+        updatePeersIndicator();
+    }
+
+    private void updatePeersIndicator() {
         if (peersIndicator != null) {
-            int count = Math.max(TelebotsP2pRoutingMesh.getInstance().getActivePeers().size(), 1);
-            peersIndicator.setText("👥 " + count + " pares");
+            peersIndicator.setText(TelebotsPeerStatus.label(TelebotsP2pRoutingMesh.getInstance().getActivePeers().size()));
         }
     }
 }
